@@ -57,7 +57,11 @@ const HostDashboard = () => {
               Create Event
             </Button>
           </DialogTrigger>
-          <DialogContent className={`${isMobile ? 'w-[95%] h-[90vh] overflow-y-auto' : 'max-w-4xl'} sm:max-w-[600px] md:max-w-[700px] lg:max-w-[800px]`}>
+          <DialogContent className={`${
+            isMobile 
+              ? 'w-[95%] max-h-[80vh]' 
+              : 'w-[90%] max-w-[1200px] max-h-[85vh]'
+          } overflow-y-auto p-6`}>
             <DialogHeader>
               <DialogTitle>Create New Event</DialogTitle>
             </DialogHeader>
