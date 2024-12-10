@@ -1,15 +1,20 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
+import EventBasicInfo from "./event-form/EventBasicInfo";
+import EventDateLocation from "./event-form/EventDateLocation";
+import EventCapacityFee from "./event-form/EventCapacityFee";
 
-const CreateEventForm = () => {
+interface CreateEventFormProps {
+  onSuccess?: () => void;
+}
+
+const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { user } = useAuth();
@@ -50,7 +55,6 @@ const CreateEventForm = () => {
     try {
       setLoading(true);
 
-      // Upload banner photo
       let bannerUrl = "";
       if (bannerFile) {
         const fileExt = bannerFile.name.split('.').pop();
@@ -60,10 +64,9 @@ const CreateEventForm = () => {
           .upload(fileName, bannerFile);
 
         if (uploadError) throw uploadError;
-        bannerUrl = `${process.env.VITE_SUPABASE_URL}/storage/v1/object/public/event_banners/${fileName}`;
+        bannerUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/event_banners/${fileName}`;
       }
 
-      // Create event
       const { error: eventError } = await supabase.from('events').insert({
         title: formData.title,
         date: date?.toISOString(),
@@ -83,6 +86,8 @@ const CreateEventForm = () => {
         title: "Success",
         description: "Event created successfully",
       });
+      
+      onSuccess?.();
       navigate("/events");
     } catch (error) {
       console.error('Error creating event:', error);
@@ -97,7 +102,7 @@ const CreateEventForm = () => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto p-6">
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <Label htmlFor="banner">Banner Photo</Label>
         <Input
@@ -109,105 +114,27 @@ const CreateEventForm = () => {
         />
       </div>
 
-      <div>
-        <Label htmlFor="title">Event Title</Label>
-        <Input
-          id="title"
-          name="title"
-          value={formData.title}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
+      <EventBasicInfo
+        title={formData.title}
+        description={formData.description}
+        category={formData.category}
+        onChange={handleInputChange}
+      />
 
-      <div>
-        <Label>Date</Label>
-        <Calendar
-          mode="single"
-          selected={date}
-          onSelect={setDate}
-          className="rounded-md border"
-          required
-        />
-      </div>
+      <EventDateLocation
+        date={date}
+        location={formData.location}
+        onDateSelect={setDate}
+        onLocationChange={handleInputChange}
+      />
 
-      <div>
-        <Label htmlFor="location">Location</Label>
-        <Input
-          id="location"
-          name="location"
-          value={formData.location}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="category">Category</Label>
-        <Input
-          id="category"
-          name="category"
-          value={formData.category}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="participantsLimit">Number of Participants</Label>
-        <Input
-          id="participantsLimit"
-          name="participantsLimit"
-          type="number"
-          min="1"
-          value={formData.participantsLimit}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-
-      <div>
-        <Label>Entrance Fee</Label>
-        <RadioGroup
-          value={formData.isFree}
-          onValueChange={(value) => setFormData(prev => ({ ...prev, isFree: value }))}
-          className="flex flex-col space-y-2 mt-2"
-        >
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="true" id="free" />
-            <Label htmlFor="free">Free</Label>
-          </div>
-          <div className="flex items-center space-x-2">
-            <RadioGroupItem value="false" id="paid" />
-            <Label htmlFor="paid">Paid</Label>
-          </div>
-        </RadioGroup>
-        {formData.isFree === "false" && (
-          <Input
-            type="number"
-            name="entranceFee"
-            value={formData.entranceFee}
-            onChange={handleInputChange}
-            placeholder="Enter fee amount"
-            min="0"
-            step="0.01"
-            className="mt-2"
-            required
-          />
-        )}
-      </div>
-
-      <div>
-        <Label htmlFor="description">Description</Label>
-        <textarea
-          id="description"
-          name="description"
-          value={formData.description}
-          onChange={handleInputChange}
-          className="w-full min-h-[100px] p-2 border rounded-md"
-          required
-        />
-      </div>
+      <EventCapacityFee
+        participantsLimit={formData.participantsLimit}
+        entranceFee={formData.entranceFee}
+        isFree={formData.isFree}
+        onChange={handleInputChange}
+        onFeeTypeChange={(value) => setFormData(prev => ({ ...prev, isFree: value }))}
+      />
 
       <Button type="submit" disabled={loading} className="w-full">
         {loading ? "Creating Event..." : "Create Event"}
