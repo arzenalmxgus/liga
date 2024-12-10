@@ -15,12 +15,12 @@ interface Event {
   date: string;
   location: string;
   category: string;
-  participantsLimit: number;
-  currentParticipants: number;
-  bannerPhoto: string;
+  participants_limit: number;
+  current_participants: number;
+  banner_photo: string;
   description: string;
-  entranceFee: number | null;
-  isFree: boolean;
+  entrance_fee: number | null;
+  is_free: boolean;
 }
 
 const AttendeeDashboard = () => {
@@ -100,7 +100,20 @@ const AttendeeDashboard = () => {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         {events?.map((event) => (
-          <EventCard key={event.id} {...event} />
+          <EventCard
+            key={event.id}
+            id={event.id}
+            title={event.title}
+            date={event.date}
+            location={event.location}
+            category={event.category}
+            participants_limit={event.participants_limit}
+            current_participants={event.current_participants}
+            banner_photo={event.banner_photo}
+            description={event.description}
+            entrance_fee={event.entrance_fee}
+            is_free={event.is_free}
+          />
         ))}
         {events?.length === 0 && (
           <p className="text-gray-400 col-span-full text-center py-12">
