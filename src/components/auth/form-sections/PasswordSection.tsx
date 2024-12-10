@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
@@ -14,10 +14,21 @@ interface PasswordSectionProps {
 const PasswordSection = ({ formData, setFormData }: PasswordSectionProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [passwordsMatch, setPasswordsMatch] = useState(true);
+  const [passwordTouched, setPasswordTouched] = useState(false);
 
   const updateFormData = (field: string, value: string) => {
     setFormData({ ...formData, [field]: value });
+    if (field === 'password' || field === 'confirmPassword') {
+      setPasswordTouched(true);
+    }
   };
+
+  useEffect(() => {
+    if (passwordTouched && formData.confirmPassword) {
+      setPasswordsMatch(formData.password === formData.confirmPassword);
+    }
+  }, [formData.password, formData.confirmPassword, passwordTouched]);
 
   return (
     <>
@@ -50,7 +61,9 @@ const PasswordSection = ({ formData, setFormData }: PasswordSectionProps) => {
             required 
             value={formData.confirmPassword}
             onChange={(e) => updateFormData('confirmPassword', e.target.value)}
-            className="h-12 text-base pr-10 rounded-lg"
+            className={`h-12 text-base pr-10 rounded-lg ${
+              !passwordsMatch && passwordTouched ? 'border-red-500 focus-visible:ring-red-500' : ''
+            }`}
           />
           <button
             type="button"
@@ -60,6 +73,11 @@ const PasswordSection = ({ formData, setFormData }: PasswordSectionProps) => {
             {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
+        {!passwordsMatch && passwordTouched && (
+          <p className="text-sm text-red-500 mt-1">
+            Passwords do not match
+          </p>
+        )}
       </div>
     </>
   );
