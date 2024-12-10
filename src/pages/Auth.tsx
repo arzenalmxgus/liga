@@ -4,17 +4,19 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const { toast } = useToast();
 
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    // TODO: Implement actual login logic
     setTimeout(() => {
       setIsLoading(false);
       toast({
@@ -26,8 +28,15 @@ const Auth = () => {
 
   const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (password !== confirmPassword) {
+      toast({
+        title: "Error",
+        description: "Passwords do not match.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsLoading(true);
-    // TODO: Implement actual registration logic
     setTimeout(() => {
       setIsLoading(false);
       toast({
@@ -82,16 +91,76 @@ const Auth = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="register-email">Email</Label>
-                    <Input id="register-email" type="email" required />
+                    <Label htmlFor="firstName">First Name</Label>
+                    <Input id="firstName" required />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="register-password">Password</Label>
-                    <Input id="register-password" type="password" required />
+                    <Label htmlFor="middleName">Middle Name</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select middle name option" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="na">N/A</SelectItem>
+                        <SelectItem value="custom">Enter Middle Name</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input id="confirm-password" type="password" required />
+                    <Label htmlFor="lastName">Last Name</Label>
+                    <Input id="lastName" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="suffix">Suffix</Label>
+                    <Select>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select suffix" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="na">N/A</SelectItem>
+                        <SelectItem value="jr">Jr.</SelectItem>
+                        <SelectItem value="sr">Sr.</SelectItem>
+                        <SelectItem value="ii">II</SelectItem>
+                        <SelectItem value="iii">III</SelectItem>
+                        <SelectItem value="iv">IV</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="birthdate">Birthdate</Label>
+                    <Input id="birthdate" type="date" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="profilePicture">Profile Picture (1x1)</Label>
+                    <Input id="profilePicture" type="file" accept="image/*" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input id="email" type="email" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="username">Username</Label>
+                    <Input id="username" required />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      required 
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <Input 
+                      id="confirmPassword" 
+                      type="password" 
+                      required 
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                    />
                   </div>
                 </CardContent>
                 <CardFooter>
