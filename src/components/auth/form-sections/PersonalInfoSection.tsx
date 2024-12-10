@@ -1,9 +1,12 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dispatch, SetStateAction } from "react";
 
 interface FormData {
   email: string;
+  password: string;
+  confirmPassword: string;
   firstName: string;
   middleName: string;
   lastName: string;
@@ -13,12 +16,12 @@ interface FormData {
 
 interface PersonalInfoSectionProps {
   formData: FormData;
-  setFormData: (data: FormData) => void;
+  setFormData: Dispatch<SetStateAction<FormData>>;
 }
 
 const PersonalInfoSection = ({ formData, setFormData }: PersonalInfoSectionProps) => {
   const updateFormData = (field: keyof FormData, value: string) => {
-    setFormData({ ...formData, [field]: value });
+    setFormData(prev => ({ ...prev, [field]: value }));
   };
 
   return (
