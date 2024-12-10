@@ -17,6 +17,15 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background-image: url('/lovable-uploads/5254e291-c462-4e78-88cd-1bf62f2050ac.png');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
   }
+}
+
+.bg-gradient-overlay {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7));
 }
