@@ -6,7 +6,7 @@ import RegisterForm from "@/components/auth/RegisterForm";
 
 const Auth = () => {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <Navigation />
       <main className="md:ml-16 pb-16 md:pb-0 flex items-center justify-center min-h-[calc(100vh-4rem)]">
         <Card className="w-[90%] max-w-[1200px] mx-auto bg-white/5 backdrop-blur-sm rounded-xl overflow-y-auto max-h-[85vh]">
