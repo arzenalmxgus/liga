@@ -52,8 +52,7 @@ const RegisterForm = () => {
             suffix: formData.suffix === "na" ? null : formData.suffix,
             birthdate: formData.birthdate,
             user_role: userRole,
-          },
-          emailRedirectTo: undefined // Remove email redirect
+          }
         },
       });
 

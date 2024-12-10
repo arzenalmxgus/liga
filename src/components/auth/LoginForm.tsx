@@ -21,25 +21,30 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log("Attempting login...");
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("Login error:", error);
         toast({
           title: "Error",
           description: error.message,
           variant: "destructive",
         });
-      } else {
-        toast({
-          title: "Success",
-          description: "Logged in successfully!",
-        });
-        navigate("/");
+        return;
       }
-    } catch (error) {
+
+      console.log("Login successful:", data);
+      toast({
+        title: "Success",
+        description: "Logged in successfully!",
+      });
+      navigate("/");
+    } catch (error: any) {
+      console.error("Unexpected login error:", error);
       toast({
         title: "Error",
         description: "An unexpected error occurred",
