@@ -5,7 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { db, storage } from "@/lib/firebase";
+import { collection, addDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import EventBasicInfo from "./event-form/EventBasicInfo";
 import EventDateLocation from "./event-form/EventDateLocation";
 import EventCapacityFee from "./event-form/EventCapacityFee";
@@ -57,30 +59,26 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
 
       let bannerUrl = "";
       if (bannerFile) {
-        const fileExt = bannerFile.name.split('.').pop();
-        const fileName = `${Math.random()}.${fileExt}`;
-        const { error: uploadError, data } = await supabase.storage
-          .from('event_banners')
-          .upload(fileName, bannerFile);
-
-        if (uploadError) throw uploadError;
-        bannerUrl = `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/public/event_banners/${fileName}`;
+        const storageRef = ref(storage, `event_banners/${Date.now()}_${bannerFile.name}`);
+        const snapshot = await uploadBytes(storageRef, bannerFile);
+        bannerUrl = await getDownloadURL(snapshot.ref);
       }
 
-      const { error: eventError } = await supabase.from('events').insert({
+      const eventsRef = collection(db, 'events');
+      await addDoc(eventsRef, {
         title: formData.title,
         date: date?.toISOString(),
         location: formData.location,
         category: formData.category,
-        participants_limit: parseInt(formData.participantsLimit),
-        entrance_fee: formData.isFree === "true" ? null : parseFloat(formData.entranceFee),
-        is_free: formData.isFree === "true",
-        banner_photo: bannerUrl,
-        host_id: user.uid,
+        participantsLimit: parseInt(formData.participantsLimit),
+        entranceFee: formData.isFree === "true" ? null : parseFloat(formData.entranceFee),
+        isFree: formData.isFree === "true",
+        bannerPhoto: bannerUrl,
+        hostId: user.uid,
         description: formData.description,
+        currentParticipants: 0,
+        createdAt: new Date().toISOString(),
       });
-
-      if (eventError) throw eventError;
 
       toast({
         title: "Success",

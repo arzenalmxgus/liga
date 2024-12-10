@@ -1,18 +1,19 @@
 import { useQuery } from "@tanstack/react-query";
 import EventCard from "./EventCard";
-import { supabase } from "@/lib/supabase";
+import { collection, getDocs, orderBy, query } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 const EventsGrid = () => {
   const { data: events, isLoading } = useQuery({
     queryKey: ['events'],
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('events')
-        .select('*')
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      return data;
+      const eventsRef = collection(db, 'events');
+      const q = query(eventsRef, orderBy('createdAt', 'desc'));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
     },
   });
 
