@@ -8,6 +8,7 @@ import { Button } from "../ui/button";
 import { Plus } from "lucide-react";
 import CreateEventForm from "../CreateEventForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "../ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface Event {
   id: string;
@@ -26,6 +27,7 @@ interface Event {
 const HostDashboard = () => {
   const { user } = useAuth();
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
+  const isMobile = useIsMobile();
 
   const { data: events, isLoading, refetch } = useQuery({
     queryKey: ['host-events', user?.uid],
@@ -55,7 +57,7 @@ const HostDashboard = () => {
               Create Event
             </Button>
           </DialogTrigger>
-          <DialogContent className="max-w-2xl">
+          <DialogContent className={`${isMobile ? 'w-[95%] h-[90vh] overflow-y-auto' : 'max-w-4xl'} sm:max-w-[600px] md:max-w-[700px] lg:max-w-[800px]`}>
             <DialogHeader>
               <DialogTitle>Create New Event</DialogTitle>
             </DialogHeader>
