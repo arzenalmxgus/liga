@@ -73,9 +73,9 @@ const PasswordSection = ({ formData, setFormData }: PasswordSectionProps) => {
             {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
         </div>
-        {!passwordsMatch && passwordTouched && (
-          <p className="text-sm text-red-500 mt-1">
-            Passwords do not match
+        {passwordTouched && formData.confirmPassword && (
+          <p className={`text-sm mt-1 ${passwordsMatch ? 'text-green-500' : 'text-red-500'}`}>
+            {passwordsMatch ? 'The passwords match!' : 'Passwords do not match'}
           </p>
         )}
       </div>
