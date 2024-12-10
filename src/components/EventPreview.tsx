@@ -32,7 +32,15 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
           </div>
         </DialogHeader>
         <div className="mt-4">
-          <img src={event.image} alt={event.title} className="w-full h-64 object-cover rounded-lg" />
+          <img 
+            src={event.image} 
+            alt={event.title} 
+            className="w-full h-64 object-cover rounded-lg"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder.svg';
+            }}
+          />
           <div className="mt-4 space-y-3">
             <div>
               <h3 className="font-semibold">Date</h3>

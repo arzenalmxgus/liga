@@ -56,7 +56,15 @@ const EventCard = ({
         onClick={handleCardClick}
       >
         <div className="relative h-48 overflow-hidden">
-          <img src={banner_photo} alt={title} className="w-full h-full object-cover" />
+          <img 
+            src={banner_photo} 
+            alt={title} 
+            className="w-full h-full object-cover" 
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = '/placeholder.svg';
+            }}
+          />
           <div className="absolute top-4 right-4 bg-accent px-3 py-1 rounded-full text-xs font-semibold">
             {category}
           </div>

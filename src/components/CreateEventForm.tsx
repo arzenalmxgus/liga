@@ -54,29 +54,33 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
       return;
     }
 
+    if (!bannerFile) {
+      toast({
+        title: "Image Required",
+        description: "Please upload an event banner image",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
 
-      let bannerUrl = "";
-      if (bannerFile) {
-        // Upload to Supabase Storage
-        const fileExt = bannerFile.name.split('.').pop();
-        const fileName = `${Date.now()}.${fileExt}`;
-        const { data: uploadData, error: uploadError } = await supabase.storage
-          .from('event_banners')
-          .upload(fileName, bannerFile);
+      // Upload to Supabase Storage
+      const fileExt = bannerFile.name.split('.').pop();
+      const fileName = `${Date.now()}.${fileExt}`;
+      const { data: uploadData, error: uploadError } = await supabase.storage
+        .from('event_banners')
+        .upload(fileName, bannerFile);
 
-        if (uploadError) {
-          throw new Error('Error uploading image: ' + uploadError.message);
-        }
-
-        // Get the public URL
-        const { data: { publicUrl } } = supabase.storage
-          .from('event_banners')
-          .getPublicUrl(fileName);
-
-        bannerUrl = publicUrl;
+      if (uploadError) {
+        throw new Error('Error uploading image: ' + uploadError.message);
       }
+
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('event_banners')
+        .getPublicUrl(fileName);
 
       const eventsRef = collection(db, 'events');
       await addDoc(eventsRef, {
@@ -87,7 +91,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         participantsLimit: parseInt(formData.participantsLimit),
         entranceFee: formData.isFree === "true" ? null : parseFloat(formData.entranceFee),
         isFree: formData.isFree === "true",
-        bannerPhoto: bannerUrl,
+        bannerPhoto: publicUrl,
         hostId: user.uid,
         description: formData.description,
         currentParticipants: 0,
