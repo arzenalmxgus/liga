@@ -52,7 +52,7 @@ const Auth = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       <main className="md:ml-16 pb-16 md:pb-0 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-        <Card className="w-[90%] max-w-md mx-auto">
+        <Card className="w-[70%] max-w-4xl mx-auto bg-white/5 backdrop-blur-sm">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="login">Login</TabsTrigger>
@@ -61,23 +61,39 @@ const Auth = () => {
             <TabsContent value="login">
               <form onSubmit={handleLogin}>
                 <CardHeader>
-                  <CardTitle>Login</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-2xl font-semibold text-center">Login</CardTitle>
+                  <CardDescription className="text-center">
                     Enter your credentials to access your account
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6 px-8">
                   <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required />
+                    <Label htmlFor="email" className="text-base">Email</Label>
+                    <Input 
+                      id="email" 
+                      type="email" 
+                      required 
+                      placeholder="Enter your email address"
+                      className="h-12 text-base"
+                    />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
-                    <Input id="password" type="password" required />
+                    <Label htmlFor="password" className="text-base">Password</Label>
+                    <Input 
+                      id="password" 
+                      type="password" 
+                      required 
+                      placeholder="Enter your password"
+                      className="h-12 text-base"
+                    />
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                <CardFooter className="px-8 pb-8">
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base bg-primary hover:bg-primary/90" 
+                    disabled={isLoading}
+                  >
                     {isLoading ? "Loading..." : "Login"}
                   </Button>
                 </CardFooter>
@@ -86,104 +102,114 @@ const Auth = () => {
             <TabsContent value="register">
               <form onSubmit={handleRegister}>
                 <CardHeader>
-                  <CardTitle>Register</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-2xl font-semibold text-center">Register</CardTitle>
+                  <CardDescription className="text-center">
                     Create a new account to get started
                   </CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-6 px-8">
                   <div className="space-y-2">
-                    <Label>Account Type</Label>
+                    <Label className="text-base">Account Type</Label>
                     <RadioGroup 
                       defaultValue="attendee" 
                       onValueChange={setUserRole}
-                      className="flex flex-col space-y-1"
+                      className="flex flex-col space-y-2"
                     >
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3">
                         <RadioGroupItem value="attendee" id="attendee" />
-                        <Label htmlFor="attendee">Attendee - Join and participate in events</Label>
+                        <Label htmlFor="attendee" className="text-base">Attendee - Join and participate in events</Label>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center space-x-3">
                         <RadioGroupItem value="host" id="host" />
-                        <Label htmlFor="host">Host - Create and manage events</Label>
+                        <Label htmlFor="host" className="text-base">Host - Create and manage events</Label>
                       </div>
                     </RadioGroup>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="firstName">First Name</Label>
-                    <Input id="firstName" required />
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="firstName" className="text-base">First Name</Label>
+                      <Input id="firstName" required className="h-12 text-base" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="middleName" className="text-base">Middle Name</Label>
+                      <Select>
+                        <SelectTrigger className="h-12 text-base">
+                          <SelectValue placeholder="Select middle name option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="na">N/A</SelectItem>
+                          <SelectItem value="custom">Enter Middle Name</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="lastName" className="text-base">Last Name</Label>
+                      <Input id="lastName" required className="h-12 text-base" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="suffix" className="text-base">Suffix</Label>
+                      <Select>
+                        <SelectTrigger className="h-12 text-base">
+                          <SelectValue placeholder="Select suffix" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="na">N/A</SelectItem>
+                          <SelectItem value="jr">Jr.</SelectItem>
+                          <SelectItem value="sr">Sr.</SelectItem>
+                          <SelectItem value="ii">II</SelectItem>
+                          <SelectItem value="iii">III</SelectItem>
+                          <SelectItem value="iv">IV</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="middleName">Middle Name</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select middle name option" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="na">N/A</SelectItem>
-                        <SelectItem value="custom">Enter Middle Name</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="birthdate" className="text-base">Birthdate</Label>
+                    <Input id="birthdate" type="date" required className="h-12 text-base" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="lastName">Last Name</Label>
-                    <Input id="lastName" required />
+                    <Label htmlFor="profilePicture" className="text-base">Profile Picture (1x1)</Label>
+                    <Input id="profilePicture" type="file" accept="image/*" required className="h-12 text-base" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="suffix">Suffix</Label>
-                    <Select>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select suffix" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="na">N/A</SelectItem>
-                        <SelectItem value="jr">Jr.</SelectItem>
-                        <SelectItem value="sr">Sr.</SelectItem>
-                        <SelectItem value="ii">II</SelectItem>
-                        <SelectItem value="iii">III</SelectItem>
-                        <SelectItem value="iv">IV</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <Label htmlFor="email" className="text-base">Email</Label>
+                    <Input id="email" type="email" required className="h-12 text-base" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="birthdate">Birthdate</Label>
-                    <Input id="birthdate" type="date" required />
+                    <Label htmlFor="username" className="text-base">Username</Label>
+                    <Input id="username" required className="h-12 text-base" />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="profilePicture">Profile Picture (1x1)</Label>
-                    <Input id="profilePicture" type="file" accept="image/*" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input id="email" type="email" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="username">Username</Label>
-                    <Input id="username" required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="password">Password</Label>
+                    <Label htmlFor="password" className="text-base">Password</Label>
                     <Input 
                       id="password" 
                       type="password" 
                       required 
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      className="h-12 text-base"
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm Password</Label>
+                    <Label htmlFor="confirmPassword" className="text-base">Confirm Password</Label>
                     <Input 
                       id="confirmPassword" 
                       type="password" 
                       required 
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
+                      className="h-12 text-base"
                     />
                   </div>
                 </CardContent>
-                <CardFooter>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                <CardFooter className="px-8 pb-8">
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 text-base bg-primary hover:bg-primary/90" 
+                    disabled={isLoading}
+                  >
                     {isLoading ? "Loading..." : "Register"}
                   </Button>
                 </CardFooter>
