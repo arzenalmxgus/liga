@@ -9,6 +9,20 @@ import { useState } from "react";
 import { Calendar, Filter } from "lucide-react";
 import { DatePicker } from "../ui/date-picker";
 
+interface Event {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  category: string;
+  participants_limit: number;
+  current_participants: number;
+  banner_photo: string;
+  description: string;
+  entrance_fee: number | null;
+  is_free: boolean;
+}
+
 const StudentDashboard = () => {
   const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
@@ -21,7 +35,6 @@ const StudentDashboard = () => {
       const eventsRef = collection(db, 'events');
       let q = query(eventsRef);
       
-      // Add filters based on search term, date, and category
       if (selectedCategory) {
         q = query(q, where('category', '==', selectedCategory));
       }
@@ -30,9 +43,8 @@ const StudentDashboard = () => {
       let filteredEvents = querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
+      })) as Event[];
 
-      // Client-side filtering for search and date
       if (searchTerm) {
         filteredEvents = filteredEvents.filter(event => 
           event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
