@@ -10,7 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 
-// Define the UserRole type to match the database schema
 type UserRole = "attendee" | "host";
 
 const RegisterForm = () => {
@@ -49,7 +48,7 @@ const RegisterForm = () => {
         options: {
           data: {
             first_name: firstName,
-            middle_name: middleName,
+            middle_name: middleName || null,
             last_name: lastName,
             suffix: suffix === "na" ? null : suffix,
             birthdate,
@@ -67,7 +66,7 @@ const RegisterForm = () => {
           .insert({
             id: authData.user.id,
             first_name: firstName,
-            middle_name: middleName,
+            middle_name: middleName || null,
             last_name: lastName,
             suffix: suffix === "na" ? null : suffix,
             birthdate,
@@ -88,16 +87,9 @@ const RegisterForm = () => {
         description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
+      console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  // Handler to safely set userRole
-  const handleUserRoleChange = (value: string) => {
-    // Only set the state if the value is a valid UserRole
-    if (value === "attendee" || value === "host") {
-      setUserRole(value);
     }
   };
 
@@ -114,7 +106,7 @@ const RegisterForm = () => {
           <Label className="text-base">Account Type</Label>
           <RadioGroup 
             defaultValue="attendee" 
-            onValueChange={handleUserRoleChange}
+            onValueChange={setUserRole}
             className="flex flex-col space-y-2"
           >
             <div className="flex items-center space-x-3">
