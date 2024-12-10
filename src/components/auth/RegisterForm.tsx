@@ -66,9 +66,9 @@ const RegisterForm = () => {
 
       toast({
         title: "Success",
-        description: "Registration successful! You can now log in.",
+        description: "Registration successful! Redirecting to homepage...",
       });
-      navigate("/auth");
+      navigate("/"); // Changed from "/auth" to "/"
     } catch (error: any) {
       console.error("Registration error:", error);
       let errorMessage = "An unexpected error occurred";
