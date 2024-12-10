@@ -1,21 +1,18 @@
 import Navigation from "@/components/Navigation";
-import EventsGrid from "@/components/EventsGrid";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
-import { useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import CreateEventForm from "@/components/CreateEventForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import StudentDashboard from "@/components/dashboard/StudentDashboard";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const Index = () => {
-  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const { user } = useAuth();
+  const navigate = useNavigate();
 
-  // Query to check if user is a host
-  const { data: profile } = useQuery({
+  // Query to check user role
+  const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', user?.uid],
     queryFn: async () => {
       if (!user) return null;
@@ -26,30 +23,41 @@ const Index = () => {
     enabled: !!user,
   });
 
-  const isHost = profile?.user_role === 'host';
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background text-foreground">
+        <Navigation />
+        <main className="md:ml-16 pb-16 md:pb-0 flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
+          <h1 className="text-4xl font-bold mb-6">Welcome to Event Management</h1>
+          <p className="text-lg text-gray-400 mb-8">Please log in or register to continue</p>
+          <Button onClick={() => navigate("/auth")} size="lg">
+            Get Started
+          </Button>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       <main className="md:ml-16 pb-16 md:pb-0">
-        <header className="p-6 border-b border-gray-800 flex justify-between items-center">
-          <div>
-            <h1 className="text-2xl font-bold text-white">Upcoming Events</h1>
-            <p className="text-gray-400 mt-1">Discover and join exciting events</p>
+        {profile?.user_role === "student" && <StudentDashboard />}
+        {/* We'll implement other dashboards in subsequent updates */}
+        {(profile?.user_role === "coach" || profile?.user_role === "coordinator" || profile?.user_role === "official") && (
+          <div className="p-6">
+            <h1 className="text-2xl font-bold mb-4">
+              {profile.user_role.charAt(0).toUpperCase() + profile.user_role.slice(1)} Dashboard
+            </h1>
+            <p className="text-gray-400">
+              Additional features for {profile.user_role} will be implemented soon.
+            </p>
           </div>
-          {user && isHost && (
-            <Button onClick={() => setIsCreateEventOpen(true)} className="gap-2">
-              <Plus className="h-4 w-4" />
-              Create Event
-            </Button>
-          )}
-        </header>
-        <EventsGrid />
-        <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
-          <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-            <CreateEventForm onSuccess={() => setIsCreateEventOpen(false)} />
-          </DialogContent>
-        </Dialog>
+        )}
       </main>
     </div>
   );
