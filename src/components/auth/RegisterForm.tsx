@@ -23,7 +23,6 @@ const RegisterForm = () => {
     suffix: "na",
     birthdate: "",
   });
-  const [showConfirmation, setShowConfirmation] = useState(false);
   
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -62,19 +61,8 @@ const RegisterForm = () => {
         throw authError;
       }
 
-      console.log("Auth successful, waiting for session...");
+      console.log("Auth successful, creating profile...");
       
-      // Wait for session to be established (500ms should be enough)
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      console.log("Checking session...");
-      const { data: sessionData } = await supabase.auth.getSession();
-      
-      if (!sessionData.session) {
-        console.log("No session found, but continuing with profile creation...");
-      }
-
-      console.log("Creating profile...");
       if (authData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
@@ -94,48 +82,23 @@ const RegisterForm = () => {
         }
 
         console.log("Registration completed successfully!");
-        setShowConfirmation(true);
         toast({
-          title: "Registration Successful",
-          description: "Please check your email to confirm your account before logging in.",
+          title: "Success",
+          description: "Registration successful! You can now log in.",
         });
         navigate("/auth");
       }
     } catch (error: any) {
       console.error("Full registration error:", error);
-      let errorMessage = "An unexpected error occurred";
-      
-      if (error.message.includes("email_not_confirmed")) {
-        errorMessage = "Please confirm your email before logging in. Check your inbox for the confirmation link.";
-      }
-      
       toast({
         title: "Error",
-        description: errorMessage,
+        description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  if (showConfirmation) {
-    return (
-      <div className="text-center p-6 space-y-4">
-        <h2 className="text-2xl font-semibold">Check Your Email</h2>
-        <p className="text-muted-foreground">
-          We've sent a confirmation link to your email address.
-          Please click the link to activate your account.
-        </p>
-        <Button
-          onClick={() => navigate("/auth")}
-          className="mt-4"
-        >
-          Return to Login
-        </Button>
-      </div>
-    );
-  }
 
   return (
     <form onSubmit={handleRegister}>
