@@ -40,6 +40,7 @@ const RegisterForm = () => {
     setIsLoading(true);
 
     try {
+      console.log("Starting registration process...");
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -55,8 +56,12 @@ const RegisterForm = () => {
         },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error("Auth Error:", authError);
+        throw authError;
+      }
 
+      console.log("Auth successful, creating profile...");
       if (authData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
@@ -70,8 +75,12 @@ const RegisterForm = () => {
             user_role: userRole,
           });
 
-        if (profileError) throw profileError;
+        if (profileError) {
+          console.error("Profile Error:", profileError);
+          throw profileError;
+        }
 
+        console.log("Registration completed successfully!");
         toast({
           title: "Success",
           description: "Registration successful! Please check your email for verification.",
@@ -79,12 +88,12 @@ const RegisterForm = () => {
         navigate("/");
       }
     } catch (error: any) {
+      console.error("Full registration error:", error);
       toast({
         title: "Error",
         description: error.message || "An unexpected error occurred",
         variant: "destructive",
       });
-      console.error("Registration error:", error);
     } finally {
       setIsLoading(false);
     }
