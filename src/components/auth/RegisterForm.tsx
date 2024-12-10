@@ -3,8 +3,8 @@ import { Button } from "@/components/ui/button";
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { auth } from "@/lib/firebase";
-import { supabase } from "@/lib/supabase";
+import { auth, db } from "@/lib/firebase";
+import { doc, setDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import AccountTypeSection from "./form-sections/AccountTypeSection";
 import PersonalInfoSection from "./form-sections/PersonalInfoSection";
@@ -42,7 +42,6 @@ const RegisterForm = () => {
     setIsLoading(true);
 
     try {
-      console.log("Starting Firebase registration process...");
       const { user } = await createUserWithEmailAndPassword(
         auth,
         formData.email,
@@ -53,7 +52,18 @@ const RegisterForm = () => {
         displayName: `${formData.firstName} ${formData.lastName}`
       });
 
-      console.log("Registration completed successfully!");
+      // Create user profile in Firestore
+      await setDoc(doc(db, 'profiles', user.uid), {
+        firstName: formData.firstName,
+        middleName: formData.middleName,
+        lastName: formData.lastName,
+        suffix: formData.suffix,
+        birthdate: formData.birthdate,
+        email: formData.email,
+        user_role: userRole,
+        createdAt: new Date().toISOString(),
+      });
+
       toast({
         title: "Success",
         description: "Registration successful! You can now log in.",

@@ -7,7 +7,8 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import CreateEventForm from "@/components/CreateEventForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/lib/supabase";
+import { db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 
 const Index = () => {
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
@@ -18,12 +19,9 @@ const Index = () => {
     queryKey: ['profile', user?.uid],
     queryFn: async () => {
       if (!user) return null;
-      const { data } = await supabase
-        .from('profiles')
-        .select('user_role')
-        .eq('id', user.uid)
-        .single();
-      return data;
+      const docRef = doc(db, 'profiles', user.uid);
+      const docSnap = await getDoc(docRef);
+      return docSnap.exists() ? docSnap.data() : null;
     },
     enabled: !!user,
   });
