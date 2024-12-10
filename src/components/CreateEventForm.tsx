@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { db, storage } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
+import { supabase } from "@/lib/supabase";
 import { collection, addDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import EventBasicInfo from "./event-form/EventBasicInfo";
 import EventDateLocation from "./event-form/EventDateLocation";
 import EventCapacityFee from "./event-form/EventCapacityFee";
@@ -59,9 +59,23 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
 
       let bannerUrl = "";
       if (bannerFile) {
-        const storageRef = ref(storage, `event_banners/${Date.now()}_${bannerFile.name}`);
-        const snapshot = await uploadBytes(storageRef, bannerFile);
-        bannerUrl = await getDownloadURL(snapshot.ref);
+        // Upload to Supabase Storage
+        const fileExt = bannerFile.name.split('.').pop();
+        const fileName = `${Date.now()}.${fileExt}`;
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('event_banners')
+          .upload(fileName, bannerFile);
+
+        if (uploadError) {
+          throw new Error('Error uploading image: ' + uploadError.message);
+        }
+
+        // Get the public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('event_banners')
+          .getPublicUrl(fileName);
+
+        bannerUrl = publicUrl;
       }
 
       const eventsRef = collection(db, 'events');
