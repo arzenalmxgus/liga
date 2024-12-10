@@ -3,7 +3,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { db } from "@/lib/firebase";
 import { doc, getDoc } from "firebase/firestore";
-import StudentDashboard from "@/components/dashboard/StudentDashboard";
+import AttendeeDashboard from "@/components/dashboard/AttendeeDashboard";
+import HostDashboard from "@/components/dashboard/HostDashboard";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
@@ -11,7 +12,6 @@ const Index = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
 
-  // Query to check user role
   const { data: profile, isLoading } = useQuery({
     queryKey: ['profile', user?.uid],
     queryFn: async () => {
@@ -46,17 +46,10 @@ const Index = () => {
     <div className="min-h-screen bg-background text-foreground">
       <Navigation />
       <main className="md:ml-16 pb-16 md:pb-0">
-        {profile?.user_role === "student" && <StudentDashboard />}
-        {/* We'll implement other dashboards in subsequent updates */}
-        {(profile?.user_role === "coach" || profile?.user_role === "coordinator" || profile?.user_role === "official") && (
-          <div className="p-6">
-            <h1 className="text-2xl font-bold mb-4">
-              {profile.user_role.charAt(0).toUpperCase() + profile.user_role.slice(1)} Dashboard
-            </h1>
-            <p className="text-gray-400">
-              Additional features for {profile.user_role} will be implemented soon.
-            </p>
-          </div>
+        {profile?.user_role === "host" ? (
+          <HostDashboard />
+        ) : (
+          <AttendeeDashboard />
         )}
       </main>
     </div>
