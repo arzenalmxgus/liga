@@ -5,22 +5,49 @@ import { Label } from "@/components/ui/label";
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Coming Soon",
-        description: "Login functionality will be implemented soon.",
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-    }, 1000);
+
+      if (error) {
+        toast({
+          title: "Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "Logged in successfully!",
+        });
+        navigate("/");
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -33,11 +60,14 @@ const LoginForm = () => {
       </CardHeader>
       <CardContent className="space-y-6 px-8">
         <div className="space-y-2">
-          <Label htmlFor="username" className="text-base">Username</Label>
+          <Label htmlFor="email" className="text-base">Email</Label>
           <Input 
-            id="username" 
+            id="email" 
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
             required 
-            placeholder="Enter your username"
+            placeholder="Enter your email"
             className="h-12 text-base rounded-lg"
           />
         </div>
@@ -47,6 +77,8 @@ const LoginForm = () => {
             <Input 
               id="password" 
               type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
               required 
               placeholder="Enter your password"
               className="h-12 text-base pr-10 rounded-lg"

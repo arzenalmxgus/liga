@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, EyeOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabase";
+import { useNavigate } from "react-router-dom";
 
 const RegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,9 +17,16 @@ const RegisterForm = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [userRole, setUserRole] = useState("attendee");
+  const [email, setEmail] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [middleName, setMiddleName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [suffix, setSuffix] = useState("na");
+  const [birthdate, setBirthdate] = useState("");
   const { toast } = useToast();
+  const navigate = useNavigate();
 
-  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (password !== confirmPassword) {
       toast({
@@ -28,13 +37,59 @@ const RegisterForm = () => {
       return;
     }
     setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      toast({
-        title: "Coming Soon",
-        description: `Registration as ${userRole} will be implemented soon.`,
+
+    try {
+      // Register the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            middle_name: middleName,
+            last_name: lastName,
+            suffix: suffix === "na" ? null : suffix,
+            birthdate,
+            user_role: userRole,
+          },
+        },
       });
-    }, 1000);
+
+      if (authError) throw authError;
+
+      if (authData.user) {
+        // Create profile record
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert([
+            {
+              id: authData.user.id,
+              first_name: firstName,
+              middle_name: middleName,
+              last_name: lastName,
+              suffix: suffix === "na" ? null : suffix,
+              birthdate,
+              user_role: userRole,
+            }
+          ]);
+
+        if (profileError) throw profileError;
+
+        toast({
+          title: "Success",
+          description: "Registration successful! Please check your email for verification.",
+        });
+        navigate("/");
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: error.message || "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -66,11 +121,17 @@ const RegisterForm = () => {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="firstName" className="text-base">First Name</Label>
-            <Input id="firstName" required className="h-12 text-base rounded-lg" />
+            <Input 
+              id="firstName" 
+              value={firstName}
+              onChange={(e) => setFirstName(e.target.value)}
+              required 
+              className="h-12 text-base rounded-lg" 
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="middleName" className="text-base">Middle Name</Label>
-            <Select>
+            <Select value={middleName} onValueChange={setMiddleName}>
               <SelectTrigger className="h-12 text-base rounded-lg">
                 <SelectValue placeholder="Select middle name option" />
               </SelectTrigger>
@@ -84,11 +145,17 @@ const RegisterForm = () => {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <Label htmlFor="lastName" className="text-base">Last Name</Label>
-            <Input id="lastName" required className="h-12 text-base rounded-lg" />
+            <Input 
+              id="lastName" 
+              value={lastName}
+              onChange={(e) => setLastName(e.target.value)}
+              required 
+              className="h-12 text-base rounded-lg" 
+            />
           </div>
           <div className="space-y-2">
             <Label htmlFor="suffix" className="text-base">Suffix</Label>
-            <Select>
+            <Select value={suffix} onValueChange={setSuffix}>
               <SelectTrigger className="h-12 text-base rounded-lg">
                 <SelectValue placeholder="Select suffix" />
               </SelectTrigger>
@@ -105,19 +172,25 @@ const RegisterForm = () => {
         </div>
         <div className="space-y-2">
           <Label htmlFor="birthdate" className="text-base">Birthdate</Label>
-          <Input id="birthdate" type="date" required className="h-12 text-base rounded-lg" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="profilePicture" className="text-base">Profile Picture (1x1)</Label>
-          <Input id="profilePicture" type="file" accept="image/*" required className="h-12 text-base rounded-lg" />
+          <Input 
+            id="birthdate" 
+            type="date" 
+            value={birthdate}
+            onChange={(e) => setBirthdate(e.target.value)}
+            required 
+            className="h-12 text-base rounded-lg" 
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="email" className="text-base">Email</Label>
-          <Input id="email" type="email" required className="h-12 text-base rounded-lg" />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="username" className="text-base">Username</Label>
-          <Input id="username" required className="h-12 text-base rounded-lg" />
+          <Input 
+            id="email" 
+            type="email" 
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required 
+            className="h-12 text-base rounded-lg" 
+          />
         </div>
         <div className="space-y-2">
           <Label htmlFor="password" className="text-base">Password</Label>
