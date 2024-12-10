@@ -32,10 +32,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
       setSession(session)
       setUser(session?.user ?? null)
       setLoading(false)
+
+      // Handle email verification
+      if (event === 'SIGNED_IN') {
+        const currentPath = window.location.pathname;
+        if (currentPath.includes('verify')) {
+          window.location.href = '/email-verified';
+        }
+      }
     })
 
     return () => subscription.unsubscribe()

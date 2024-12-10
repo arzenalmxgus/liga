@@ -10,6 +10,7 @@ import Events from "./pages/Events";
 import Search from "./pages/Search";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import EmailVerified from "./pages/EmailVerified";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ const App = () => (
                 <Route path="/search" element={<Search />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/auth" element={<Auth />} />
+                <Route path="/email-verified" element={<EmailVerified />} />
               </Routes>
             </BrowserRouter>
           </div>
