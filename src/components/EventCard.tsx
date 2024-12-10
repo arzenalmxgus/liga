@@ -5,15 +5,31 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
 
 interface EventCardProps {
+  id: string;
   title: string;
   date: string;
   location: string;
   category: string;
-  participants: number;
-  image: string;
+  participants_limit: number;
+  current_participants: number;
+  banner_photo: string;
+  description: string;
+  entrance_fee: number | null;
+  is_free: boolean;
 }
 
-const EventCard = ({ title, date, location, category, participants, image }: EventCardProps) => {
+const EventCard = ({ 
+  title, 
+  date, 
+  location, 
+  category, 
+  participants_limit,
+  current_participants,
+  banner_photo,
+  description,
+  entrance_fee,
+  is_free,
+}: EventCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -40,7 +56,7 @@ const EventCard = ({ title, date, location, category, participants, image }: Eve
         onClick={handleCardClick}
       >
         <div className="relative h-48 overflow-hidden">
-          <img src={image} alt={title} className="w-full h-full object-cover" />
+          <img src={banner_photo} alt={title} className="w-full h-full object-cover" />
           <div className="absolute top-4 right-4 bg-accent px-3 py-1 rounded-full text-xs font-semibold">
             {category}
           </div>
@@ -50,7 +66,7 @@ const EventCard = ({ title, date, location, category, participants, image }: Eve
           <div className="space-y-2 text-gray-300">
             <div className="flex items-center gap-2">
               <Calendar className="w-4 h-4" />
-              <span className="text-sm">{date}</span>
+              <span className="text-sm">{new Date(date).toLocaleDateString()}</span>
             </div>
             <div className="flex items-center gap-2">
               <MapPin className="w-4 h-4" />
@@ -58,7 +74,7 @@ const EventCard = ({ title, date, location, category, participants, image }: Eve
             </div>
             <div className="flex items-center gap-2">
               <Users className="w-4 h-4" />
-              <span className="text-sm">{participants} participants</span>
+              <span className="text-sm">{current_participants}/{participants_limit} participants</span>
             </div>
           </div>
         </div>
@@ -66,7 +82,18 @@ const EventCard = ({ title, date, location, category, participants, image }: Eve
       <EventPreview 
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
-        event={{ title, date, location, category, participants, image }}
+        event={{ 
+          title, 
+          date, 
+          location, 
+          category, 
+          participants: current_participants,
+          image: banner_photo,
+          description,
+          entrance_fee,
+          is_free,
+          participants_limit
+        }}
       />
     </>
   );

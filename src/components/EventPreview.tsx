@@ -11,7 +11,11 @@ interface EventPreviewProps {
     location: string;
     category: string;
     participants: number;
+    participants_limit: number;
     image: string;
+    description: string;
+    entrance_fee: number | null;
+    is_free: boolean;
   };
 }
 
@@ -32,7 +36,7 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
           <div className="mt-4 space-y-3">
             <div>
               <h3 className="font-semibold">Date</h3>
-              <p>{event.date}</p>
+              <p>{new Date(event.date).toLocaleDateString()}</p>
             </div>
             <div>
               <h3 className="font-semibold">Location</h3>
@@ -44,7 +48,15 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
             </div>
             <div>
               <h3 className="font-semibold">Participants</h3>
-              <p>{event.participants} registered</p>
+              <p>{event.participants}/{event.participants_limit} registered</p>
+            </div>
+            <div>
+              <h3 className="font-semibold">Entrance Fee</h3>
+              <p>{event.is_free ? "Free" : `$${event.entrance_fee?.toFixed(2)}`}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold">Description</h3>
+              <p>{event.description}</p>
             </div>
           </div>
           <div className="mt-6">
