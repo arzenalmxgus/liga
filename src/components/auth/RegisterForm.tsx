@@ -10,13 +10,16 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 
+// Define the UserRole type to match the database schema
+type UserRole = "attendee" | "host";
+
 const RegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [userRole, setUserRole] = useState("attendee");
+  const [userRole, setUserRole] = useState<UserRole>("attendee");
   const [email, setEmail] = useState("");
   const [firstName, setFirstName] = useState("");
   const [middleName, setMiddleName] = useState("");
@@ -61,17 +64,15 @@ const RegisterForm = () => {
         // Create profile record
         const { error: profileError } = await supabase
           .from('profiles')
-          .insert([
-            {
-              id: authData.user.id,
-              first_name: firstName,
-              middle_name: middleName,
-              last_name: lastName,
-              suffix: suffix === "na" ? null : suffix,
-              birthdate,
-              user_role: userRole,
-            }
-          ]);
+          .insert({
+            id: authData.user.id,
+            first_name: firstName,
+            middle_name: middleName,
+            last_name: lastName,
+            suffix: suffix === "na" ? null : suffix,
+            birthdate,
+            user_role: userRole,
+          });
 
         if (profileError) throw profileError;
 
