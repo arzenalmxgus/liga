@@ -37,8 +37,8 @@ export default {
           foreground: "#FFFFFF",
         },
         card: {
-          DEFAULT: "#2D2D2D",
-          foreground: "#FFFFFF",
+          DEFAULT: "#FFFFFF",
+          foreground: "#111827",
         },
       },
       borderRadius: {

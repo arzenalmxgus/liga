@@ -11,13 +11,12 @@ import Search from "./pages/Search";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 
-// Move queryClient inside the component to ensure it's created after React initialization
 const App = () => {
   const queryClient = new QueryClient();
   
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="dark">
+      <ThemeProvider attribute="class" defaultTheme="light">
         <AuthProvider>
           <TooltipProvider>
             <div className="min-h-screen bg-background font-['Poppins']">
