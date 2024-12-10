@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { auth } from "@/lib/firebase";
 import { supabase } from "@/lib/supabase";
 import { useNavigate } from "react-router-dom";
 import AccountTypeSection from "./form-sections/AccountTypeSection";
@@ -40,56 +42,25 @@ const RegisterForm = () => {
     setIsLoading(true);
 
     try {
-      console.log("Starting registration process...");
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            first_name: formData.firstName,
-            middle_name: formData.middleName || null,
-            last_name: formData.lastName,
-            suffix: formData.suffix === "na" ? null : formData.suffix,
-            birthdate: formData.birthdate,
-            user_role: userRole,
-          }
-        },
+      console.log("Starting Firebase registration process...");
+      const { user } = await createUserWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
+
+      await updateProfile(user, {
+        displayName: `${formData.firstName} ${formData.lastName}`
       });
 
-      if (authError) {
-        console.error("Auth Error:", authError);
-        throw authError;
-      }
-
-      console.log("Auth successful, creating profile...");
-      
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: authData.user.id,
-            first_name: formData.firstName,
-            middle_name: formData.middleName || null,
-            last_name: formData.lastName,
-            suffix: formData.suffix === "na" ? null : formData.suffix,
-            birthdate: formData.birthdate,
-            user_role: userRole,
-          });
-
-        if (profileError) {
-          console.error("Profile Error:", profileError);
-          throw profileError;
-        }
-
-        console.log("Registration completed successfully!");
-        toast({
-          title: "Success",
-          description: "Registration successful! You can now log in.",
-        });
-        navigate("/auth");
-      }
+      console.log("Registration completed successfully!");
+      toast({
+        title: "Success",
+        description: "Registration successful! You can now log in.",
+      });
+      navigate("/auth");
     } catch (error: any) {
-      console.error("Full registration error:", error);
+      console.error("Registration error:", error);
       toast({
         title: "Error",
         description: error.message || "An unexpected error occurred",
