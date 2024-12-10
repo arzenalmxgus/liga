@@ -63,6 +63,13 @@ const RegisterForm = () => {
 
       console.log("Auth successful, creating profile...");
       if (authData.user) {
+        // Wait for the session to be established
+        const { data: sessionData } = await supabase.auth.getSession();
+        
+        if (!sessionData.session) {
+          throw new Error("Session not established");
+        }
+
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
