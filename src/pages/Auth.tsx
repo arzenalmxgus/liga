@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -12,6 +13,7 @@ const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+  const [userRole, setUserRole] = useState("attendee");
   const { toast } = useToast();
 
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
@@ -41,7 +43,7 @@ const Auth = () => {
       setIsLoading(false);
       toast({
         title: "Coming Soon",
-        description: "Registration functionality will be implemented soon.",
+        description: `Registration as ${userRole} will be implemented soon.`,
       });
     }, 1000);
   };
@@ -90,6 +92,23 @@ const Auth = () => {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Account Type</Label>
+                    <RadioGroup 
+                      defaultValue="attendee" 
+                      onValueChange={setUserRole}
+                      className="flex flex-col space-y-1"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="attendee" id="attendee" />
+                        <Label htmlFor="attendee">Attendee - Join and participate in events</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="host" id="host" />
+                        <Label htmlFor="host">Host - Create and manage events</Label>
+                      </div>
+                    </RadioGroup>
+                  </div>
                   <div className="space-y-2">
                     <Label htmlFor="firstName">First Name</Label>
                     <Input id="firstName" required />
