@@ -53,6 +53,7 @@ const RegisterForm = () => {
             birthdate: formData.birthdate,
             user_role: userRole,
           },
+          emailRedirectTo: undefined // Remove email redirect
         },
       });
 
