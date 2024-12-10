@@ -71,9 +71,20 @@ const RegisterForm = () => {
       navigate("/auth");
     } catch (error: any) {
       console.error("Registration error:", error);
+      let errorMessage = "An unexpected error occurred";
+      
+      // Handle specific Firebase auth errors
+      if (error.code === "auth/email-already-in-use") {
+        errorMessage = "This email is already registered. Please use a different email or try logging in.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "Password should be at least 6 characters long.";
+      }
+
       toast({
         title: "Error",
-        description: error.message || "An unexpected error occurred",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
