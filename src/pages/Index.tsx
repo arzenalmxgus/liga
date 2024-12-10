@@ -6,26 +6,29 @@ import { useState } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import CreateEventForm from "@/components/CreateEventForm";
 import { useAuth } from "@/contexts/AuthContext";
-import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/lib/supabase";
 
 const Index = () => {
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const { user } = useAuth();
-  const { toast } = useToast();
-  const navigate = useNavigate();
 
-  const handleCreateEventClick = () => {
-    if (!user) {
-      toast({
-        title: "Authentication Required",
-        description: "Please log in as a host to create events",
-      });
-      navigate("/auth");
-      return;
-    }
-    setIsCreateEventOpen(true);
-  };
+  // Query to check if user is a host
+  const { data: profile } = useQuery({
+    queryKey: ['profile', user?.id],
+    queryFn: async () => {
+      if (!user) return null;
+      const { data } = await supabase
+        .from('profiles')
+        .select('user_role')
+        .eq('id', user.id)
+        .single();
+      return data;
+    },
+    enabled: !!user,
+  });
+
+  const isHost = profile?.user_role === 'host';
 
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -36,10 +39,12 @@ const Index = () => {
             <h1 className="text-2xl font-bold text-white">Upcoming Events</h1>
             <p className="text-gray-400 mt-1">Discover and join exciting events</p>
           </div>
-          <Button onClick={handleCreateEventClick} className="gap-2">
-            <Plus className="h-4 w-4" />
-            Create Event
-          </Button>
+          {user && isHost && (
+            <Button onClick={() => setIsCreateEventOpen(true)} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Create Event
+            </Button>
+          )}
         </header>
         <EventsGrid />
         <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
