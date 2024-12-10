@@ -33,12 +33,11 @@ const LoginForm = () => {
       </CardHeader>
       <CardContent className="space-y-6 px-8">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-base">Email</Label>
+          <Label htmlFor="username" className="text-base">Username</Label>
           <Input 
-            id="email" 
-            type="email" 
+            id="username" 
             required 
-            placeholder="Enter your email address"
+            placeholder="Enter your username"
             className="h-12 text-base rounded-lg"
           />
         </div>
