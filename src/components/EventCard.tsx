@@ -1,6 +1,8 @@
 import { Calendar, MapPin, Users } from "lucide-react";
 import { useState } from "react";
 import EventPreview from "./EventPreview";
+import { useNavigate } from "react-router-dom";
+import { useToast } from "@/hooks/use-toast";
 
 interface EventCardProps {
   title: string;
@@ -13,12 +15,29 @@ interface EventCardProps {
 
 const EventCard = ({ title, date, location, category, participants, image }: EventCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // This is a mock function - replace with actual auth check
+  const isLoggedIn = () => false;
+
+  const handleCardClick = () => {
+    if (!isLoggedIn()) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to view event details",
+      });
+      navigate("/auth");
+      return;
+    }
+    setIsPreviewOpen(true);
+  };
 
   return (
     <>
       <div 
         className="bg-card rounded-lg overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 animate-fade-in cursor-pointer"
-        onClick={() => setIsPreviewOpen(true)}
+        onClick={handleCardClick}
       >
         <div className="relative h-48 overflow-hidden">
           <img src={image} alt={title} className="w-full h-full object-cover" />
