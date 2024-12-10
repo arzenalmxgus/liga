@@ -93,6 +93,14 @@ const RegisterForm = () => {
     }
   };
 
+  // Handler to safely set userRole
+  const handleUserRoleChange = (value: string) => {
+    // Only set the state if the value is a valid UserRole
+    if (value === "attendee" || value === "host") {
+      setUserRole(value);
+    }
+  };
+
   return (
     <form onSubmit={handleRegister}>
       <CardHeader>
@@ -106,7 +114,7 @@ const RegisterForm = () => {
           <Label className="text-base">Account Type</Label>
           <RadioGroup 
             defaultValue="attendee" 
-            onValueChange={setUserRole}
+            onValueChange={handleUserRoleChange}
             className="flex flex-col space-y-2"
           >
             <div className="flex items-center space-x-3">
