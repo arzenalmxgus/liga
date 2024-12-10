@@ -39,7 +39,8 @@ const PersonalInfoSection = ({ formData, setFormData }: PersonalInfoSectionProps
         </div>
         <div className="space-y-2">
           <Label htmlFor="middleName" className="text-base">Middle Name</Label>
-          <Select value={formData.middleName} onValueChange={(value) => updateFormData('middleName', value)}>
+          <Select value={formData.middleName === "" ? "na" : formData.middleName === "custom" ? "custom" : "na"} 
+                 onValueChange={(value) => updateFormData('middleName', value)}>
             <SelectTrigger className="h-12 text-base rounded-lg">
               <SelectValue placeholder="Select middle name option" />
             </SelectTrigger>
@@ -48,6 +49,15 @@ const PersonalInfoSection = ({ formData, setFormData }: PersonalInfoSectionProps
               <SelectItem value="custom">Enter Middle Name</SelectItem>
             </SelectContent>
           </Select>
+          {formData.middleName === "custom" && (
+            <Input
+              id="middleNameInput"
+              placeholder="Enter your middle name"
+              value={formData.middleName === "custom" ? "" : formData.middleName}
+              onChange={(e) => updateFormData('middleName', e.target.value)}
+              className="h-12 text-base rounded-lg mt-2"
+            />
+          )}
         </div>
       </div>
       <div className="grid grid-cols-2 gap-4">
