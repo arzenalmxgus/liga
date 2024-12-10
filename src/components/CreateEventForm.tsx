@@ -76,7 +76,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         entrance_fee: formData.isFree === "true" ? null : parseFloat(formData.entranceFee),
         is_free: formData.isFree === "true",
         banner_photo: bannerUrl,
-        host_id: user.id,
+        host_id: user.uid,
         description: formData.description,
       });
 

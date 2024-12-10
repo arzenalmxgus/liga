@@ -15,13 +15,13 @@ const Index = () => {
 
   // Query to check if user is a host
   const { data: profile } = useQuery({
-    queryKey: ['profile', user?.id],
+    queryKey: ['profile', user?.uid],
     queryFn: async () => {
       if (!user) return null;
       const { data } = await supabase
         .from('profiles')
         .select('user_role')
-        .eq('id', user.id)
+        .eq('id', user.uid)
         .single();
       return data;
     },
