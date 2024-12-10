@@ -29,10 +29,10 @@ const Index = () => {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="min-h-screen text-foreground">
         <Navigation />
         <main className="md:ml-16 pb-16 md:pb-0 flex flex-col items-center justify-center min-h-[calc(100vh-4rem)]">
-          <h1 className="text-4xl font-bold mb-6">Welcome to Event Management</h1>
+          <h1 className="text-4xl font-bold mb-6 text-white">Welcome to Event Management</h1>
           <p className="text-lg text-gray-400 mb-8">Please log in or register to continue</p>
           <Button onClick={() => navigate("/auth")} size="lg">
             Get Started
@@ -43,7 +43,7 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen text-foreground">
       <Navigation />
       <main className="md:ml-16 pb-16 md:pb-0">
         {profile?.user_role === "host" ? (
