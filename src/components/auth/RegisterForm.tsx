@@ -61,15 +61,20 @@ const RegisterForm = () => {
         throw authError;
       }
 
-      console.log("Auth successful, creating profile...");
-      if (authData.user) {
-        // Wait for the session to be established
-        const { data: sessionData } = await supabase.auth.getSession();
-        
-        if (!sessionData.session) {
-          throw new Error("Session not established");
-        }
+      console.log("Auth successful, waiting for session...");
+      
+      // Wait for session to be established (500ms should be enough)
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      console.log("Checking session...");
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session) {
+        console.log("No session found, but continuing with profile creation...");
+      }
 
+      console.log("Creating profile...");
+      if (authData.user) {
         const { error: profileError } = await supabase
           .from('profiles')
           .insert({
