@@ -78,7 +78,6 @@ const AttendeeDashboard = () => {
           className="md:w-1/3"
         />
         <div className="flex items-center gap-2">
-          <Calendar className="w-4 h-4" />
           <DatePicker
             selected={selectedDate}
             onSelect={setSelectedDate}
@@ -87,14 +86,14 @@ const AttendeeDashboard = () => {
         </div>
         <Button
           variant="outline"
-          className="gap-2"
+          className="bg-white/20 hover:bg-white/30 text-white border-white/20"
           onClick={() => {
             setSearchTerm("");
             setSelectedDate(undefined);
             setSelectedCategory("");
           }}
         >
-          <Filter className="w-4 h-4" />
+          <Filter className="w-4 h-4 mr-2" />
           Clear Filters
         </Button>
       </div>
