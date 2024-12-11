@@ -13,28 +13,27 @@ import SocialLinksSection from "./SocialLinksSection";
 interface ProfileFormProps {
   user: any;
   onCancel: () => void;
+  socialLinks: {
+    instagram: string;
+    facebook: string;
+    twitter: string;
+    youtube: string;
+  };
+  setSocialLinks: React.Dispatch<React.SetStateAction<{
+    instagram: string;
+    facebook: string;
+    twitter: string;
+    youtube: string;
+  }>>;
 }
 
-interface SocialLinks {
-  instagram: string;
-  facebook: string;
-  twitter: string;
-  youtube: string;
-}
-
-const ProfileForm = ({ user, onCancel }: ProfileFormProps) => {
+const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFormProps) => {
   const { toast } = useToast();
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [bio, setBio] = useState("");
   const [role, setRole] = useState("Host");
   const [city, setCity] = useState("");
   const [contactNumber, setContactNumber] = useState("");
-  const [socialLinks, setSocialLinks] = useState<SocialLinks>({
-    instagram: "",
-    facebook: "",
-    twitter: "",
-    youtube: "",
-  });
   const [loading, setLoading] = useState(false);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
 
@@ -166,7 +165,12 @@ const ProfileForm = ({ user, onCancel }: ProfileFormProps) => {
       />
 
       <div className="flex justify-end space-x-4">
-        <Button type="button" variant="outline" onClick={onCancel} className="text-white">
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          className="bg-black/20 text-white hover:bg-black/40 border-gray-700"
+        >
           Cancel
         </Button>
         <Button type="submit" disabled={loading}>

@@ -9,6 +9,12 @@ import { Pencil } from "lucide-react";
 const Profile = () => {
   const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
+  const [socialLinks, setSocialLinks] = useState({
+    instagram: "",
+    facebook: "",
+    twitter: "",
+    youtube: "",
+  });
 
   if (!isEditing) {
     return (
@@ -34,6 +40,7 @@ const Profile = () => {
               role="Host"
               eventsHosted={0}
               eventsAttended={0}
+              socialLinks={socialLinks}
             />
           </div>
         </main>
@@ -49,7 +56,12 @@ const Profile = () => {
           <header className="flex justify-between items-center mb-8">
             <h1 className="text-2xl font-bold text-white">Edit Profile</h1>
           </header>
-          <ProfileForm user={user} onCancel={() => setIsEditing(false)} />
+          <ProfileForm 
+            user={user} 
+            onCancel={() => setIsEditing(false)}
+            socialLinks={socialLinks}
+            setSocialLinks={setSocialLinks}
+          />
         </div>
       </main>
     </div>
