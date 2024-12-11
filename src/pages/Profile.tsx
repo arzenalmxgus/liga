@@ -25,8 +25,7 @@ const Profile = () => {
   const [contactNumber, setContactNumber] = useState("");
   const [socialLinks, setSocialLinks] = useState({
     instagram: "",
-    tumblr: "",
-    pinterest: "",
+    facebook: "",
     twitter: "",
     youtube: "",
   });

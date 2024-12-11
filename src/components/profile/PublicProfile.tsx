@@ -1,11 +1,10 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Instagram, Tumblr, Pinterest, Twitter, Youtube, User, MapPin, Phone, Mail } from "lucide-react";
+import { Instagram, Facebook, Twitter, Youtube, User, MapPin, Phone, Mail } from "lucide-react";
 
 interface SocialLinks {
   instagram: string;
-  tumblr: string;
-  pinterest: string;
+  facebook: string;
   twitter: string;
   youtube: string;
 }
@@ -37,8 +36,7 @@ const PublicProfile = ({
 }: PublicProfileProps) => {
   const socialIcons = {
     instagram: Instagram,
-    tumblr: Tumblr,
-    pinterest: Pinterest,
+    facebook: Facebook,
     twitter: Twitter,
     youtube: Youtube,
   };
