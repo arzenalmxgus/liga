@@ -142,7 +142,7 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
                   </div>
                   <div className="bg-card/5 backdrop-blur-sm p-4 rounded-lg">
                     <h3 className="font-semibold text-primary mb-1">Participants</h3>
-                    <p>{participants?.length || 0}/{event.participants_limit} registered</p>
+                    <p>{participants?.length || 0} registered</p>
                   </div>
                   <div className="bg-card/5 backdrop-blur-sm p-4 rounded-lg">
                     <h3 className="font-semibold text-primary mb-1">Entrance Fee</h3>
