@@ -15,6 +15,13 @@ interface ProfileFormProps {
   onCancel: () => void;
 }
 
+interface SocialLinks {
+  instagram: string;
+  facebook: string;
+  twitter: string;
+  youtube: string;
+}
+
 const ProfileForm = ({ user, onCancel }: ProfileFormProps) => {
   const { toast } = useToast();
   const [displayName, setDisplayName] = useState(user?.displayName || "");
@@ -22,7 +29,7 @@ const ProfileForm = ({ user, onCancel }: ProfileFormProps) => {
   const [role, setRole] = useState("Host");
   const [city, setCity] = useState("");
   const [contactNumber, setContactNumber] = useState("");
-  const [socialLinks, setSocialLinks] = useState({
+  const [socialLinks, setSocialLinks] = useState<SocialLinks>({
     instagram: "",
     facebook: "",
     twitter: "",

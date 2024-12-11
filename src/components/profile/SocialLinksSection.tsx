@@ -4,25 +4,27 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 
-interface SocialLink {
-  platform: string;
-  username: string;
+interface SocialLinks {
+  instagram: string;
+  facebook: string;
+  twitter: string;
+  youtube: string;
 }
 
 interface SocialLinksSectionProps {
-  socialLinks: Record<string, string>;
-  setSocialLinks: (links: Record<string, string>) => void;
+  socialLinks: SocialLinks;
+  setSocialLinks: React.Dispatch<React.SetStateAction<SocialLinks>>;
 }
 
 const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionProps) => {
   const [showAddLink, setShowAddLink] = useState(false);
   const platforms = ['instagram', 'facebook', 'twitter', 'youtube'];
   
-  const handleSocialLinkChange = (platform: string, value: string) => {
-    setSocialLinks({
-      ...socialLinks,
+  const handleSocialLinkChange = (platform: keyof SocialLinks, value: string) => {
+    setSocialLinks(prev => ({
+      ...prev,
       [platform]: value,
-    });
+    }));
   };
 
   return (
@@ -36,8 +38,8 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
           <Input
             id={platform}
             placeholder={`Enter your ${platform} username`}
-            value={socialLinks[platform]}
-            onChange={(e) => handleSocialLinkChange(platform, e.target.value)}
+            value={socialLinks[platform as keyof SocialLinks]}
+            onChange={(e) => handleSocialLinkChange(platform as keyof SocialLinks, e.target.value)}
             className="text-white bg-black/20"
           />
         </div>
