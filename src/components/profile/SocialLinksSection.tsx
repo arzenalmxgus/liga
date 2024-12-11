@@ -86,6 +86,9 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
           if (!link) return null;
           return (
             <div key={platform} className="flex items-center gap-2">
+              <div className="min-w-[100px] text-gray-400 capitalize">
+                {platform}:
+              </div>
               {editingPlatform === platform ? (
                 <Input
                   value={link}
