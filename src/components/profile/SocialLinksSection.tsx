@@ -32,6 +32,7 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
     'Snapchat',
     'Threads',
     'TikTok',
+    'Tumblr',
     'Twitch',
     'Twitter',
     'WhatsApp',
