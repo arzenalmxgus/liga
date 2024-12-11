@@ -16,9 +16,11 @@ interface EventCardProps {
   description: string;
   entrance_fee: number | null;
   is_free: boolean;
+  hostId: string;
 }
 
 const EventCard = ({ 
+  id,
   title, 
   date, 
   location, 
@@ -29,6 +31,7 @@ const EventCard = ({
   description,
   entrance_fee,
   is_free,
+  hostId,
 }: EventCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const navigate = useNavigate();
@@ -91,6 +94,7 @@ const EventCard = ({
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}
         event={{ 
+          id,
           title, 
           date, 
           location, 
@@ -100,7 +104,8 @@ const EventCard = ({
           description,
           entrance_fee,
           is_free,
-          participants_limit
+          participants_limit,
+          hostId
         }}
       />
     </>

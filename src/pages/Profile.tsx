@@ -40,6 +40,7 @@ const Profile = () => {
             </div>
             <PublicProfile
               displayName={user?.displayName || ""}
+              realName=""
               email={user?.email || ""}
               photoURL={user?.photoURL}
               bio=""

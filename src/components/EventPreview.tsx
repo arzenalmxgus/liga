@@ -18,6 +18,7 @@ interface EventPreviewProps {
   isOpen: boolean;
   onClose: () => void;
   event: {
+    id: string;
     title: string;
     date: string;
     location: string;
