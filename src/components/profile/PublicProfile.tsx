@@ -1,6 +1,19 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
-import { Instagram, Facebook, Twitter, Youtube, User, MapPin, Phone, Mail } from "lucide-react";
+import { 
+  Instagram, 
+  Facebook, 
+  Twitter, 
+  Youtube, 
+  User, 
+  MapPin, 
+  Phone, 
+  Mail,
+  MessageCircle,
+  Camera,
+  Twitch,
+  Globe,
+} from "lucide-react";
 
 interface SocialLinks {
   instagram: string;
@@ -34,7 +47,7 @@ const PublicProfile = ({
   contactNumber,
   socialLinks,
 }: PublicProfileProps) => {
-  const socialIcons = {
+  const socialIcons: Record<string, React.ComponentType> = {
     instagram: Instagram,
     facebook: Facebook,
     twitter: Twitter,
@@ -98,7 +111,8 @@ const PublicProfile = ({
             <div className="flex space-x-4">
               {Object.entries(socialLinks).map(([platform, link]) => {
                 if (!link) return null;
-                const Icon = socialIcons[platform as keyof typeof socialIcons];
+                const Icon = socialIcons[platform.toLowerCase()];
+                if (!Icon) return null;
                 return (
                   <a
                     key={platform}
