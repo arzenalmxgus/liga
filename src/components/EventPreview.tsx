@@ -1,8 +1,8 @@
 import { Button } from "./ui/button";
 import { Dialog, DialogContent } from "./ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
-import { useQuery } from "@tanstack/react-query";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useState } from "react";
 import EventRegistrationForm from "./event-registration/EventRegistrationForm";
@@ -10,6 +10,9 @@ import EventHeader from "./event-preview/EventHeader";
 import EventImage from "./event-preview/EventImage";
 import EventDetails from "./event-preview/EventDetails";
 import ParticipantsList from "./event-preview/ParticipantsList";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "./ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface EventPreviewProps {
   isOpen: boolean;
@@ -32,6 +35,8 @@ interface EventPreviewProps {
 
 const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
   const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const isHost = user?.uid === event.hostId;
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
@@ -70,6 +75,41 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
   const handleRegistrationSuccess = () => {
     setShowRegistrationForm(false);
     onClose();
+  };
+
+  const handleDeleteEvent = async () => {
+    try {
+      // Delete event document
+      await deleteDoc(doc(db, 'events', event.id));
+      
+      // Delete all participant registrations
+      const participantsRef = collection(db, 'event_participants');
+      const q = query(participantsRef, where('eventId', '==', event.id));
+      const snapshot = await getDocs(q);
+      
+      const deletePromises = snapshot.docs.map(doc => deleteDoc(doc.ref));
+      await Promise.all(deletePromises);
+
+      // Show success message
+      toast({
+        title: "Event Deleted",
+        description: "The event and all its registrations have been removed.",
+      });
+
+      // Close the preview dialog
+      onClose();
+
+      // Invalidate queries to refresh the events list
+      queryClient.invalidateQueries({ queryKey: ['events'] });
+      queryClient.invalidateQueries({ queryKey: ['host-events'] });
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete the event. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -115,18 +155,51 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
                   <p className="text-sm leading-relaxed text-white">{event.description}</p>
                 </div>
 
-                {!isHost && (
-                  <Button 
-                    className="w-full bg-primary hover:bg-primary/90 text-white"
-                    onClick={() => setShowRegistrationForm(true)}
-                    disabled={participants?.length >= event.participants_limit}
-                  >
-                    {participants?.length >= event.participants_limit 
-                      ? "Event Full" 
-                      : "Register for Event"
-                    }
-                  </Button>
-                )}
+                <div className="flex gap-4">
+                  {!isHost && (
+                    <Button 
+                      className="flex-1 bg-primary hover:bg-primary/90 text-white"
+                      onClick={() => setShowRegistrationForm(true)}
+                      disabled={participants?.length >= event.participants_limit}
+                    >
+                      {participants?.length >= event.participants_limit 
+                        ? "Event Full" 
+                        : "Register for Event"
+                      }
+                    </Button>
+                  )}
+                  
+                  {isHost && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="destructive" className="w-full gap-2">
+                          <Trash2 className="w-4 h-4" />
+                          Delete Event
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent className="bg-gray-900 text-white border border-gray-800">
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Delete Event</AlertDialogTitle>
+                          <AlertDialogDescription className="text-gray-400">
+                            Are you sure you want to delete this event? This action cannot be undone.
+                            All participant registrations will also be removed.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel className="bg-gray-800 text-white hover:bg-gray-700">
+                            Cancel
+                          </AlertDialogCancel>
+                          <AlertDialogAction
+                            onClick={handleDeleteEvent}
+                            className="bg-red-600 hover:bg-red-700"
+                          >
+                            Delete
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
               </div>
             </div>
 
