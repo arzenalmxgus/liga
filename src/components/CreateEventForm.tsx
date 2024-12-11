@@ -41,12 +41,22 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setBannerFile(e.target.files[0]);
+      const file = e.target.files[0];
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "File too large",
+          description: "Please select an image under 5MB",
+          variant: "destructive",
+        });
+        return;
+      }
+      setBannerFile(file);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!user) {
       toast({
         title: "Authentication required",
@@ -93,8 +103,8 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         date: date.toISOString(),
         location: formData.location,
         category: formData.category,
-        participantsLimit: parseInt(formData.participantsLimit),
-        entranceFee: formData.isFree === "true" ? null : parseFloat(formData.entranceFee),
+        participantsLimit: parseInt(formData.participantsLimit) || 0,
+        entranceFee: formData.isFree === "true" ? null : parseFloat(formData.entranceFee) || 0,
         isFree: formData.isFree === "true",
         bannerPhoto: downloadURL,
         hostId: user.uid,
@@ -112,7 +122,9 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         description: "Event created successfully",
       });
       
-      onSuccess?.();
+      if (onSuccess) {
+        onSuccess();
+      }
       navigate("/events");
     } catch (error) {
       console.error('Error creating event:', error);
@@ -127,7 +139,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6" onReset={(e) => e.preventDefault()}>
       <div>
         <Label htmlFor="banner">Banner Photo</Label>
         <Input
