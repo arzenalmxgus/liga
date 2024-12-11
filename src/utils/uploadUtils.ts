@@ -8,10 +8,12 @@ export const uploadImageToSupabase = async (file: File, path: string): Promise<s
   try {
     const fileExt = file.name.split('.').pop();
     const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${path}/${fileName}`;
+    const filePath = `${fileName}`; // Simplified path
 
+    console.log('Uploading to Supabase with path:', filePath);
+    
     const { data, error } = await supabase.storage
-      .from('event-images')
+      .from('events') // Changed from 'event-images' to 'events'
       .upload(filePath, file);
 
     if (error) {
@@ -22,7 +24,7 @@ export const uploadImageToSupabase = async (file: File, path: string): Promise<s
     console.log('Supabase upload successful:', data);
 
     const { data: { publicUrl } } = supabase.storage
-      .from('event-images')
+      .from('events') // Changed from 'event-images' to 'events'
       .getPublicUrl(filePath);
 
     return publicUrl;
