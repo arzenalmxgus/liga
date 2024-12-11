@@ -20,7 +20,7 @@ const Profile = () => {
               <Button
                 onClick={() => setIsEditing(true)}
                 variant="outline"
-                className="gap-2 text-white border-gray-700 hover:bg-gray-800"
+                className="bg-black/20 text-white hover:bg-black/40 border-gray-700"
               >
                 <Pencil className="w-4 h-4" />
                 Edit Profile
