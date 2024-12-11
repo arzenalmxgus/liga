@@ -1,5 +1,3 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
@@ -29,30 +27,27 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
 
   return (
     <div className="space-y-4">
-      <Label className="text-white">Social Links</Label>
-      {platforms.map((platform) => (
-        <div key={platform} className="space-y-2">
-          <Label htmlFor={platform} className="text-white capitalize flex items-center gap-2">
+      <div className="flex flex-wrap gap-4">
+        {platforms.map((platform) => (
+          <Button
+            key={platform}
+            variant="outline"
+            className="bg-black/20 text-white hover:bg-black/40 border-gray-700"
+            onClick={() => handleSocialLinkChange(platform as keyof SocialLinks, socialLinks[platform as keyof SocialLinks])}
+          >
             {platform}
-          </Label>
-          <Input
-            id={platform}
-            placeholder={`Enter your ${platform} username`}
-            value={socialLinks[platform as keyof SocialLinks]}
-            onChange={(e) => handleSocialLinkChange(platform as keyof SocialLinks, e.target.value)}
-            className="text-white bg-black/20"
-          />
-        </div>
-      ))}
-      <Button
-        type="button"
-        variant="outline"
-        className="w-full mt-4 text-white border-gray-700"
-        onClick={() => setShowAddLink(!showAddLink)}
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        Add a social link
-      </Button>
+          </Button>
+        ))}
+        <Button
+          type="button"
+          variant="outline"
+          className="bg-black/20 text-white hover:bg-black/40 border-gray-700"
+          onClick={() => setShowAddLink(!showAddLink)}
+        >
+          <Plus className="w-4 h-4 mr-2" />
+          Add a social link
+        </Button>
+      </div>
     </div>
   );
 };
