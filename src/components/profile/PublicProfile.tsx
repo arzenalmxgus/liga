@@ -16,7 +16,8 @@ import {
   MessageSquare,
   PinIcon,
   UserRound,
-  Info
+  Info,
+  LucideIcon
 } from "lucide-react";
 
 interface SocialLinks {
@@ -59,7 +60,7 @@ const PublicProfile = ({
   contactNumber,
   socialLinks,
 }: PublicProfileProps) => {
-  const socialIcons: Record<string, React.ComponentType> = {
+  const socialIcons: Record<string, LucideIcon> = {
     instagram: Instagram,
     facebook: Facebook,
     twitter: Twitter,
