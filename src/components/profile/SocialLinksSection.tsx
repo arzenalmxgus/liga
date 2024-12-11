@@ -1,6 +1,14 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
 
 interface SocialLinks {
   instagram: string;
@@ -16,6 +24,7 @@ interface SocialLinksSectionProps {
 
 const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionProps) => {
   const [showAddLink, setShowAddLink] = useState(false);
+  const [selectedPlatform, setSelectedPlatform] = useState<keyof SocialLinks | ''>('');
   const platforms = ['instagram', 'facebook', 'twitter', 'youtube'];
   
   const handleSocialLinkChange = (platform: keyof SocialLinks, value: string) => {
@@ -25,19 +34,13 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
     }));
   };
 
+  const handlePlatformSelect = (platform: string) => {
+    setSelectedPlatform(platform as keyof SocialLinks);
+  };
+
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap gap-4">
-        {platforms.map((platform) => (
-          <Button
-            key={platform}
-            variant="outline"
-            className="bg-black/20 text-white hover:bg-black/40 border-gray-700"
-            onClick={() => handleSocialLinkChange(platform as keyof SocialLinks, socialLinks[platform as keyof SocialLinks])}
-          >
-            {platform}
-          </Button>
-        ))}
         <Button
           type="button"
           variant="outline"
@@ -48,6 +51,32 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
           Add a social link
         </Button>
       </div>
+
+      {showAddLink && (
+        <div className="space-y-4 animate-fade-in">
+          <Select onValueChange={handlePlatformSelect}>
+            <SelectTrigger className="bg-black/20 text-white border-gray-700">
+              <SelectValue placeholder="Select platform" />
+            </SelectTrigger>
+            <SelectContent>
+              {platforms.map((platform) => (
+                <SelectItem key={platform} value={platform} className="capitalize">
+                  {platform}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          {selectedPlatform && (
+            <Input
+              placeholder={`Enter your ${selectedPlatform} username`}
+              value={socialLinks[selectedPlatform]}
+              onChange={(e) => handleSocialLinkChange(selectedPlatform, e.target.value)}
+              className="text-white bg-black/20 border-gray-700"
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };
