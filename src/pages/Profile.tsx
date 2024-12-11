@@ -14,6 +14,12 @@ const Profile = () => {
     facebook: "",
     twitter: "",
     youtube: "",
+    twitch: "",
+    linkedin: "",
+    github: "",
+    discord: "",
+    tiktok: "",
+    pinterest: "",
   });
 
   if (!isEditing) {

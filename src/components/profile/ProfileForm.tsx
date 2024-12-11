@@ -18,12 +18,24 @@ interface ProfileFormProps {
     facebook: string;
     twitter: string;
     youtube: string;
+    twitch: string;
+    linkedin: string;
+    github: string;
+    discord: string;
+    tiktok: string;
+    pinterest: string;
   };
   setSocialLinks: React.Dispatch<React.SetStateAction<{
     instagram: string;
     facebook: string;
     twitter: string;
     youtube: string;
+    twitch: string;
+    linkedin: string;
+    github: string;
+    discord: string;
+    tiktok: string;
+    pinterest: string;
   }>>;
 }
 
