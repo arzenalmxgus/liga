@@ -57,12 +57,12 @@ const Profile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen">
       <Navigation />
       <main className="md:ml-16 pb-16 md:pb-0">
         <div className="max-w-2xl mx-auto p-6">
           <header className="flex justify-between items-center mb-8">
-            <h1 className="text-2xl font-bold">Profile</h1>
+            <h1 className="text-2xl font-bold text-white">Profile</h1>
             <Button
               variant="outline"
               size="sm"
@@ -91,6 +91,7 @@ const Profile = () => {
                     type="file"
                     accept="image/*"
                     onChange={(e) => setProfilePicture(e.target.files?.[0] || null)}
+                    className="text-white"
                   />
                   <p className="text-sm text-gray-400 mt-1">
                     Recommended: Square image, max 2MB
@@ -101,17 +102,18 @@ const Profile = () => {
 
             <form onSubmit={handleProfileUpdate} className="space-y-4">
               <div>
-                <Label htmlFor="displayName">Display Name</Label>
+                <Label htmlFor="displayName" className="text-white">Display Name</Label>
                 <Input
                   id="displayName"
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   disabled={!isEditing}
+                  className="text-white"
                 />
               </div>
 
               <div>
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email" className="text-white">Email</Label>
                 <Input
                   id="email"
                   value={user?.email || ""}
