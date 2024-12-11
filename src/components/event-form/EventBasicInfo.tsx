@@ -48,6 +48,7 @@ const EventBasicInfo = ({ formData, handleInputChange, date, setDate, disabled }
         <DatePicker
           selected={date}
           onSelect={setDate}
+          placeholder="Select event date"
         />
       </div>
 
