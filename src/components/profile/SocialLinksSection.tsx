@@ -16,6 +16,12 @@ interface SocialLinks {
   facebook: string;
   twitter: string;
   youtube: string;
+  twitch: string;
+  linkedin: string;
+  github: string;
+  discord: string;
+  tiktok: string;
+  pinterest: string;
 }
 
 interface SocialLinksSectionProps {
@@ -33,7 +39,13 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
     'Facebook',
     'Instagram',
     'Twitter',
-    'YouTube'
+    'YouTube',
+    'Twitch',
+    'LinkedIn',
+    'GitHub',
+    'Discord',
+    'TikTok',
+    'Pinterest'
   ];
   
   const handleSocialLinkChange = (platform: keyof SocialLinks, value: string) => {
