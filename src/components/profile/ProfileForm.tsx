@@ -1,52 +1,19 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { storage, db } from "@/lib/firebase";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { db } from "@/lib/firebase";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import SocialLinksSection from "./SocialLinksSection";
 import BasicInfoSection from "./form-sections/BasicInfoSection";
 import ContactInfoSection from "./form-sections/ContactInfoSection";
+import { uploadProfilePicture, flattenObject } from "@/utils/profileUtils";
+import type { SocialLinks, ProfileFormData } from "@/types/profile";
 
 interface ProfileFormProps {
   user: any;
   onCancel: () => void;
-  socialLinks: {
-    instagram: string;
-    facebook: string;
-    twitter: string;
-    youtube: string;
-    twitch: string;
-    linkedin: string;
-    github: string;
-    discord: string;
-    tiktok: string;
-    pinterest: string;
-  };
-  setSocialLinks: React.Dispatch<React.SetStateAction<{
-    instagram: string;
-    facebook: string;
-    twitter: string;
-    youtube: string;
-    twitch: string;
-    linkedin: string;
-    github: string;
-    discord: string;
-    tiktok: string;
-    pinterest: string;
-  }>>;
-}
-
-interface UpdateData {
-  displayName: string;
-  realName: string;
-  bio: string;
-  role: string;
-  city: string;
-  contactNumber: string;
-  socialLinks: ProfileFormProps['socialLinks'];
-  updatedAt: string;
-  photoURL?: string;
+  socialLinks: SocialLinks;
+  setSocialLinks: React.Dispatch<React.SetStateAction<SocialLinks>>;
 }
 
 const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFormProps) => {
@@ -91,24 +58,6 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
     fetchUserProfile();
   }, [user, toast]);
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      if (file.size > 2 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: "File size must be less than 2MB",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      setProfilePicture(file);
-      const fileUrl = URL.createObjectURL(file);
-      setPreviewUrl(fileUrl);
-    }
-  };
-
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -118,12 +67,10 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
       let photoURL = user.photoURL;
 
       if (profilePicture) {
-        const storageRef = ref(storage, `profile_pictures/${user.uid}`);
-        await uploadBytes(storageRef, profilePicture);
-        photoURL = await getDownloadURL(storageRef);
+        photoURL = await uploadProfilePicture(user.uid, profilePicture);
       }
 
-      const updateData: UpdateData = {
+      const updateData: ProfileFormData = {
         displayName,
         realName,
         bio,
@@ -139,7 +86,7 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
       }
 
       const userRef = doc(db, "profiles", user.uid);
-      await updateDoc(userRef, updateData);
+      await updateDoc(userRef, flattenObject(updateData));
 
       toast({
         title: "Profile Updated",
@@ -166,7 +113,21 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
         realName={realName}
         setRealName={setRealName}
         previewUrl={previewUrl}
-        handleFileChange={handleFileChange}
+        handleFileChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+              toast({
+                title: "Error",
+                description: "File size must be less than 2MB",
+                variant: "destructive",
+              });
+              return;
+            }
+            setProfilePicture(file);
+            setPreviewUrl(URL.createObjectURL(file));
+          }
+        }}
       />
 
       <ContactInfoSection
