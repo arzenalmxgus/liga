@@ -21,6 +21,7 @@ interface Event {
   description: string;
   entrance_fee: number | null;
   is_free: boolean;
+  hostId: string;
 }
 
 const StudentDashboard = () => {
@@ -102,9 +103,25 @@ const StudentDashboard = () => {
         {events?.map((event) => (
           <EventCard
             key={event.id}
-            {...event}
+            id={event.id}
+            title={event.title}
+            date={event.date}
+            location={event.location}
+            category={event.category}
+            participants_limit={event.participants_limit}
+            current_participants={event.current_participants}
+            banner_photo={event.banner_photo}
+            description={event.description}
+            entrance_fee={event.entrance_fee}
+            is_free={event.is_free}
+            hostId={event.hostId}
           />
         ))}
+        {events?.length === 0 && (
+          <p className="text-gray-400 col-span-full text-center py-12">
+            No events found. Try adjusting your filters.
+          </p>
+        )}
       </div>
     </div>
   );

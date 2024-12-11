@@ -77,17 +77,8 @@ const HostDashboard = () => {
         {events?.map((event) => (
           <EventCard
             key={event.id}
-            id={event.id}
-            title={event.title}
-            date={event.date}
-            location={event.location}
-            category={event.category}
-            participants_limit={event.participants_limit}
-            current_participants={event.current_participants}
-            banner_photo={event.banner_photo}
-            description={event.description}
-            entrance_fee={event.entrance_fee}
-            is_free={event.is_free}
+            {...event}
+            hostId={event.hostId}
           />
         ))}
         {events?.length === 0 && (

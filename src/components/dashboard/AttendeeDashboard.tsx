@@ -21,6 +21,7 @@ interface Event {
   description: string;
   entrance_fee: number | null;
   is_free: boolean;
+  hostId: string;
 }
 
 const AttendeeDashboard = () => {
@@ -113,6 +114,7 @@ const AttendeeDashboard = () => {
             description={event.description}
             entrance_fee={event.entrance_fee}
             is_free={event.is_free}
+            hostId={event.hostId}
           />
         ))}
         {events?.length === 0 && (
