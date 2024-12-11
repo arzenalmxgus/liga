@@ -172,7 +172,10 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
                   {isHost && (
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="destructive" className="w-full gap-2">
+                        <Button 
+                          variant="destructive" 
+                          className="w-full gap-2 bg-red-600 hover:bg-red-700 text-white font-medium shadow-lg transition-all duration-200 ease-in-out"
+                        >
                           <Trash2 className="w-4 h-4" />
                           Delete Event
                         </Button>
