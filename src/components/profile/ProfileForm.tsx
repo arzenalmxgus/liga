@@ -7,7 +7,6 @@ import { doc, updateDoc, getDoc } from "firebase/firestore";
 import SocialLinksSection from "./SocialLinksSection";
 import BasicInfoSection from "./form-sections/BasicInfoSection";
 import ContactInfoSection from "./form-sections/ContactInfoSection";
-import AttendeesList from "./AttendeesList";
 
 interface ProfileFormProps {
   user: any;
@@ -70,10 +69,15 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
         }
       } catch (error) {
         console.error("Error fetching user profile:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data. Please try again.",
+          variant: "destructive",
+        });
       }
     };
     fetchUserProfile();
-  }, [user]);
+  }, [user, toast]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -107,18 +111,23 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
         photoURL = await getDownloadURL(storageRef);
       }
 
-      const userRef = doc(db, "profiles", user.uid);
-      await updateDoc(userRef, {
+      const updateData = {
         displayName,
         realName,
-        photoURL,
         bio,
         role,
         city,
         contactNumber,
         socialLinks,
         updatedAt: new Date().toISOString(),
-      });
+      };
+
+      if (photoURL) {
+        updateData.photoURL = photoURL;
+      }
+
+      const userRef = doc(db, "profiles", user.uid);
+      await updateDoc(userRef, updateData);
 
       toast({
         title: "Profile Updated",
@@ -163,13 +172,12 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
         setSocialLinks={setSocialLinks}
       />
 
-      {role === "Host" && <AttendeesList />}
-
       <div className="flex justify-end space-x-4">
         <Button 
           type="button" 
           variant="outline" 
           onClick={onCancel}
+          disabled={loading}
           className="bg-black/20 text-white hover:bg-black/40 border-gray-700"
         >
           Cancel
