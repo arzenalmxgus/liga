@@ -16,10 +16,10 @@ const App = () => {
   
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider attribute="class" defaultTheme="light">
+      <ThemeProvider attribute="class" defaultTheme="dark">
         <AuthProvider>
           <TooltipProvider>
-            <div className="relative min-h-screen font-['Poppins']">
+            <div className="relative min-h-screen font-['Poppins'] dark">
               <div className="absolute inset-0 bg-gradient-overlay" />
               <div className="relative z-10">
                 <Toaster />
