@@ -65,6 +65,20 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate all fields are filled
+    const hasEmptyFields = Object.values(formData).some(value => value === "");
+    const hasEmptyFiles = Object.values(files).some(file => file === null);
+    
+    if (hasEmptyFields || hasEmptyFiles) {
+      toast({
+        title: "Validation Error",
+        description: "Please fill in all fields and upload all required documents.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -229,6 +243,7 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
           <Select
             value={formData.eventType}
             onValueChange={(value) => setFormData(prev => ({ ...prev, eventType: value }))}
+            required
           >
             <SelectTrigger>
               <SelectValue placeholder="Select event type" />
@@ -245,6 +260,7 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
           <Select
             value={formData.school}
             onValueChange={(value) => setFormData(prev => ({ ...prev, school: value }))}
+            required
           >
             <SelectTrigger>
               <SelectValue placeholder="Select school" />
@@ -291,7 +307,7 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
         </div>
       </div>
 
-      <div className="flex justify-end space-x-4">
+      <div className="flex justify-end space-x-4 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
