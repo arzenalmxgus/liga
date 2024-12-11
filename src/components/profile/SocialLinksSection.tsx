@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import {
   Select,
@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
 
 interface SocialLinks {
   instagram: string;
@@ -23,31 +24,46 @@ interface SocialLinksSectionProps {
 }
 
 const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionProps) => {
+  const { toast } = useToast();
   const [showAddLink, setShowAddLink] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<keyof SocialLinks | ''>('');
+  const [editingPlatform, setEditingPlatform] = useState<keyof SocialLinks | null>(null);
+  
   const platforms = [
     'Facebook',
     'Instagram',
-    'LINE',
-    'Snapchat',
-    'Threads',
-    'TikTok',
-    'Tumblr',
-    'Twitch',
     'Twitter',
-    'WhatsApp',
     'YouTube'
   ];
   
   const handleSocialLinkChange = (platform: keyof SocialLinks, value: string) => {
     setSocialLinks(prev => ({
       ...prev,
-      [platform]: value,
+      [platform.toLowerCase()]: value,
     }));
   };
 
   const handlePlatformSelect = (platform: string) => {
-    setSelectedPlatform(platform as keyof SocialLinks);
+    setSelectedPlatform(platform.toLowerCase() as keyof SocialLinks);
+  };
+
+  const handleRemoveLink = (platform: keyof SocialLinks) => {
+    setSocialLinks(prev => ({
+      ...prev,
+      [platform]: '',
+    }));
+    toast({
+      title: "Social Link Removed",
+      description: `Your ${platform} link has been removed.`,
+    });
+  };
+
+  const startEditing = (platform: keyof SocialLinks) => {
+    setEditingPlatform(platform);
+  };
+
+  const stopEditing = () => {
+    setEditingPlatform(null);
   };
 
   return (
@@ -64,6 +80,46 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
         </Button>
       </div>
 
+      {/* Existing Social Links */}
+      <div className="space-y-3">
+        {Object.entries(socialLinks).map(([platform, link]) => {
+          if (!link) return null;
+          return (
+            <div key={platform} className="flex items-center gap-2">
+              {editingPlatform === platform ? (
+                <Input
+                  value={link}
+                  onChange={(e) => handleSocialLinkChange(platform as keyof SocialLinks, e.target.value)}
+                  onBlur={stopEditing}
+                  className="text-white bg-black/20 border-gray-700 flex-1"
+                  autoFocus
+                />
+              ) : (
+                <div className="flex-1 text-white">{link}</div>
+              )}
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => startEditing(platform as keyof SocialLinks)}
+                className="text-gray-400 hover:text-white"
+              >
+                <Pencil className="w-4 h-4" />
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => handleRemoveLink(platform as keyof SocialLinks)}
+                className="text-gray-400 hover:text-red-500"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          );
+        })}
+      </div>
+
       {showAddLink && (
         <div className="space-y-4 animate-fade-in">
           <Select onValueChange={handlePlatformSelect}>
@@ -74,7 +130,7 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
               {platforms.map((platform) => (
                 <SelectItem 
                   key={platform} 
-                  value={platform} 
+                  value={platform.toLowerCase()} 
                   className="capitalize text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white font-['Poppins']"
                 >
                   {platform}
