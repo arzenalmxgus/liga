@@ -44,16 +44,16 @@ const HostDashboard = () => {
   });
 
   if (isLoading) {
-    return <div className="p-6">Loading events...</div>;
+    return <div className="p-6 text-white">Loading events...</div>;
   }
 
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold">My Events</h1>
+        <h1 className="text-2xl font-bold text-white">My Events</h1>
         <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
           <DialogTrigger asChild>
-            <Button className="gap-2">
+            <Button className="gap-2 bg-white/20 hover:bg-white/30 text-white">
               <Plus className="w-4 h-4" />
               Create Event
             </Button>
@@ -62,9 +62,9 @@ const HostDashboard = () => {
             isMobile 
               ? 'w-[95%] max-h-[80vh]' 
               : 'w-[90%] max-w-[1200px] max-h-[85vh]'
-          } overflow-y-auto p-6`}>
+          } overflow-y-auto p-6 bg-gray-900/95 border border-white/20 text-white`}>
             <DialogHeader>
-              <DialogTitle>Create New Event</DialogTitle>
+              <DialogTitle className="text-xl font-bold text-white">Create New Event</DialogTitle>
             </DialogHeader>
             <CreateEventForm onSuccess={() => {
               setIsCreateEventOpen(false);
