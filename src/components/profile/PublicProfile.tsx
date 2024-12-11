@@ -135,7 +135,7 @@ const PublicProfile = ({
         {socialLinks && Object.entries(socialLinks).some(([_, value]) => value) && (
           <div className="mt-6">
             <h3 className="text-lg font-semibold text-white mb-2">Social Links</h3>
-            <div className="flex space-x-4">
+            <div className="flex flex-wrap gap-4">
               {Object.entries(socialLinks).map(([platform, link]) => {
                 if (!link) return null;
                 const Icon = socialIcons[platform.toLowerCase()];
@@ -149,9 +149,7 @@ const PublicProfile = ({
                     className="text-gray-400 hover:text-white transition-colors"
                     title={platform.charAt(0).toUpperCase() + platform.slice(1)}
                   >
-                    <div className="w-5 h-5">
-                      <Icon />
-                    </div>
+                    <Icon className="w-5 h-5" />
                   </a>
                 );
               })}
