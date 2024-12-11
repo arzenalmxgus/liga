@@ -93,24 +93,24 @@ const EventCard = ({
               target.src = '/placeholder.svg';
             }}
           />
-          <div className="absolute top-4 right-4 bg-accent px-3 py-1 rounded-full text-xs font-semibold">
+          <div className="absolute top-4 right-4 bg-accent/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-white shadow-md">
             {category}
           </div>
         </div>
-        <div className="p-4">
-          <h3 className="text-lg font-semibold mb-2 text-white">{title}</h3>
-          <div className="space-y-2 text-gray-300">
-            <div className="flex items-center gap-2">
-              <Calendar className="w-4 h-4" />
-              <span className="text-sm">{new Date(date).toLocaleDateString()}</span>
+        <div className="p-6 space-y-4 bg-gradient-to-b from-gray-900/90 to-gray-900/95">
+          <h3 className="text-xl font-semibold mb-2 text-white">{title}</h3>
+          <div className="space-y-3 text-gray-100">
+            <div className="flex items-center gap-3 bg-white/10 rounded-lg p-2 backdrop-blur-sm">
+              <Calendar className="w-5 h-5 text-primary" />
+              <span className="text-sm font-medium">{new Date(date).toLocaleDateString()}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <MapPin className="w-4 h-4" />
-              <span className="text-sm">{location}</span>
+            <div className="flex items-center gap-3 bg-white/10 rounded-lg p-2 backdrop-blur-sm">
+              <MapPin className="w-5 h-5 text-secondary" />
+              <span className="text-sm font-medium">{location}</span>
             </div>
-            <div className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              <span className="text-sm">{current_participants}/{participants_limit} participants</span>
+            <div className="flex items-center gap-3 bg-white/10 rounded-lg p-2 backdrop-blur-sm">
+              <Users className="w-5 h-5 text-accent" />
+              <span className="text-sm font-medium">{current_participants} registered participants</span>
             </div>
           </div>
         </div>
