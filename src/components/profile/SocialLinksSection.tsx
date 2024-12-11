@@ -25,7 +25,18 @@ interface SocialLinksSectionProps {
 const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionProps) => {
   const [showAddLink, setShowAddLink] = useState(false);
   const [selectedPlatform, setSelectedPlatform] = useState<keyof SocialLinks | ''>('');
-  const platforms = ['instagram', 'facebook', 'twitter', 'youtube'];
+  const platforms = [
+    'Facebook',
+    'Instagram',
+    'LINE',
+    'Snapchat',
+    'Threads',
+    'TikTok',
+    'Twitch',
+    'Twitter',
+    'WhatsApp',
+    'YouTube'
+  ];
   
   const handleSocialLinkChange = (platform: keyof SocialLinks, value: string) => {
     setSocialLinks(prev => ({
@@ -63,7 +74,7 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
                 <SelectItem 
                   key={platform} 
                   value={platform} 
-                  className="capitalize text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white"
+                  className="capitalize text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white font-['Poppins']"
                 >
                   {platform}
                 </SelectItem>
