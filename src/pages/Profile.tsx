@@ -21,6 +21,15 @@ const Profile = () => {
   const [displayName, setDisplayName] = useState(user?.displayName || "");
   const [bio, setBio] = useState("");
   const [role, setRole] = useState("Host");
+  const [city, setCity] = useState("");
+  const [contactNumber, setContactNumber] = useState("");
+  const [socialLinks, setSocialLinks] = useState({
+    instagram: "",
+    tumblr: "",
+    pinterest: "",
+    twitter: "",
+    youtube: "",
+  });
   const [loading, setLoading] = useState(false);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
 
@@ -44,6 +53,9 @@ const Profile = () => {
         photoURL,
         bio,
         role,
+        city,
+        contactNumber,
+        socialLinks,
         updatedAt: new Date().toISOString(),
       });
 
@@ -79,10 +91,10 @@ const Profile = () => {
             </Button>
           </header>
 
-          <Tabs defaultValue="edit" className="space-y-6">
+          <Tabs defaultValue="preview" className="space-y-6">
             <TabsList className="bg-black/20 border-gray-800">
-              <TabsTrigger value="edit" className="text-white">Edit Profile</TabsTrigger>
-              <TabsTrigger value="preview" className="text-white">Preview</TabsTrigger>
+              <TabsTrigger value="preview" className="text-white">Profile</TabsTrigger>
+              {isEditing && <TabsTrigger value="edit" className="text-white">Edit Profile</TabsTrigger>}
             </TabsList>
 
             <TabsContent value="edit">
@@ -99,19 +111,17 @@ const Profile = () => {
                       <User className="w-8 h-8 text-gray-400" />
                     )}
                   </div>
-                  {isEditing && (
-                    <div>
-                      <Input
-                        type="file"
-                        accept="image/*"
-                        onChange={(e) => setProfilePicture(e.target.files?.[0] || null)}
-                        className="text-white"
-                      />
-                      <p className="text-sm text-gray-400 mt-1">
-                        Recommended: Square image, max 2MB
-                      </p>
-                    </div>
-                  )}
+                  <div>
+                    <Input
+                      type="file"
+                      accept="image/*"
+                      onChange={(e) => setProfilePicture(e.target.files?.[0] || null)}
+                      className="text-white"
+                    />
+                    <p className="text-sm text-gray-400 mt-1">
+                      Recommended: Square image, max 2MB
+                    </p>
+                  </div>
                 </div>
 
                 <form onSubmit={handleProfileUpdate} className="space-y-4">
@@ -121,7 +131,6 @@ const Profile = () => {
                       id="displayName"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      disabled={!isEditing}
                       className="text-white bg-black/20"
                     />
                   </div>
@@ -132,9 +141,30 @@ const Profile = () => {
                       id="bio"
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
-                      disabled={!isEditing}
                       className="text-white bg-black/20 min-h-[100px]"
                       placeholder="Tell us about yourself..."
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="city" className="text-white">Current City</Label>
+                    <Input
+                      id="city"
+                      value={city}
+                      onChange={(e) => setCity(e.target.value)}
+                      className="text-white bg-black/20"
+                      placeholder="Enter your current city"
+                    />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="contactNumber" className="text-white">Contact Number</Label>
+                    <Input
+                      id="contactNumber"
+                      value={contactNumber}
+                      onChange={(e) => setContactNumber(e.target.value)}
+                      className="text-white bg-black/20"
+                      placeholder="Enter your contact number"
                     />
                   </div>
 
@@ -144,15 +174,34 @@ const Profile = () => {
                       id="email"
                       value={user?.email || ""}
                       disabled
-                      className="bg-gray-100"
+                      className="bg-black/20 text-white"
                     />
                   </div>
 
-                  {isEditing && (
-                    <Button type="submit" disabled={loading}>
-                      {loading ? "Updating..." : "Save Changes"}
-                    </Button>
-                  )}
+                  <div className="space-y-4">
+                    <Label className="text-white">Social Links</Label>
+                    {Object.entries(socialLinks).map(([platform, link]) => (
+                      <div key={platform}>
+                        <Label htmlFor={platform} className="text-white capitalize">{platform}</Label>
+                        <Input
+                          id={platform}
+                          value={link}
+                          onChange={(e) =>
+                            setSocialLinks((prev) => ({
+                              ...prev,
+                              [platform]: e.target.value,
+                            }))
+                          }
+                          className="text-white bg-black/20"
+                          placeholder={`Enter your ${platform} profile URL`}
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <Button type="submit" disabled={loading}>
+                    {loading ? "Updating..." : "Save Changes"}
+                  </Button>
                 </form>
               </div>
             </TabsContent>
@@ -166,6 +215,9 @@ const Profile = () => {
                 role={role}
                 eventsHosted={0}
                 eventsAttended={0}
+                city={city}
+                contactNumber={contactNumber}
+                socialLinks={socialLinks}
               />
             </TabsContent>
           </Tabs>
