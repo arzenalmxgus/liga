@@ -1,7 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Loader2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
 
 interface BasicInfoSectionProps {
   displayName: string;
@@ -10,7 +10,7 @@ interface BasicInfoSectionProps {
   setRealName: (value: string) => void;
   previewUrl: string | null;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  uploadingImage?: boolean;
+  uploadingImage: boolean;
 }
 
 const BasicInfoSection = ({
@@ -20,14 +20,12 @@ const BasicInfoSection = ({
   setRealName,
   previewUrl,
   handleFileChange,
-  uploadingImage = false,
+  uploadingImage,
 }: BasicInfoSectionProps) => {
-  const { toast } = useToast();
-
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <div className="relative w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+        <div className="relative w-24 h-24 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
           {previewUrl ? (
             <img
               src={previewUrl}
@@ -43,17 +41,23 @@ const BasicInfoSection = ({
             </div>
           )}
         </div>
-        <div>
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="text-white"
-            disabled={uploadingImage}
-          />
-          <p className="text-sm text-gray-400 mt-1">
-            Recommended: Square image, max 2MB
-          </p>
+        <div className="flex-1">
+          <Label htmlFor="photo" className="block text-white mb-2">
+            Profile Photo
+          </Label>
+          <div className="flex flex-col gap-2">
+            <Input
+              id="photo"
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              disabled={uploadingImage}
+              className="text-white bg-black/20 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100"
+            />
+            <p className="text-sm text-gray-400">
+              Maximum file size: 2MB. Supported formats: JPG, PNG, GIF
+            </p>
+          </div>
         </div>
       </div>
 
