@@ -121,7 +121,9 @@ const PublicProfile = ({
                     rel="noopener noreferrer"
                     className="text-gray-400 hover:text-white transition-colors"
                   >
-                    <Icon className="w-5 h-5" />
+                    <div className="w-5 h-5">
+                      <Icon />
+                    </div>
                   </a>
                 );
               })}
