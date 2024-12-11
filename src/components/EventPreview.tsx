@@ -80,94 +80,103 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
+      <DialogContent className="max-w-6xl p-0 gap-0">
+        <DialogHeader className="p-6 pb-0">
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-2xl font-bold">{event.title}</DialogTitle>
+            <DialogTitle className="text-3xl font-bold">{event.title}</DialogTitle>
             <Button variant="ghost" size="icon" onClick={onClose}>
               <X className="h-4 w-4" />
             </Button>
           </div>
         </DialogHeader>
-        <div className="mt-4">
-          <img 
-            src={event.image} 
-            alt={event.title} 
-            className="w-full h-64 object-cover rounded-lg"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = '/placeholder.svg';
-            }}
-          />
-          <div className="mt-4 space-y-3">
-            <div>
-              <h3 className="font-semibold">Date</h3>
-              <p>{new Date(event.date).toLocaleDateString()}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Location</h3>
-              <p>{event.location}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Category</h3>
-              <p>{event.category}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Participants</h3>
-              <p>{event.participants}/{event.participants_limit} registered</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Entrance Fee</h3>
-              <p>{event.is_free ? "Free" : `$${event.entrance_fee?.toFixed(2)}`}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold">Description</h3>
-              <p>{event.description}</p>
+        
+        <div className="flex flex-col md:flex-row gap-6 p-6">
+          {/* Left Column - Image */}
+          <div className="md:w-1/2">
+            <div className="relative h-[400px] rounded-lg overflow-hidden">
+              <img 
+                src={event.image} 
+                alt={event.title} 
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.src = '/placeholder.svg';
+                }}
+              />
+              <div className="absolute top-4 right-4 bg-accent/90 backdrop-blur-sm px-4 py-2 rounded-full">
+                <span className="text-white font-semibold">{event.category}</span>
+              </div>
             </div>
           </div>
 
-          {isHost && (
-            <div className="mt-6">
-              <h3 className="font-semibold mb-4">Participants List</h3>
-              {loadingParticipants ? (
-                <p>Loading participants...</p>
-              ) : participants && participants.length > 0 ? (
-                <div className="border rounded-lg overflow-hidden">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Display Name</TableHead>
-                        <TableHead>Real Name</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>City</TableHead>
-                        <TableHead>Registration Date</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {participants.map((participant) => (
-                        <TableRow key={participant.id}>
-                          <TableCell>{participant.displayName}</TableCell>
-                          <TableCell>{participant.realName}</TableCell>
-                          <TableCell>{participant.email}</TableCell>
-                          <TableCell>{participant.city || 'N/A'}</TableCell>
-                          <TableCell>
-                            {new Date(participant.registrationDate).toLocaleDateString()}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </div>
-              ) : (
-                <p className="text-gray-500">No participants registered yet.</p>
-              )}
+          {/* Right Column - Event Details */}
+          <div className="md:w-1/2 space-y-6">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-card/5 backdrop-blur-sm p-4 rounded-lg">
+                <h3 className="font-semibold text-primary mb-1">Date</h3>
+                <p>{new Date(event.date).toLocaleDateString()}</p>
+              </div>
+              <div className="bg-card/5 backdrop-blur-sm p-4 rounded-lg">
+                <h3 className="font-semibold text-primary mb-1">Location</h3>
+                <p>{event.location}</p>
+              </div>
+              <div className="bg-card/5 backdrop-blur-sm p-4 rounded-lg">
+                <h3 className="font-semibold text-primary mb-1">Participants</h3>
+                <p>{event.participants}/{event.participants_limit} registered</p>
+              </div>
+              <div className="bg-card/5 backdrop-blur-sm p-4 rounded-lg">
+                <h3 className="font-semibold text-primary mb-1">Entrance Fee</h3>
+                <p>{event.is_free ? "Free" : `$${event.entrance_fee?.toFixed(2)}`}</p>
+              </div>
             </div>
-          )}
 
-          <div className="mt-6">
+            <div className="bg-card/5 backdrop-blur-sm p-4 rounded-lg">
+              <h3 className="font-semibold text-primary mb-2">Description</h3>
+              <p className="text-sm leading-relaxed">{event.description}</p>
+            </div>
+
             <Button className="w-full">Register for Event</Button>
           </div>
         </div>
+
+        {/* Participants List for Hosts */}
+        {isHost && (
+          <div className="border-t border-gray-800 p-6">
+            <h3 className="font-semibold text-xl mb-4">Participants List</h3>
+            {loadingParticipants ? (
+              <p>Loading participants...</p>
+            ) : participants && participants.length > 0 ? (
+              <div className="border rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Display Name</TableHead>
+                      <TableHead>Real Name</TableHead>
+                      <TableHead>Email</TableHead>
+                      <TableHead>City</TableHead>
+                      <TableHead>Registration Date</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {participants.map((participant) => (
+                      <TableRow key={participant.id}>
+                        <TableCell>{participant.displayName}</TableCell>
+                        <TableCell>{participant.realName}</TableCell>
+                        <TableCell>{participant.email}</TableCell>
+                        <TableCell>{participant.city || 'N/A'}</TableCell>
+                        <TableCell>
+                          {new Date(participant.registrationDate).toLocaleDateString()}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            ) : (
+              <p className="text-gray-500">No participants registered yet.</p>
+            )}
+          </div>
+        )}
       </DialogContent>
     </Dialog>
   );
