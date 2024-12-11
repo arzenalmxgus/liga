@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
+import { Loader2 } from "lucide-react";
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -20,7 +21,10 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
+      console.log('Attempting to sign in with email:', email);
       await signInWithEmailAndPassword(auth, email, password);
+      console.log('Sign in successful');
+      
       toast({
         title: "Success",
         description: "Logged in successfully!",
@@ -28,9 +32,18 @@ const LoginForm = () => {
       navigate("/");
     } catch (error: any) {
       console.error("Login error:", error);
+      
+      // Handle specific Firebase auth errors
+      let errorMessage = "Failed to log in. Please try again.";
+      if (error.code === "auth/invalid-login-credentials") {
+        errorMessage = "Invalid email or password. Please check your credentials and try again.";
+      } else if (error.code === "auth/network-request-failed") {
+        errorMessage = "Network error. Please check your internet connection.";
+      }
+
       toast({
         title: "Error",
-        description: error.message || "Failed to log in",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -56,6 +69,7 @@ const LoginForm = () => {
             onChange={(e) => setEmail(e.target.value)}
             required
             className="bg-black/20 text-white placeholder:text-gray-400"
+            disabled={isLoading}
           />
         </div>
         <div className="space-y-2">
@@ -67,6 +81,7 @@ const LoginForm = () => {
             onChange={(e) => setPassword(e.target.value)}
             required
             className="bg-black/20 text-white placeholder:text-gray-400"
+            disabled={isLoading}
           />
         </div>
       </CardContent>
@@ -76,7 +91,14 @@ const LoginForm = () => {
           className="w-full h-12 text-base bg-primary hover:bg-primary/90 rounded-lg text-white"
           disabled={isLoading}
         >
-          {isLoading ? "Loading..." : "Login"}
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Logging in...
+            </>
+          ) : (
+            "Login"
+          )}
         </Button>
       </CardFooter>
     </form>
