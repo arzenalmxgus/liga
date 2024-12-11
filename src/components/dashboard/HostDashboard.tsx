@@ -22,6 +22,7 @@ interface Event {
   description: string;
   entrance_fee: number | null;
   is_free: boolean;
+  hostId: string;
 }
 
 const HostDashboard = () => {

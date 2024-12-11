@@ -37,6 +37,18 @@ interface ProfileFormProps {
   }>>;
 }
 
+interface UpdateData {
+  displayName: string;
+  realName: string;
+  bio: string;
+  role: string;
+  city: string;
+  contactNumber: string;
+  socialLinks: ProfileFormProps['socialLinks'];
+  updatedAt: string;
+  photoURL?: string;
+}
+
 const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFormProps) => {
   const { toast } = useToast();
   const [displayName, setDisplayName] = useState(user?.displayName || "");
@@ -111,7 +123,7 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
         photoURL = await getDownloadURL(storageRef);
       }
 
-      const updateData = {
+      const updateData: UpdateData = {
         displayName,
         realName,
         bio,
