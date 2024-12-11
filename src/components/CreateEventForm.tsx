@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
@@ -10,8 +11,7 @@ import { collection, addDoc } from "firebase/firestore";
 import { uploadImageToSupabase } from "@/utils/uploadUtils";
 import { Loader2 } from "lucide-react";
 import EventBasicInfo from "./event-form/EventBasicInfo";
-import EventDateLocation from "./event-form/EventDateLocation";
-import EventCapacityFee from "./event-form/EventCapacityFee";
+import EventRequirements from "./event-form/EventRequirements";
 
 interface CreateEventFormProps {
   onSuccess?: () => void;
@@ -24,6 +24,8 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   const [loading, setLoading] = useState(false);
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [date, setDate] = useState<Date>();
+  const [requireAdditionalInfo, setRequireAdditionalInfo] = useState(false);
+  
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -32,6 +34,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
     participantsLimit: "",
     entranceFee: "",
     isFree: "true",
+    requiresAdditionalInfo: false,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -91,32 +94,19 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
     setLoading(true);
 
     try {
-      console.log('Starting event creation process...');
-      
-      // Upload image to Supabase
-      console.log('Uploading banner to Supabase...');
       const downloadURL = await uploadImageToSupabase(bannerFile, 'events');
-      console.log('Banner upload successful:', downloadURL);
 
-      // Create event document in Firebase
-      console.log('Creating event document in Firebase...');
       const eventData = {
-        title: formData.title,
-        description: formData.description,
+        ...formData,
         date: date.toISOString(),
-        location: formData.location,
-        category: formData.category,
-        participantsLimit: parseInt(formData.participantsLimit) || 0,
-        entranceFee: formData.isFree === "true" ? null : parseFloat(formData.entranceFee) || 0,
-        isFree: formData.isFree === "true",
         bannerPhoto: downloadURL,
         hostId: user.uid,
         createdAt: new Date().toISOString(),
         currentParticipants: 0,
+        requiresAdditionalInfo: requireAdditionalInfo,
       };
 
       const docRef = await addDoc(collection(db, "events"), eventData);
-      console.log('Event created successfully:', docRef.id);
 
       toast({
         title: "Success",
@@ -142,13 +132,13 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <Label htmlFor="banner">Banner Photo</Label>
+        <Label htmlFor="banner" className="text-white">Banner Photo</Label>
         <Input
           id="banner"
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          className="cursor-pointer"
+          className="cursor-pointer bg-white/10 text-white"
           disabled={loading}
         />
       </div>
@@ -156,24 +146,35 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
       <EventBasicInfo
         formData={formData}
         handleInputChange={handleInputChange}
-        disabled={loading}
-      />
-
-      <EventDateLocation
         date={date}
         setDate={setDate}
+        disabled={loading}
+      />
+
+      <div className="flex items-center space-x-2">
+        <Checkbox
+          id="requireAdditionalInfo"
+          checked={requireAdditionalInfo}
+          onCheckedChange={(checked) => {
+            setRequireAdditionalInfo(checked as boolean);
+            setFormData(prev => ({
+              ...prev,
+              requiresAdditionalInfo: checked as boolean
+            }));
+          }}
+        />
+        <Label htmlFor="requireAdditionalInfo" className="text-white">
+          Require additional participant information
+        </Label>
+      </div>
+
+      <EventRequirements
         formData={formData}
         handleInputChange={handleInputChange}
         disabled={loading}
       />
 
-      <EventCapacityFee
-        formData={formData}
-        handleInputChange={handleInputChange}
-        disabled={loading}
-      />
-
-      <Button type="submit" disabled={loading} className="w-full">
+      <Button type="submit" disabled={loading} className="w-full bg-primary hover:bg-primary/90">
         {loading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

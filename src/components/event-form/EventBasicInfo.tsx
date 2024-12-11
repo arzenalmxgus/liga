@@ -1,5 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { DatePicker } from "@/components/ui/date-picker";
 
 interface EventBasicInfoProps {
   formData: {
@@ -8,14 +9,16 @@ interface EventBasicInfoProps {
     category: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  date: Date | undefined;
+  setDate: (date: Date | undefined) => void;
   disabled?: boolean;
 }
 
-const EventBasicInfo = ({ formData, handleInputChange, disabled }: EventBasicInfoProps) => {
+const EventBasicInfo = ({ formData, handleInputChange, date, setDate, disabled }: EventBasicInfoProps) => {
   return (
     <div className="space-y-4">
       <div>
-        <Label htmlFor="title">Event Title</Label>
+        <Label htmlFor="title" className="text-white">Event Title</Label>
         <Input
           id="title"
           name="title"
@@ -23,11 +26,12 @@ const EventBasicInfo = ({ formData, handleInputChange, disabled }: EventBasicInf
           onChange={handleInputChange}
           required
           disabled={disabled}
+          className="bg-white/10 text-white"
         />
       </div>
 
       <div>
-        <Label htmlFor="category">Category</Label>
+        <Label htmlFor="category" className="text-white">Category</Label>
         <Input
           id="category"
           name="category"
@@ -35,17 +39,26 @@ const EventBasicInfo = ({ formData, handleInputChange, disabled }: EventBasicInf
           onChange={handleInputChange}
           required
           disabled={disabled}
+          className="bg-white/10 text-white"
         />
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
+        <Label className="text-white">Event Date</Label>
+        <DatePicker
+          date={date}
+          setDate={setDate}
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="description" className="text-white">Description</Label>
         <textarea
           id="description"
           name="description"
           value={formData.description}
           onChange={handleInputChange}
-          className="w-full min-h-[100px] p-2 border rounded-md bg-background"
+          className="w-full min-h-[100px] p-2 rounded-md bg-white/10 text-white"
           required
           disabled={disabled}
         />
