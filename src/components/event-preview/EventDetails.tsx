@@ -23,7 +23,9 @@ const EventDetails = ({ date, location, participants, entrance_fee, is_free }: E
       </div>
       <div className="bg-card/5 backdrop-blur-sm p-4 rounded-lg">
         <h3 className="font-semibold text-primary mb-1">Entrance Fee</h3>
-        <p className="text-white">{is_free ? "Free" : `$${entrance_fee?.toFixed(2)}`}</p>
+        <p className="text-white">
+          {is_free ? "Free" : `$${entrance_fee?.toFixed(2) || '0.00'}`}
+        </p>
       </div>
     </div>
   );
