@@ -3,19 +3,19 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface EventCapacityFeeProps {
-  participantsLimit: string;
-  entranceFee: string;
-  isFree: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onFeeTypeChange: (value: string) => void;
+  formData: {
+    participantsLimit: string;
+    entranceFee: string;
+    isFree: string;
+  };
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
 const EventCapacityFee = ({
-  participantsLimit,
-  entranceFee,
-  isFree,
-  onChange,
-  onFeeTypeChange,
+  formData,
+  handleInputChange,
+  disabled
 }: EventCapacityFeeProps) => {
   return (
     <div className="space-y-4">
@@ -26,18 +26,28 @@ const EventCapacityFee = ({
           name="participantsLimit"
           type="number"
           min="1"
-          value={participantsLimit}
-          onChange={onChange}
+          value={formData.participantsLimit}
+          onChange={handleInputChange}
           required
+          disabled={disabled}
         />
       </div>
 
       <div>
         <Label>Entrance Fee</Label>
         <RadioGroup
-          value={isFree}
-          onValueChange={onFeeTypeChange}
+          value={formData.isFree}
+          onValueChange={(value) => {
+            const event = {
+              target: {
+                name: 'isFree',
+                value: value
+              }
+            } as React.ChangeEvent<HTMLInputElement>;
+            handleInputChange(event);
+          }}
           className="flex flex-col space-y-2 mt-2"
+          disabled={disabled}
         >
           <div className="flex items-center space-x-2">
             <RadioGroupItem value="true" id="free" />
@@ -48,17 +58,18 @@ const EventCapacityFee = ({
             <Label htmlFor="paid">Paid</Label>
           </div>
         </RadioGroup>
-        {isFree === "false" && (
+        {formData.isFree === "false" && (
           <Input
             type="number"
             name="entranceFee"
-            value={entranceFee}
-            onChange={onChange}
+            value={formData.entranceFee}
+            onChange={handleInputChange}
             placeholder="Enter fee amount"
             min="0"
             step="0.01"
             className="mt-2"
             required
+            disabled={disabled}
           />
         )}
       </div>

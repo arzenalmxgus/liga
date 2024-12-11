@@ -4,16 +4,20 @@ import { Label } from "@/components/ui/label";
 
 interface EventDateLocationProps {
   date: Date | undefined;
-  location: string;
-  onDateSelect: (date: Date | undefined) => void;
-  onLocationChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  setDate: (date: Date | undefined) => void;
+  formData: {
+    location: string;
+  };
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  disabled?: boolean;
 }
 
 const EventDateLocation = ({ 
   date, 
-  location, 
-  onDateSelect, 
-  onLocationChange 
+  setDate,
+  formData,
+  handleInputChange,
+  disabled
 }: EventDateLocationProps) => {
   return (
     <div className="space-y-4">
@@ -22,9 +26,9 @@ const EventDateLocation = ({
         <Calendar
           mode="single"
           selected={date}
-          onSelect={onDateSelect}
+          onSelect={setDate}
           className="rounded-md border"
-          required
+          disabled={disabled}
         />
       </div>
 
@@ -33,9 +37,10 @@ const EventDateLocation = ({
         <Input
           id="location"
           name="location"
-          value={location}
-          onChange={onLocationChange}
+          value={formData.location}
+          onChange={handleInputChange}
           required
+          disabled={disabled}
         />
       </div>
     </div>
