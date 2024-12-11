@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -7,7 +7,7 @@ import { User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc } from "firebase/firestore";
 import SocialLinksSection from "./SocialLinksSection";
 
 interface ProfileFormProps {
@@ -48,6 +48,48 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
   const [contactNumber, setContactNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!user?.uid) return;
+      try {
+        const userRef = doc(db, "profiles", user.uid);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const data = userDoc.data();
+          setBio(data.bio || "");
+          setCity(data.city || "");
+          setContactNumber(data.contactNumber || "");
+          setRole(data.role || "Host");
+          if (data.photoURL) {
+            setPreviewUrl(data.photoURL);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user profile:", error);
+      }
+    };
+    fetchUserProfile();
+  }, [user]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "File size must be less than 2MB",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      setProfilePicture(file);
+      const fileUrl = URL.createObjectURL(file);
+      setPreviewUrl(fileUrl);
+    }
+  };
 
   const handleProfileUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,6 +123,7 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
       });
       onCancel();
     } catch (error) {
+      console.error("Error updating profile:", error);
       toast({
         title: "Error",
         description: "Failed to update profile. Please try again.",
@@ -94,12 +137,12 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
   return (
     <form onSubmit={handleProfileUpdate} className="space-y-6">
       <div className="flex items-center space-x-4">
-        <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center">
-          {user?.photoURL ? (
+        <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+          {previewUrl ? (
             <img
-              src={user.photoURL}
+              src={previewUrl}
               alt="Profile"
-              className="w-full h-full rounded-full object-cover"
+              className="w-full h-full object-cover"
             />
           ) : (
             <User className="w-8 h-8 text-gray-400" />
@@ -109,7 +152,7 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
           <Input
             type="file"
             accept="image/*"
-            onChange={(e) => setProfilePicture(e.target.files?.[0] || null)}
+            onChange={handleFileChange}
             className="text-white"
           />
           <p className="text-sm text-gray-400 mt-1">
