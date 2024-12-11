@@ -10,19 +10,19 @@ interface AccountTypeSectionProps {
 const AccountTypeSection = ({ userRole, setUserRole }: AccountTypeSectionProps) => {
   return (
     <div className="space-y-2">
-      <Label className="text-base">Account Type</Label>
+      <Label className="text-base text-white">Account Type</Label>
       <RadioGroup 
         defaultValue={userRole}
         onValueChange={(value: UserRole) => setUserRole(value)}
         className="flex flex-col space-y-2"
       >
         <div className="flex items-center space-x-3">
-          <RadioGroupItem value="attendee" id="attendee" />
-          <Label htmlFor="attendee" className="text-base">Attendee - Participate in events</Label>
+          <RadioGroupItem value="attendee" id="attendee" className="border-white" />
+          <Label htmlFor="attendee" className="text-base text-white">Attendee - Participate in events</Label>
         </div>
         <div className="flex items-center space-x-3">
-          <RadioGroupItem value="host" id="host" />
-          <Label htmlFor="host" className="text-base">Host - Create and manage events</Label>
+          <RadioGroupItem value="host" id="host" className="border-white" />
+          <Label htmlFor="host" className="text-base text-white">Host - Create and manage events</Label>
         </div>
       </RadioGroup>
     </div>

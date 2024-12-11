@@ -95,8 +95,8 @@ const RegisterForm = () => {
   return (
     <form onSubmit={handleRegister}>
       <CardHeader>
-        <CardTitle className="text-2xl font-semibold text-center">Register</CardTitle>
-        <CardDescription className="text-center">
+        <CardTitle className="text-2xl font-semibold text-center text-white">Register</CardTitle>
+        <CardDescription className="text-center text-gray-300">
           Create a new account to get started
         </CardDescription>
       </CardHeader>
@@ -108,7 +108,7 @@ const RegisterForm = () => {
       <CardFooter className="px-8 pb-8">
         <Button 
           type="submit" 
-          className="w-full h-12 text-base bg-primary hover:bg-primary/90 rounded-lg" 
+          className="w-full h-12 text-base bg-primary hover:bg-primary/90 rounded-lg text-white" 
           disabled={isLoading}
         >
           {isLoading ? "Loading..." : "Register"}
