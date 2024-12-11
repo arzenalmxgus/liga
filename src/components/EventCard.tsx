@@ -3,6 +3,10 @@ import { useState } from "react";
 import EventPreview from "./EventPreview";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/AuthContext";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { useQuery } from "@tanstack/react-query";
 
 interface EventCardProps {
   id: string;
@@ -36,12 +40,22 @@ const EventCard = ({
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
-  
-  // This is a mock function - replace with actual auth check
-  const isLoggedIn = () => false;
+  const { user } = useAuth();
+
+  // Fetch user profile to check role
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile', user?.uid],
+    queryFn: async () => {
+      if (!user?.uid) return null;
+      const docRef = doc(db, 'profiles', user.uid);
+      const docSnap = await getDoc(docRef);
+      return docSnap.exists() ? docSnap.data() : null;
+    },
+    enabled: !!user,
+  });
 
   const handleCardClick = () => {
-    if (!isLoggedIn()) {
+    if (!user) {
       toast({
         title: "Authentication Required",
         description: "Please log in to view event details",
@@ -49,7 +63,18 @@ const EventCard = ({
       navigate("/auth");
       return;
     }
-    setIsPreviewOpen(true);
+
+    // Allow both hosts and attendees to view event details
+    if (userProfile?.user_role === 'host' || userProfile?.user_role === 'attendee') {
+      console.log('Opening preview for user role:', userProfile.user_role);
+      setIsPreviewOpen(true);
+    } else {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to view event details",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
