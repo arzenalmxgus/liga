@@ -5,9 +5,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { db } from "@/lib/firebase";
-import { supabase } from "@/lib/supabase";
+import { db, storage } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { Loader2 } from "lucide-react";
 import EventBasicInfo from "./event-form/EventBasicInfo";
 import EventDateLocation from "./event-form/EventDateLocation";
 import EventCapacityFee from "./event-form/EventCapacityFee";
@@ -63,40 +64,48 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
       return;
     }
 
+    if (!date) {
+      toast({
+        title: "Date Required",
+        description: "Please select an event date",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       setLoading(true);
+      console.log("Starting event creation process...");
 
-      // Upload to Supabase Storage
-      const fileExt = bannerFile.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from('event_banners')
-        .upload(fileName, bannerFile);
-
-      if (uploadError) {
-        throw new Error('Error uploading image: ' + uploadError.message);
-      }
-
-      // Get the public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('event_banners')
-        .getPublicUrl(fileName);
+      // Upload to Firebase Storage
+      const storageRef = ref(storage, `event_banners/${Date.now()}_${bannerFile.name}`);
+      console.log("Uploading image to Firebase Storage...");
+      const uploadResult = await uploadBytes(storageRef, bannerFile);
+      console.log("Image uploaded successfully");
+      
+      // Get the download URL
+      const downloadURL = await getDownloadURL(uploadResult.ref);
+      console.log("Got download URL:", downloadURL);
 
       const eventsRef = collection(db, 'events');
-      await addDoc(eventsRef, {
+      const eventData = {
         title: formData.title,
-        date: date?.toISOString(),
+        date: date.toISOString(),
         location: formData.location,
         category: formData.category,
         participantsLimit: parseInt(formData.participantsLimit),
         entranceFee: formData.isFree === "true" ? null : parseFloat(formData.entranceFee),
         isFree: formData.isFree === "true",
-        bannerPhoto: publicUrl,
+        bannerPhoto: downloadURL,
         hostId: user.uid,
         description: formData.description,
         currentParticipants: 0,
         createdAt: new Date().toISOString(),
-      });
+      };
+
+      console.log("Creating event with data:", eventData);
+      await addDoc(eventsRef, eventData);
+      console.log("Event created successfully");
 
       toast({
         title: "Success",
@@ -127,6 +136,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
           accept="image/*"
           onChange={handleFileChange}
           required
+          disabled={loading}
         />
       </div>
 
@@ -153,7 +163,14 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
       />
 
       <Button type="submit" disabled={loading} className="w-full">
-        {loading ? "Creating Event..." : "Create Event"}
+        {loading ? (
+          <span className="flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Creating Event...
+          </span>
+        ) : (
+          "Create Event"
+        )}
       </Button>
     </form>
   );
