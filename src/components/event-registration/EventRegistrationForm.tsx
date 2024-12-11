@@ -1,13 +1,13 @@
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, updateDoc, doc, increment } from "firebase/firestore";
 import { uploadImageToSupabase } from "@/utils/uploadUtils";
 import { Loader2 } from "lucide-react";
+import PersonalInfoSection from "./PersonalInfoSection";
+import AcademicInfoSection from "./AcademicInfoSection";
+import DocumentsSection from "./DocumentsSection";
 
 interface EventRegistrationFormProps {
   eventId: string;
@@ -48,6 +48,10 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handleSelectChange = (value: string) => {
+    setFormData(prev => ({ ...prev, eventType: value }));
+  };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: keyof typeof files) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
@@ -66,7 +70,6 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate all fields are filled
     const hasEmptyFields = Object.values(formData).some(value => value === "");
     const hasEmptyFiles = Object.values(files).some(file => file === null);
     
@@ -82,7 +85,6 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
     setLoading(true);
 
     try {
-      // Upload files to Supabase
       const uploadPromises = [];
       for (const [key, file] of Object.entries(files)) {
         if (file) {
@@ -93,7 +95,6 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
       }
       const uploadedFiles = Object.fromEntries(await Promise.all(uploadPromises));
 
-      // Create registration document
       const registrationData = {
         ...formData,
         ...uploadedFiles,
@@ -103,10 +104,7 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
       };
 
       await addDoc(collection(db, "event_participants"), registrationData);
-
-      // Update event participants count
-      const eventRef = doc(db, "events", eventId);
-      await updateDoc(eventRef, {
+      await updateDoc(doc(db, "events", eventId), {
         currentParticipants: increment(1)
       });
 
@@ -128,184 +126,36 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="name">Full Name</Label>
-          <Input
-            id="name"
-            name="name"
-            value={formData.name}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="dateOfBirth">Date of Birth</Label>
-          <Input
-            id="dateOfBirth"
-            name="dateOfBirth"
-            type="date"
-            value={formData.dateOfBirth}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="age">Age</Label>
-          <Input
-            id="age"
-            name="age"
-            type="number"
-            value={formData.age}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="nationality">Nationality</Label>
-          <Input
-            id="nationality"
-            name="nationality"
-            value={formData.nationality}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="year">Year Level</Label>
-          <Input
-            id="year"
-            name="year"
-            value={formData.year}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="course">Course</Label>
-          <Input
-            id="course"
-            name="course"
-            value={formData.course}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="academicLoadUnits">Academic Load Units</Label>
-          <Input
-            id="academicLoadUnits"
-            name="academicLoadUnits"
-            type="number"
-            value={formData.academicLoadUnits}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="yearsOfParticipation">Years of Participation</Label>
-          <Input
-            id="yearsOfParticipation"
-            name="yearsOfParticipation"
-            type="number"
-            value={formData.yearsOfParticipation}
-            onChange={handleInputChange}
-            required
-          />
-        </div>
-      </div>
-
-      <div>
-        <Label htmlFor="highSchoolGradYear">High School Graduation Year</Label>
-        <Input
-          id="highSchoolGradYear"
-          name="highSchoolGradYear"
-          type="number"
-          value={formData.highSchoolGradYear}
-          onChange={handleInputChange}
-          required
-        />
-      </div>
-
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="eventType">Event Type</Label>
-          <Select
-            value={formData.eventType}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, eventType: value }))}
-            required
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select event type" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="sports">Sports</SelectItem>
-              <SelectItem value="socio-cultural">Socio-cultural</SelectItem>
-              <SelectItem value="academic">Academic</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <Label htmlFor="school">School</Label>
-          <Input
-            id="school"
-            name="school"
-            value={formData.school}
-            onChange={handleInputChange}
-            placeholder="Enter your school name"
-            required
-          />
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <Label htmlFor="photo">Photo</Label>
-          <Input
-            id="photo"
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFileChange(e, 'photo')}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="registrarCert">Registrar's Certification</Label>
-          <Input
-            id="registrarCert"
-            type="file"
-            accept=".pdf,.doc,.docx"
-            onChange={(e) => handleFileChange(e, 'registrarCert')}
-            required
-          />
-        </div>
-        <div>
-          <Label htmlFor="psaCopy">PSA Copy</Label>
-          <Input
-            id="psaCopy"
-            type="file"
-            accept=".pdf,.doc,.docx"
-            onChange={(e) => handleFileChange(e, 'psaCopy')}
-            required
-          />
-        </div>
-      </div>
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <PersonalInfoSection 
+        formData={formData}
+        handleInputChange={handleInputChange}
+      />
+      
+      <AcademicInfoSection 
+        formData={formData}
+        handleInputChange={handleInputChange}
+        handleSelectChange={handleSelectChange}
+      />
+      
+      <DocumentsSection 
+        handleFileChange={handleFileChange}
+      />
 
       <div className="flex justify-end space-x-4 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel}>
+        <Button 
+          type="button" 
+          variant="outline" 
+          onClick={onCancel}
+          className="bg-white/20 hover:bg-white/30 text-white border-white/20"
+        >
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
+        <Button 
+          type="submit" 
+          disabled={loading}
+          className="bg-primary hover:bg-primary/90 text-white"
+        >
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
