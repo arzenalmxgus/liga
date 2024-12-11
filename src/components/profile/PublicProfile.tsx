@@ -15,6 +15,8 @@ import {
   MessageCircle,
   MessageSquare,
   PinIcon,
+  UserRound,
+  Info
 } from "lucide-react";
 
 interface SocialLinks {
@@ -85,15 +87,18 @@ const PublicProfile = ({
           </Avatar>
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-white">{displayName}</h2>
-            {realName && <p className="text-gray-400">{realName}</p>}
-            <div className="flex items-center space-x-2 text-gray-400 mt-1">
-              {city && (
-                <div className="flex items-center">
-                  <MapPin className="w-4 h-4 mr-1" />
-                  <span>{city}</span>
-                </div>
-              )}
-            </div>
+            {realName && (
+              <div className="flex items-center text-gray-400 mt-1">
+                <UserRound className="w-4 h-4 mr-1" />
+                <span>{realName}</span>
+              </div>
+            )}
+            {city && (
+              <div className="flex items-center text-gray-400 mt-1">
+                <MapPin className="w-4 h-4 mr-1" />
+                <span>{city}</span>
+              </div>
+            )}
             <div className="mt-2">
               <span className="inline-block px-3 py-1 text-sm font-semibold text-white bg-purple-600 rounded-full">
                 {role}
@@ -104,7 +109,10 @@ const PublicProfile = ({
 
         {bio && (
           <div className="mt-6">
-            <h3 className="text-lg font-semibold text-white mb-2">About</h3>
+            <div className="flex items-center text-white mb-2">
+              <Info className="w-5 h-5 mr-2" />
+              <h3 className="text-lg font-semibold">About</h3>
+            </div>
             <p className="text-gray-300">{bio}</p>
           </div>
         )}
