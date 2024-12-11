@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-import { db, storage } from "@/lib/firebase";
+import { db } from "@/lib/firebase";
 import { collection, addDoc } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { uploadImageToSupabase } from "@/utils/uploadUtils";
 import { Loader2 } from "lucide-react";
 import EventBasicInfo from "./event-form/EventBasicInfo";
 import EventDateLocation from "./event-form/EventDateLocation";
@@ -18,25 +18,28 @@ interface CreateEventFormProps {
 }
 
 const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
+  const { user } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { user } = useAuth();
   const [loading, setLoading] = useState(false);
-  const [date, setDate] = useState<Date>();
   const [bannerFile, setBannerFile] = useState<File | null>(null);
+  const [date, setDate] = useState<Date>();
   const [formData, setFormData] = useState({
     title: "",
+    description: "",
     location: "",
     category: "",
     participantsLimit: "",
     entranceFee: "",
     isFree: "true",
-    description: "",
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -56,19 +59,12 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     
     if (!user) {
       toast({
         title: "Authentication required",
-        description: "Please log in as a host to create events",
-      });
-      return;
-    }
-
-    if (!bannerFile) {
-      toast({
-        title: "Image Required",
-        description: "Please upload an event banner image",
+        description: "Please log in to create an event",
         variant: "destructive",
       });
       return;
@@ -76,30 +72,37 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
 
     if (!date) {
       toast({
-        title: "Date Required",
+        title: "Date required",
         description: "Please select an event date",
         variant: "destructive",
       });
       return;
     }
 
+    if (!bannerFile) {
+      toast({
+        title: "Banner required",
+        description: "Please upload a banner image",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setLoading(true);
+
     try {
-      setLoading(true);
-      console.log("Starting event creation process...");
-
-      // Upload to Firebase Storage
-      const storageRef = ref(storage, `event_banners/${Date.now()}_${bannerFile.name}`);
-      console.log("Uploading image to Firebase Storage...");
-      const uploadResult = await uploadBytes(storageRef, bannerFile);
-      console.log("Image uploaded successfully");
+      console.log('Starting event creation process...');
       
-      // Get the download URL
-      const downloadURL = await getDownloadURL(uploadResult.ref);
-      console.log("Got download URL:", downloadURL);
+      // Upload image to Supabase
+      console.log('Uploading banner to Supabase...');
+      const downloadURL = await uploadImageToSupabase(bannerFile, 'events');
+      console.log('Banner upload successful:', downloadURL);
 
-      const eventsRef = collection(db, 'events');
+      // Create event document in Firebase
+      console.log('Creating event document in Firebase...');
       const eventData = {
         title: formData.title,
+        description: formData.description,
         date: date.toISOString(),
         location: formData.location,
         category: formData.category,
@@ -108,14 +111,12 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         isFree: formData.isFree === "true",
         bannerPhoto: downloadURL,
         hostId: user.uid,
-        description: formData.description,
-        currentParticipants: 0,
         createdAt: new Date().toISOString(),
+        currentParticipants: 0,
       };
 
-      console.log("Creating event with data:", eventData);
-      await addDoc(eventsRef, eventData);
-      console.log("Event created successfully");
+      const docRef = await addDoc(collection(db, "events"), eventData);
+      console.log('Event created successfully:', docRef.id);
 
       toast({
         title: "Success",
@@ -139,7 +140,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6" onReset={(e) => e.preventDefault()}>
+    <form onSubmit={handleSubmit} className="space-y-6">
       <div>
         <Label htmlFor="banner">Banner Photo</Label>
         <Input
@@ -147,41 +148,39 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
           type="file"
           accept="image/*"
           onChange={handleFileChange}
-          required
+          className="cursor-pointer"
           disabled={loading}
         />
       </div>
 
       <EventBasicInfo
-        title={formData.title}
-        description={formData.description}
-        category={formData.category}
-        onChange={handleInputChange}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        disabled={loading}
       />
 
       <EventDateLocation
         date={date}
-        location={formData.location}
-        onDateSelect={setDate}
-        onLocationChange={handleInputChange}
+        setDate={setDate}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        disabled={loading}
       />
 
       <EventCapacityFee
-        participantsLimit={formData.participantsLimit}
-        entranceFee={formData.entranceFee}
-        isFree={formData.isFree}
-        onChange={handleInputChange}
-        onFeeTypeChange={(value) => setFormData(prev => ({ ...prev, isFree: value }))}
+        formData={formData}
+        handleInputChange={handleInputChange}
+        disabled={loading}
       />
 
       <Button type="submit" disabled={loading} className="w-full">
         {loading ? (
-          <span className="flex items-center gap-2">
-            <Loader2 className="h-4 w-4 animate-spin" />
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Creating Event...
-          </span>
+          </>
         ) : (
-          "Create Event"
+          'Create Event'
         )}
       </Button>
     </form>
