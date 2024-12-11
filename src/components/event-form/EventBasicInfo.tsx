@@ -46,8 +46,8 @@ const EventBasicInfo = ({ formData, handleInputChange, date, setDate, disabled }
       <div>
         <Label className="text-white">Event Date</Label>
         <DatePicker
-          date={date}
-          setDate={setDate}
+          selected={date}
+          onSelect={setDate}
         />
       </div>
 
