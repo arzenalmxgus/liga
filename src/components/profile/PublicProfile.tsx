@@ -12,7 +12,7 @@ import {
   Twitch,
   Linkedin,
   Github,
-  Discord,
+  MessageCircle,
   MessageSquare,
   PinIcon,
 } from "lucide-react";
@@ -63,8 +63,8 @@ const PublicProfile = ({
     twitch: Twitch,
     linkedin: Linkedin,
     github: Github,
-    discord: Discord,
-    tiktok: MessageSquare, // Using MessageSquare as a fallback for TikTok
+    discord: MessageCircle, // Using MessageCircle as an alternative for Discord
+    tiktok: MessageSquare,
     pinterest: PinIcon,
   };
 
