@@ -58,9 +58,13 @@ const SocialLinksSection = ({ socialLinks, setSocialLinks }: SocialLinksSectionP
             <SelectTrigger className="bg-black/20 text-white border-gray-700">
               <SelectValue placeholder="Select platform" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-gray-800 border border-gray-700">
               {platforms.map((platform) => (
-                <SelectItem key={platform} value={platform} className="capitalize">
+                <SelectItem 
+                  key={platform} 
+                  value={platform} 
+                  className="capitalize text-white hover:bg-gray-700 focus:bg-gray-700 focus:text-white"
+                >
                   {platform}
                 </SelectItem>
               ))}
