@@ -88,10 +88,10 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-6xl max-h-[90vh] p-0 gap-0 overflow-hidden">
+      <DialogContent className="max-w-6xl h-[90vh] p-0 gap-0 overflow-hidden">
         {showRegistrationForm ? (
           <div className="p-6 h-full overflow-y-auto">
-            <DialogHeader className="mb-6 sticky top-0 bg-background z-10">
+            <DialogHeader className="mb-6 sticky top-0 bg-background z-10 pb-4 border-b">
               <DialogTitle>Register for {event.title}</DialogTitle>
             </DialogHeader>
             <EventRegistrationForm

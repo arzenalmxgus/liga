@@ -257,20 +257,14 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
         </div>
         <div>
           <Label htmlFor="school">School</Label>
-          <Select
+          <Input
+            id="school"
+            name="school"
             value={formData.school}
-            onValueChange={(value) => setFormData(prev => ({ ...prev, school: value }))}
+            onChange={handleInputChange}
+            placeholder="Enter your school name"
             required
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select school" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="school1">School 1</SelectItem>
-              <SelectItem value="school2">School 2</SelectItem>
-              <SelectItem value="school3">School 3</SelectItem>
-            </SelectContent>
-          </Select>
+          />
         </div>
       </div>
 
