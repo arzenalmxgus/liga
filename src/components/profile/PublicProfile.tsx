@@ -9,10 +9,12 @@ import {
   MapPin, 
   Phone, 
   Mail,
-  MessageCircle,
-  Camera,
   Twitch,
-  Globe,
+  Linkedin,
+  Github,
+  Discord,
+  MessageSquare,
+  PinIcon,
 } from "lucide-react";
 
 interface SocialLinks {
@@ -58,6 +60,12 @@ const PublicProfile = ({
     facebook: Facebook,
     twitter: Twitter,
     youtube: Youtube,
+    twitch: Twitch,
+    linkedin: Linkedin,
+    github: Github,
+    discord: Discord,
+    tiktok: MessageSquare, // Using MessageSquare as a fallback for TikTok
+    pinterest: PinIcon,
   };
 
   return (
@@ -126,6 +134,7 @@ const PublicProfile = ({
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-gray-400 hover:text-white transition-colors"
+                    title={platform.charAt(0).toUpperCase() + platform.slice(1)}
                   >
                     <div className="w-5 h-5">
                       <Icon />
