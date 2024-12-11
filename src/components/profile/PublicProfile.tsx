@@ -65,7 +65,7 @@ const PublicProfile = ({
     twitch: Twitch,
     linkedin: Linkedin,
     github: Github,
-    discord: MessageCircle, // Using MessageCircle as an alternative for Discord
+    discord: MessageCircle,
     tiktok: MessageSquare,
     pinterest: PinIcon,
   };
@@ -85,7 +85,7 @@ const PublicProfile = ({
           </Avatar>
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-white">{displayName}</h2>
-            <p className="text-gray-400">{realName}</p>
+            {realName && <p className="text-gray-400">{realName}</p>}
             <div className="flex items-center space-x-2 text-gray-400 mt-1">
               {city && (
                 <div className="flex items-center">
@@ -102,10 +102,12 @@ const PublicProfile = ({
           </div>
         </div>
 
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold text-white mb-2">About</h3>
-          <p className="text-gray-300">{bio || "No bio available"}</p>
-        </div>
+        {bio && (
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold text-white mb-2">About</h3>
+            <p className="text-gray-300">{bio}</p>
+          </div>
+        )}
 
         <div className="mt-6 space-y-2">
           {email && (
