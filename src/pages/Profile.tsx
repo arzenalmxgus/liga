@@ -3,6 +3,8 @@ import Navigation from "@/components/Navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import PublicProfile from "@/components/profile/PublicProfile";
 import ProfileForm from "@/components/profile/ProfileForm";
+import { Button } from "@/components/ui/button";
+import { Pencil } from "lucide-react";
 
 const Profile = () => {
   const { user } = useAuth();
@@ -14,6 +16,16 @@ const Profile = () => {
         <Navigation />
         <main className="md:ml-16 pb-16 md:pb-0">
           <div className="max-w-4xl mx-auto p-6">
+            <div className="flex justify-end mb-4">
+              <Button
+                onClick={() => setIsEditing(true)}
+                variant="outline"
+                className="gap-2 text-white border-gray-700 hover:bg-gray-800"
+              >
+                <Pencil className="w-4 h-4" />
+                Edit Profile
+              </Button>
+            </div>
             <PublicProfile
               displayName={user?.displayName || ""}
               email={user?.email || ""}
