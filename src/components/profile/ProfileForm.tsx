@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { User } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { storage, db } from "@/lib/firebase";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { doc, updateDoc, getDoc } from "firebase/firestore";
 import SocialLinksSection from "./SocialLinksSection";
+import BasicInfoSection from "./form-sections/BasicInfoSection";
+import ContactInfoSection from "./form-sections/ContactInfoSection";
+import AttendeesList from "./AttendeesList";
 
 interface ProfileFormProps {
   user: any;
@@ -42,6 +41,7 @@ interface ProfileFormProps {
 const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFormProps) => {
   const { toast } = useToast();
   const [displayName, setDisplayName] = useState(user?.displayName || "");
+  const [realName, setRealName] = useState("");
   const [bio, setBio] = useState("");
   const [role, setRole] = useState("Host");
   const [city, setCity] = useState("");
@@ -58,6 +58,8 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
         const userDoc = await getDoc(userRef);
         if (userDoc.exists()) {
           const data = userDoc.data();
+          setDisplayName(data.displayName || "");
+          setRealName(data.realName || "");
           setBio(data.bio || "");
           setCity(data.city || "");
           setContactNumber(data.contactNumber || "");
@@ -108,6 +110,7 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
       const userRef = doc(db, "profiles", user.uid);
       await updateDoc(userRef, {
         displayName,
+        realName,
         photoURL,
         bio,
         role,
@@ -136,88 +139,31 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
 
   return (
     <form onSubmit={handleProfileUpdate} className="space-y-6">
-      <div className="flex items-center space-x-4">
-        <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
-          {previewUrl ? (
-            <img
-              src={previewUrl}
-              alt="Profile"
-              className="w-full h-full object-cover"
-            />
-          ) : (
-            <User className="w-8 h-8 text-gray-400" />
-          )}
-        </div>
-        <div>
-          <Input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="text-white"
-          />
-          <p className="text-sm text-gray-400 mt-1">
-            Recommended: Square image, max 2MB
-          </p>
-        </div>
-      </div>
+      <BasicInfoSection
+        displayName={displayName}
+        setDisplayName={setDisplayName}
+        realName={realName}
+        setRealName={setRealName}
+        previewUrl={previewUrl}
+        handleFileChange={handleFileChange}
+      />
 
-      <div>
-        <Label htmlFor="displayName" className="text-white">Display Name</Label>
-        <Input
-          id="displayName"
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          className="text-white bg-black/20"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="bio" className="text-white">Bio</Label>
-        <Textarea
-          id="bio"
-          value={bio}
-          onChange={(e) => setBio(e.target.value)}
-          className="text-white bg-black/20 min-h-[100px]"
-          placeholder="Tell us about yourself..."
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="city" className="text-white">Current City</Label>
-        <Input
-          id="city"
-          value={city}
-          onChange={(e) => setCity(e.target.value)}
-          className="text-white bg-black/20"
-          placeholder="Enter your current city"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="contactNumber" className="text-white">Contact Number</Label>
-        <Input
-          id="contactNumber"
-          value={contactNumber}
-          onChange={(e) => setContactNumber(e.target.value)}
-          className="text-white bg-black/20"
-          placeholder="Enter your contact number"
-        />
-      </div>
-
-      <div>
-        <Label htmlFor="email" className="text-white">Email</Label>
-        <Input
-          id="email"
-          value={user?.email || ""}
-          disabled
-          className="bg-black/20 text-white"
-        />
-      </div>
+      <ContactInfoSection
+        bio={bio}
+        setBio={setBio}
+        city={city}
+        setCity={setCity}
+        contactNumber={contactNumber}
+        setContactNumber={setContactNumber}
+        email={user?.email || ""}
+      />
 
       <SocialLinksSection
         socialLinks={socialLinks}
         setSocialLinks={setSocialLinks}
       />
+
+      {role === "Host" && <AttendeesList />}
 
       <div className="flex justify-end space-x-4">
         <Button 

@@ -32,6 +32,7 @@ interface SocialLinks {
 
 interface PublicProfileProps {
   displayName: string;
+  realName: string;
   email: string;
   photoURL: string | null;
   bio: string;
@@ -45,6 +46,7 @@ interface PublicProfileProps {
 
 const PublicProfile = ({
   displayName,
+  realName,
   email,
   photoURL,
   bio,
@@ -83,6 +85,7 @@ const PublicProfile = ({
           </Avatar>
           <div className="flex-1">
             <h2 className="text-2xl font-bold text-white">{displayName}</h2>
+            <p className="text-gray-400">{realName}</p>
             <div className="flex items-center space-x-2 text-gray-400 mt-1">
               {city && (
                 <div className="flex items-center">
