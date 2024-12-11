@@ -93,24 +93,28 @@ const EventCard = ({
               target.src = '/placeholder.svg';
             }}
           />
-          <div className="absolute top-4 right-4 bg-accent/90 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-semibold text-white shadow-md">
+          <div className="absolute top-4 right-4 bg-accent/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-white shadow-lg">
             {category}
           </div>
         </div>
         <div className="p-6 space-y-4 bg-gradient-to-b from-gray-900/90 to-gray-900/95">
           <h3 className="text-xl font-semibold mb-2 text-white">{title}</h3>
           <div className="space-y-3 text-gray-100">
-            <div className="flex items-center gap-3 bg-white/10 rounded-lg p-2 backdrop-blur-sm">
+            <div className="flex items-center gap-3 bg-white/10 hover:bg-white/15 rounded-lg p-3 backdrop-blur-sm transition-colors">
               <Calendar className="w-5 h-5 text-primary" />
-              <span className="text-sm font-medium">{new Date(date).toLocaleDateString()}</span>
+              <span className="text-sm font-medium text-white">{new Date(date).toLocaleDateString()}</span>
             </div>
-            <div className="flex items-center gap-3 bg-white/10 rounded-lg p-2 backdrop-blur-sm">
+            <div className="flex items-center gap-3 bg-white/10 hover:bg-white/15 rounded-lg p-3 backdrop-blur-sm transition-colors">
               <MapPin className="w-5 h-5 text-secondary" />
-              <span className="text-sm font-medium">{location}</span>
+              <span className="text-sm font-medium text-white">{location}</span>
             </div>
-            <div className="flex items-center gap-3 bg-white/10 rounded-lg p-2 backdrop-blur-sm">
+            <div className="flex items-center gap-3 bg-white/10 hover:bg-white/15 rounded-lg p-3 backdrop-blur-sm transition-colors">
               <Users className="w-5 h-5 text-accent" />
-              <span className="text-sm font-medium">{current_participants} registered participants</span>
+              <span className="text-sm font-medium text-white">
+                {current_participants === 0 
+                  ? "0 participants" 
+                  : `${current_participants} registered participants`}
+              </span>
             </div>
           </div>
         </div>
