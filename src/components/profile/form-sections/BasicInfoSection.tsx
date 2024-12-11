@@ -1,6 +1,6 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User } from "lucide-react";
+import { User, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 interface BasicInfoSectionProps {
@@ -10,6 +10,7 @@ interface BasicInfoSectionProps {
   setRealName: (value: string) => void;
   previewUrl: string | null;
   handleFileChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  uploadingImage?: boolean;
 }
 
 const BasicInfoSection = ({
@@ -19,13 +20,14 @@ const BasicInfoSection = ({
   setRealName,
   previewUrl,
   handleFileChange,
+  uploadingImage = false,
 }: BasicInfoSectionProps) => {
   const { toast } = useToast();
 
   return (
     <div className="space-y-6">
       <div className="flex items-center space-x-4">
-        <div className="w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
+        <div className="relative w-20 h-20 rounded-full bg-gray-700 flex items-center justify-center overflow-hidden">
           {previewUrl ? (
             <img
               src={previewUrl}
@@ -35,6 +37,11 @@ const BasicInfoSection = ({
           ) : (
             <User className="w-8 h-8 text-gray-400" />
           )}
+          {uploadingImage && (
+            <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+              <Loader2 className="w-6 h-6 text-white animate-spin" />
+            </div>
+          )}
         </div>
         <div>
           <Input
@@ -42,6 +49,7 @@ const BasicInfoSection = ({
             accept="image/*"
             onChange={handleFileChange}
             className="text-white"
+            disabled={uploadingImage}
           />
           <p className="text-sm text-gray-400 mt-1">
             Recommended: Square image, max 2MB

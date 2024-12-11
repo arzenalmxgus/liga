@@ -8,6 +8,7 @@ import BasicInfoSection from "./form-sections/BasicInfoSection";
 import ContactInfoSection from "./form-sections/ContactInfoSection";
 import { uploadProfilePicture, flattenObject } from "@/utils/profileUtils";
 import type { SocialLinks, ProfileFormData } from "@/types/profile";
+import { Loader2 } from "lucide-react";
 
 interface ProfileFormProps {
   user: any;
@@ -25,6 +26,7 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
   const [city, setCity] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [profilePicture, setProfilePicture] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
 
@@ -67,7 +69,13 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
       let photoURL = user.photoURL;
 
       if (profilePicture) {
+        setUploadingImage(true);
+        toast({
+          title: "Uploading Image",
+          description: "Please wait while we upload your profile picture...",
+        });
         photoURL = await uploadProfilePicture(user.uid, profilePicture);
+        setUploadingImage(false);
       }
 
       const updateData: ProfileFormData = {
@@ -102,6 +110,7 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
       });
     } finally {
       setLoading(false);
+      setUploadingImage(false);
     }
   };
 
@@ -128,6 +137,7 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
             setPreviewUrl(URL.createObjectURL(file));
           }
         }}
+        uploadingImage={uploadingImage}
       />
 
       <ContactInfoSection
@@ -150,13 +160,24 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
           type="button" 
           variant="outline" 
           onClick={onCancel}
-          disabled={loading}
+          disabled={loading || uploadingImage}
           className="bg-black/20 text-white hover:bg-black/40 border-gray-700"
         >
           Cancel
         </Button>
-        <Button type="submit" disabled={loading}>
-          {loading ? "Updating..." : "Save Changes"}
+        <Button 
+          type="submit" 
+          disabled={loading || uploadingImage}
+          className="min-w-[100px]"
+        >
+          {(loading || uploadingImage) ? (
+            <span className="flex items-center gap-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              {uploadingImage ? "Uploading..." : "Saving..."}
+            </span>
+          ) : (
+            "Save Changes"
+          )}
         </Button>
       </div>
     </form>
