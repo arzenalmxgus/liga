@@ -176,10 +176,10 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
           onValueChange={setSelectedCoachId}
           disabled={loading}
         >
-          <SelectTrigger className="w-full bg-white text-black">
+          <SelectTrigger className="w-full bg-white/90 text-black border-gray-200">
             <SelectValue placeholder="Select a coach" />
           </SelectTrigger>
-          <SelectContent>
+          <SelectContent className="bg-white border-gray-200 text-black z-50">
             <SelectItem value="no_coach">No coach assigned</SelectItem>
             {coaches?.map((coach: any) => (
               <SelectItem key={coach.id} value={coach.id}>
