@@ -38,6 +38,17 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
   const isHost = user?.uid === event.hostId;
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
+  const { data: userProfile } = useQuery({
+    queryKey: ['user-profile', user?.uid],
+    queryFn: async () => {
+      if (!user?.uid) return null;
+      const q = query(collection(db, 'profiles'), where('userId', '==', user.uid));
+      const snapshot = await getDocs(q);
+      return snapshot.empty ? null : snapshot.docs[0].data();
+    },
+    enabled: !!user?.uid,
+  });
+
   const { data: participants, isLoading: loadingParticipants } = useQuery({
     queryKey: ['event-participants', event.id],
     queryFn: async () => {
@@ -104,10 +115,12 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
     }
   };
 
+  const isCoach = userProfile?.role === 'coach';
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[90vh] p-0 gap-0 overflow-hidden bg-gray-900/95">
-        {showRegistrationForm ? (
+        {showRegistrationForm && !isCoach ? (
           <RegistrationSection
             eventId={event.id}
             userId={user?.uid || ''}
