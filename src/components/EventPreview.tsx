@@ -10,7 +10,7 @@ import EventDetails from "./event-preview/EventDetails";
 import ParticipantsList from "./event-preview/ParticipantsList";
 import { useToast } from "@/hooks/use-toast";
 import RegistrationSection from "./event-preview/RegistrationSection";
-import EventActions from "./event-preview/EventActions";
+import RegistrationButton from "./event-preview/RegistrationButton";
 
 interface EventPreviewProps {
   isOpen: boolean;
@@ -37,17 +37,6 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
   const queryClient = useQueryClient();
   const isHost = user?.uid === event.hostId;
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
-
-  const { data: userProfile } = useQuery({
-    queryKey: ['user-profile', user?.uid],
-    queryFn: async () => {
-      if (!user?.uid) return null;
-      const q = query(collection(db, 'profiles'), where('userId', '==', user.uid));
-      const snapshot = await getDocs(q);
-      return snapshot.empty ? null : snapshot.docs[0].data();
-    },
-    enabled: !!user?.uid,
-  });
 
   const { data: participants, isLoading: loadingParticipants } = useQuery({
     queryKey: ['event-participants', event.id],
@@ -115,12 +104,10 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
     }
   };
 
-  const isCoach = userProfile?.role === 'coach';
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-6xl h-[90vh] p-0 gap-0 overflow-hidden bg-gray-900/95">
-        {showRegistrationForm && !isCoach ? (
+        {showRegistrationForm ? (
           <RegistrationSection
             eventId={event.id}
             userId={user?.uid || ''}
@@ -155,12 +142,18 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
                   <p className="text-sm leading-relaxed text-white">{event.description}</p>
                 </div>
 
-                <EventActions
-                  isHost={isHost}
-                  isFull={participants?.length >= event.participants_limit}
-                  onRegister={() => setShowRegistrationForm(true)}
-                  onDelete={handleDeleteEvent}
-                />
+                <div className="flex gap-4">
+                  <RegistrationButton
+                    isHost={isHost}
+                    isFull={participants?.length >= event.participants_limit}
+                    onRegister={() => setShowRegistrationForm(true)}
+                  />
+                  {isHost && (
+                    <Button onClick={handleDeleteEvent} variant="destructive">
+                      Delete Event
+                    </Button>
+                  )}
+                </div>
               </div>
             </div>
 

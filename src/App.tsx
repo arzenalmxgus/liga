@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "./contexts/AuthContext";
 import Index from "./pages/Index";
@@ -11,6 +11,31 @@ import Search from "./pages/Search";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import EventsAssigned from "./pages/EventsAssigned";
+import { useAuth } from "./contexts/AuthContext";
+import { useQuery } from "@tanstack/react-query";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "./lib/firebase";
+
+const ProtectedEventsRoute = () => {
+  const { user } = useAuth();
+  
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile', user?.uid],
+    queryFn: async () => {
+      if (!user?.uid) return null;
+      const docRef = doc(db, 'profiles', user.uid);
+      const docSnap = await getDoc(docRef);
+      return docSnap.exists() ? docSnap.data() : null;
+    },
+    enabled: !!user,
+  });
+
+  if (profile?.role === 'coach') {
+    return <Navigate to="/" replace />;
+  }
+
+  return <Events />;
+};
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -28,7 +53,7 @@ const App = () => {
                 <BrowserRouter>
                   <Routes>
                     <Route path="/" element={<Index />} />
-                    <Route path="/events" element={<Events />} />
+                    <Route path="/events" element={<ProtectedEventsRoute />} />
                     <Route path="/search" element={<Search />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/auth" element={<Auth />} />
