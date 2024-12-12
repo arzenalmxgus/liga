@@ -7,6 +7,7 @@ interface EventBasicInfoProps {
     title: string;
     description: string;
     category: string;
+    location: string;
   };
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   date: Date | undefined;
@@ -40,6 +41,20 @@ const EventBasicInfo = ({ formData, handleInputChange, date, setDate, disabled }
           required
           disabled={disabled}
           className="bg-white/10 text-white"
+        />
+      </div>
+
+      <div>
+        <Label htmlFor="location" className="text-white">Location</Label>
+        <Input
+          id="location"
+          name="location"
+          value={formData.location}
+          onChange={handleInputChange}
+          required
+          disabled={disabled}
+          className="bg-white/10 text-white"
+          placeholder="Enter event location"
         />
       </div>
 
