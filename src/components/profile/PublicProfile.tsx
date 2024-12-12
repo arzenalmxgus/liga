@@ -19,6 +19,7 @@ import {
   Info,
   LucideIcon
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface SocialLinks {
   instagram: string;
@@ -73,19 +74,16 @@ const PublicProfile = ({
     pinterest: PinIcon,
   };
 
-  const getRoleBadgeColor = (role: string) => {
-    switch (role) {
+  const getRoleBadge = (role: string) => {
+    switch (role.toUpperCase()) {
       case 'ATTENDEE':
-      case 'attendee':
-        return 'bg-blue-600';
+        return <Badge variant="secondary">Event Attendee</Badge>;
       case 'HOST':
-      case 'host':
-        return 'bg-purple-600';
+        return <Badge variant="default">Event Host</Badge>;
       case 'COACH':
-      case 'coach':
-        return 'bg-green-600';
+        return <Badge variant="outline">Sports Coach</Badge>;
       default:
-        return 'bg-blue-600';
+        return <Badge variant="secondary">Event Attendee</Badge>;
     }
   };
 
@@ -117,9 +115,7 @@ const PublicProfile = ({
               </div>
             )}
             <div className="mt-2">
-              <span className={`inline-block px-3 py-1 text-sm font-semibold text-white ${getRoleBadgeColor(role)} rounded-full`}>
-                {role}
-              </span>
+              {getRoleBadge(role)}
             </div>
           </div>
         </div>
