@@ -63,35 +63,6 @@ const Navigation = () => {
     );
   }
 
-  // Coach navigation - only show Events Assigned and Profile
-  if (profile?.role === 'coach') {
-    return (
-      <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
-        <div className="flex justify-around md:flex-col md:h-full md:justify-start md:pt-8">
-          <NavItem 
-            icon={<Calendar className="text-white" />} 
-            to="/events-assigned" 
-            label="Assigned" 
-            isActive={location.pathname === "/events-assigned"} 
-          />
-          <NavItem 
-            icon={<User className="text-white" />} 
-            to="/profile" 
-            label="Profile" 
-            isActive={location.pathname === "/profile"} 
-          />
-          <button
-            onClick={handleLogout}
-            className="p-4 transition-colors duration-200 flex flex-col items-center gap-1 text-gray-400 hover:text-primary"
-          >
-            <LogOut className="text-white" />
-            <span className="text-xs md:hidden text-white">Logout</span>
-          </button>
-        </div>
-      </nav>
-    );
-  }
-
   // Host navigation - show Home, My Events, Search, Profile
   if (profile?.role === 'host') {
     return (
@@ -114,6 +85,35 @@ const Navigation = () => {
             to="/search" 
             label="Search" 
             isActive={location.pathname === "/search"} 
+          />
+          <NavItem 
+            icon={<User className="text-white" />} 
+            to="/profile" 
+            label="Profile" 
+            isActive={location.pathname === "/profile"} 
+          />
+          <button
+            onClick={handleLogout}
+            className="p-4 transition-colors duration-200 flex flex-col items-center gap-1 text-gray-400 hover:text-primary"
+          >
+            <LogOut className="text-white" />
+            <span className="text-xs md:hidden text-white">Logout</span>
+          </button>
+        </div>
+      </nav>
+    );
+  }
+
+  // Coach navigation - only show Events Assigned and Profile
+  if (profile?.role === 'coach') {
+    return (
+      <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
+        <div className="flex justify-around md:flex-col md:h-full md:justify-start md:pt-8">
+          <NavItem 
+            icon={<Calendar className="text-white" />} 
+            to="/events-assigned" 
+            label="Assigned" 
+            isActive={location.pathname === "/events-assigned"} 
           />
           <NavItem 
             icon={<User className="text-white" />} 
