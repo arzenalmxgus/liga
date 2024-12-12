@@ -73,16 +73,22 @@ const PublicProfile = ({
     pinterest: PinIcon,
   };
 
+  const getRoleBadgeColor = (role: string) => {
+    return role.toLowerCase() === 'host' 
+      ? 'bg-purple-600' 
+      : 'bg-blue-600';
+  };
+
   return (
     <Card className="w-full max-w-2xl mx-auto bg-black/20 border-gray-800">
       <div className="p-6">
-        <div className="flex items-start space-x-4">
-          <Avatar className="w-24 h-24">
+        <div className="flex items-start space-x-6">
+          <Avatar className="w-32 h-32">
             {photoURL ? (
-              <AvatarImage src={photoURL} alt={displayName} />
+              <AvatarImage src={photoURL} alt={displayName} className="object-cover" />
             ) : (
               <AvatarFallback className="bg-gray-700">
-                <User className="w-12 h-12 text-gray-400" />
+                <User className="w-16 h-16 text-gray-400" />
               </AvatarFallback>
             )}
           </Avatar>
@@ -101,7 +107,7 @@ const PublicProfile = ({
               </div>
             )}
             <div className="mt-2">
-              <span className="inline-block px-3 py-1 text-sm font-semibold text-white bg-purple-600 rounded-full">
+              <span className={`inline-block px-3 py-1 text-sm font-semibold text-white ${getRoleBadgeColor(role)} rounded-full`}>
                 {role}
               </span>
             </div>
