@@ -18,15 +18,15 @@ const AccountTypeSection = ({ userRole, setUserRole }: AccountTypeSectionProps) 
       >
         <div className="flex items-center space-x-3">
           <RadioGroupItem value="attendee" id="attendee" className="border-white" />
-          <Label htmlFor="attendee" className="text-base text-white">Attendee - Participate in events</Label>
+          <Label htmlFor="attendee" className="text-base text-white">Attendee</Label>
         </div>
         <div className="flex items-center space-x-3">
           <RadioGroupItem value="host" id="host" className="border-white" />
-          <Label htmlFor="host" className="text-base text-white">Host - Create and manage events</Label>
+          <Label htmlFor="host" className="text-base text-white">Host</Label>
         </div>
         <div className="flex items-center space-x-3">
           <RadioGroupItem value="coach" id="coach" className="border-white" />
-          <Label htmlFor="coach" className="text-base text-white">Coach - Review and qualify participants</Label>
+          <Label htmlFor="coach" className="text-base text-white">Coach</Label>
         </div>
       </RadioGroup>
     </div>

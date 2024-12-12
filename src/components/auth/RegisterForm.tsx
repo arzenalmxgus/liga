@@ -52,7 +52,6 @@ const RegisterForm = () => {
         displayName: `${formData.firstName} ${formData.lastName}`
       });
 
-      // Create user profile in Firestore
       await setDoc(doc(db, 'profiles', user.uid), {
         firstName: formData.firstName,
         middleName: formData.middleName,
@@ -66,9 +65,13 @@ const RegisterForm = () => {
 
       toast({
         title: "Success",
-        description: "Registration successful! Redirecting to homepage...",
+        description: "Registration successful! Please wait while we redirect you...",
       });
-      navigate("/");
+      
+      // Add a slight delay before navigation to prevent auto-refresh feeling
+      setTimeout(() => {
+        navigate("/");
+      }, 1500);
     } catch (error: any) {
       console.error("Registration error:", error);
       let errorMessage = "An unexpected error occurred";
