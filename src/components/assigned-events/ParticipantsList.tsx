@@ -11,17 +11,23 @@ interface ParticipantsListProps {
 
 const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
   const { toast } = useToast();
+  console.log("Fetching participants for event:", eventId); // Debug log
 
   const { data: participants, isLoading, refetch } = useQuery({
     queryKey: ['event-participants', eventId],
     queryFn: async () => {
+      console.log("Starting query execution"); // Debug log
       const participantsRef = collection(db, 'event_participants');
       const q = query(participantsRef, where('eventId', '==', eventId));
       const snapshot = await getDocs(q);
+      console.log("Found participants:", snapshot.size); // Debug log
       
       const participantsData = [];
       for (const doc of snapshot.docs) {
         const participantData = doc.data();
+        console.log("Processing participant:", participantData); // Debug log
+        
+        // Get user profile data
         const userProfileQuery = query(
           collection(db, 'profiles'),
           where('userId', '==', participantData.userId)
@@ -33,14 +39,16 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
           participantsData.push({
             id: doc.id,
             status: participantData.status || 'pending',
-            displayName: profile.displayName || profile.realName || 'N/A',
+            displayName: profile.firstName + ' ' + profile.lastName || 'N/A',
             email: profile.email || 'N/A',
             registrationDate: participantData.registrationDate,
           });
         }
       }
+      console.log("Final participants data:", participantsData); // Debug log
       return participantsData;
     },
+    enabled: !!eventId,
   });
 
   const handleStatusUpdate = async (participantId: string, newStatus: 'approved' | 'rejected') => {
@@ -54,6 +62,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
         description: `The participant has been ${newStatus} successfully.`,
       });
     } catch (error) {
+      console.error("Error updating status:", error); // Debug log
       toast({
         title: "Error",
         description: "Failed to update participant status.",
