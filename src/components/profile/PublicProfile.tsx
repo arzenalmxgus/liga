@@ -1,38 +1,12 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card } from "@/components/ui/card";
 import { 
-  Instagram, 
-  Facebook, 
-  Twitter, 
-  Youtube, 
-  User, 
-  MapPin, 
-  Phone, 
-  Mail,
-  Twitch,
-  Linkedin,
-  Github,
-  MessageCircle,
-  MessageSquare,
-  PinIcon,
-  UserRound,
-  Info,
-  LucideIcon
+  Instagram, Facebook, Twitter, Youtube, User, MapPin, 
+  Phone, Mail, Twitch, Linkedin, Github, MessageCircle, 
+  MessageSquare, PinIcon, UserRound, Info, LucideIcon 
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
-
-interface SocialLinks {
-  instagram: string;
-  facebook: string;
-  twitter: string;
-  youtube: string;
-  twitch: string;
-  linkedin: string;
-  github: string;
-  discord: string;
-  tiktok: string;
-  pinterest: string;
-}
+import RoleBadge from "./RoleBadge";
+import type { SocialLinks } from "@/types/profile";
 
 interface PublicProfileProps {
   displayName: string;
@@ -74,40 +48,6 @@ const PublicProfile = ({
     pinterest: PinIcon,
   };
 
-  const getRoleBadge = (role: string) => {
-    if (!role) return null;
-    
-    const normalizedRole = role.toLowerCase().trim();
-    console.log("Current role:", normalizedRole); // Debug log
-    
-    switch (normalizedRole) {
-      case 'attendee':
-        return (
-          <Badge variant="secondary" className="text-sm font-medium">
-            Event Attendee
-          </Badge>
-        );
-      case 'host':
-        return (
-          <Badge variant="default" className="text-sm font-medium">
-            Event Host
-          </Badge>
-        );
-      case 'coach':
-        return (
-          <Badge variant="outline" className="text-sm font-medium text-white border-white">
-            Sports Coach
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="secondary" className="text-sm font-medium">
-            {role}
-          </Badge>
-        );
-    }
-  };
-
   return (
     <Card className="w-full max-w-2xl mx-auto bg-black/20 border-gray-800">
       <div className="p-6">
@@ -136,7 +76,7 @@ const PublicProfile = ({
               </div>
             )}
             <div className="mt-2">
-              {getRoleBadge(role)}
+              <RoleBadge role={role} />
             </div>
           </div>
         </div>
