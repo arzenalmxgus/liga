@@ -25,8 +25,8 @@ const RegistrationButton = ({ isHost, isFull, onRegister }: RegistrationButtonPr
     enabled: !!user?.uid,
   });
 
-  // Only hide for coaches
-  if (userProfile?.role === 'coach') {
+  // Don't render for coaches or hosts
+  if (isHost || userProfile?.role === 'coach') {
     return null;
   }
 

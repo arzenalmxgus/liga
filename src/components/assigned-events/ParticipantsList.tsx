@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { collection, query, where, getDocs, updateDoc, doc } from "firebase/firestore";
+import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
 import { Check, X } from "lucide-react";
@@ -21,19 +21,21 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
       
       const participantsData = [];
       for (const doc of snapshot.docs) {
-        const userData = await getDocs(query(
+        const participantData = doc.data();
+        const userProfileQuery = query(
           collection(db, 'profiles'),
-          where('userId', '==', doc.data().userId)
-        ));
+          where('userId', '==', participantData.userId)
+        );
+        const userProfileSnapshot = await getDocs(userProfileQuery);
         
-        if (!userData.empty) {
-          const profile = userData.docs[0].data();
+        if (!userProfileSnapshot.empty) {
+          const profile = userProfileSnapshot.docs[0].data();
           participantsData.push({
             id: doc.id,
-            status: doc.data().status || 'pending',
-            displayName: profile.displayName || 'N/A',
+            status: participantData.status || 'pending',
+            displayName: profile.displayName || profile.realName || 'N/A',
             email: profile.email || 'N/A',
-            registrationDate: doc.data().registrationDate,
+            registrationDate: participantData.registrationDate,
           });
         }
       }
