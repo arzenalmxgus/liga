@@ -84,24 +84,19 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
       return;
     }
 
-    if (!bannerFile) {
-      toast({
-        title: "Banner required",
-        description: "Please upload a banner image",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setLoading(true);
 
     try {
-      const downloadURL = await uploadImageToSupabase(bannerFile, 'events');
+      let downloadURL = null;
+      
+      if (bannerFile) {
+        downloadURL = await uploadImageToSupabase(bannerFile, 'events');
+      }
 
       const eventData = {
         ...formData,
         date: date.toISOString(),
-        bannerPhoto: downloadURL,
+        bannerPhoto: downloadURL || '/placeholder.svg', // Use placeholder if no banner
         hostId: user.uid,
         coachId: selectedCoachId === "no_coach" ? null : selectedCoachId,
         createdAt: new Date().toISOString(),
@@ -135,7 +130,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div>
-        <Label htmlFor="banner" className="text-white">Banner Photo</Label>
+        <Label htmlFor="banner" className="text-white">Banner Photo (Optional)</Label>
         <Input
           id="banner"
           type="file"
