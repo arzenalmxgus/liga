@@ -25,9 +25,10 @@ const RegistrationButton = ({ isHost, isFull, onRegister }: RegistrationButtonPr
     enabled: !!user?.uid,
   });
 
-  const isCoach = userProfile?.role === 'coach';
-
-  if (isHost || isCoach) return null;
+  // Don't render anything for hosts or coaches
+  if (isHost || userProfile?.role === 'coach') {
+    return null;
+  }
 
   return (
     <Button 

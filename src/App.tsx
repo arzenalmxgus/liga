@@ -30,7 +30,7 @@ const ProtectedEventsRoute = () => {
     enabled: !!user,
   });
 
-  if (profile?.role === 'coach') {
+  if (!profile || profile?.role === 'coach') {
     return <Navigate to="/" replace />;
   }
 
