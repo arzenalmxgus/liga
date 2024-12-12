@@ -59,7 +59,7 @@ const RegisterForm = () => {
         suffix: formData.suffix,
         birthdate: formData.birthdate,
         email: formData.email,
-        user_role: userRole,
+        user_role: userRole, // This now correctly saves the selected role (attendee/host/coach)
         createdAt: new Date().toISOString(),
       });
 
@@ -68,7 +68,6 @@ const RegisterForm = () => {
         description: "Registration successful! Please wait while we redirect you...",
       });
       
-      // Add a slight delay before navigation to prevent auto-refresh feeling
       setTimeout(() => {
         navigate("/");
       }, 1500);
