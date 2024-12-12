@@ -74,22 +74,20 @@ const PublicProfile = ({
   };
 
   const getRoleBadgeColor = (role: string) => {
-    // Convert role to lowercase for case-insensitive comparison
-    const normalizedRole = role.toLowerCase();
-    switch (normalizedRole) {
-      case 'host':
-        return 'bg-purple-600';
-      case 'coach':
-        return 'bg-green-600';
+    switch (role) {
+      case 'ATTENDEE':
       case 'attendee':
         return 'bg-blue-600';
+      case 'HOST':
+      case 'host':
+        return 'bg-purple-600';
+      case 'COACH':
+      case 'coach':
+        return 'bg-green-600';
       default:
         return 'bg-blue-600';
     }
   };
-
-  // Ensure the role is displayed exactly as stored in the database
-  const displayRole = role;
 
   return (
     <Card className="w-full max-w-2xl mx-auto bg-black/20 border-gray-800">
@@ -120,7 +118,7 @@ const PublicProfile = ({
             )}
             <div className="mt-2">
               <span className={`inline-block px-3 py-1 text-sm font-semibold text-white ${getRoleBadgeColor(role)} rounded-full`}>
-                {displayRole}
+                {role}
               </span>
             </div>
           </div>

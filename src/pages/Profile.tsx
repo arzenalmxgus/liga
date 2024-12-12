@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import PublicProfile from "@/components/profile/PublicProfile";
@@ -7,10 +7,11 @@ import { Button } from "@/components/ui/button";
 import { Pencil } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     displayName: "",
@@ -18,7 +19,7 @@ const Profile = () => {
     bio: "",
     city: "",
     contactNumber: "",
-    role: "Host",
+    role: "",
     photoURL: null,
   });
   const [socialLinks, setSocialLinks] = useState({
@@ -38,17 +39,19 @@ const Profile = () => {
     const fetchProfileData = async () => {
       if (!user?.uid) return;
       try {
+        console.log("Fetching profile data for user:", user.uid);
         const userRef = doc(db, "profiles", user.uid);
         const userDoc = await getDoc(userRef);
         if (userDoc.exists()) {
           const data = userDoc.data();
+          console.log("Retrieved profile data:", data);
           setProfileData({
             displayName: data.displayName || "",
             realName: data.realName || "",
             bio: data.bio || "",
             city: data.city || "",
             contactNumber: data.contactNumber || "",
-            role: data.role || "Host",
+            role: data.role || "",
             photoURL: data.photoURL || null,
           });
           if (data.socialLinks) {
@@ -57,10 +60,15 @@ const Profile = () => {
         }
       } catch (error) {
         console.error("Error fetching profile data:", error);
+        toast({
+          title: "Error",
+          description: "Failed to load profile data",
+          variant: "destructive",
+        });
       }
     };
     fetchProfileData();
-  }, [user]);
+  }, [user, toast]);
 
   if (!isEditing) {
     return (
