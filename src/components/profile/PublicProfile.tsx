@@ -74,7 +74,9 @@ const PublicProfile = ({
   };
 
   const getRoleBadgeColor = (role: string) => {
-    switch (role.toLowerCase()) {
+    // Convert role to lowercase for case-insensitive comparison
+    const normalizedRole = role.toLowerCase();
+    switch (normalizedRole) {
       case 'host':
         return 'bg-purple-600';
       case 'coach':
@@ -86,8 +88,8 @@ const PublicProfile = ({
     }
   };
 
-  // Capitalize the first letter of the role
-  const displayRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+  // Ensure the role is displayed exactly as stored in the database
+  const displayRole = role;
 
   return (
     <Card className="w-full max-w-2xl mx-auto bg-black/20 border-gray-800">
