@@ -7,11 +7,13 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, addDoc } from "firebase/firestore";
+import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
 import { uploadImageToSupabase } from "@/utils/uploadUtils";
 import { Loader2 } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 import EventBasicInfo from "./event-form/EventBasicInfo";
 import EventRequirements from "./event-form/EventRequirements";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface CreateEventFormProps {
   onSuccess?: () => void;
@@ -25,6 +27,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [date, setDate] = useState<Date>();
   const [requireAdditionalInfo, setRequireAdditionalInfo] = useState(false);
+  const [selectedCoachId, setSelectedCoachId] = useState<string>("");
   
   const [formData, setFormData] = useState({
     title: "",
@@ -35,6 +38,20 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
     entranceFee: "",
     isFree: "true",
     requiresAdditionalInfo: false,
+  });
+
+  // Query to fetch all coaches
+  const { data: coaches } = useQuery({
+    queryKey: ['coaches'],
+    queryFn: async () => {
+      const coachesRef = collection(db, 'profiles');
+      const q = query(coachesRef, where('role', '==', 'coach'));
+      const querySnapshot = await getDocs(q);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    },
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -101,6 +118,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         date: date.toISOString(),
         bannerPhoto: downloadURL,
         hostId: user.uid,
+        coachId: selectedCoachId || null, // Add the selected coach ID
         createdAt: new Date().toISOString(),
         currentParticipants: 0,
         requiresAdditionalInfo: requireAdditionalInfo,
@@ -150,6 +168,27 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         setDate={setDate}
         disabled={loading}
       />
+
+      <div className="space-y-2">
+        <Label htmlFor="coach" className="text-white">Assign Sports Coach (Optional)</Label>
+        <Select
+          value={selectedCoachId}
+          onValueChange={setSelectedCoachId}
+          disabled={loading}
+        >
+          <SelectTrigger className="w-full bg-white text-black">
+            <SelectValue placeholder="Select a coach" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">No coach assigned</SelectItem>
+            {coaches?.map((coach: any) => (
+              <SelectItem key={coach.id} value={coach.id}>
+                {coach.firstName} {coach.lastName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
 
       <div className="flex items-center space-x-2">
         <Checkbox
