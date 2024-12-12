@@ -18,6 +18,7 @@ const Index = () => {
       if (!user) return null;
       const docRef = doc(db, 'profiles', user.uid);
       const docSnap = await getDoc(docRef);
+      console.log("Profile data:", docSnap.data()); // Debug log
       return docSnap.exists() ? docSnap.data() : null;
     },
     enabled: !!user,
@@ -46,11 +47,13 @@ const Index = () => {
     );
   }
 
+  console.log("Current role:", profile?.role); // Debug log
+
   return (
     <div className="min-h-screen text-white">
       <Navigation />
       <main className="md:ml-16 pb-16 md:pb-0">
-        {profile?.user_role === "host" ? (
+        {profile?.role === "host" ? (
           <HostDashboard />
         ) : (
           <AttendeeDashboard />
