@@ -75,16 +75,17 @@ const PublicProfile = ({
   };
 
   const getRoleBadge = (role: string) => {
-    switch (role.toUpperCase()) {
-      case 'ATTENDEE':
-        return <Badge variant="secondary">Event Attendee</Badge>;
-      case 'HOST':
-        return <Badge variant="default">Event Host</Badge>;
-      case 'COACH':
-        return <Badge variant="outline">Sports Coach</Badge>;
-      default:
-        return <Badge variant="secondary">Event Attendee</Badge>;
+    const normalizedRole = role.toLowerCase();
+    if (normalizedRole === 'attendee') {
+      return <Badge variant="secondary">Event Attendee</Badge>;
     }
+    if (normalizedRole === 'host') {
+      return <Badge variant="default">Event Host</Badge>;
+    }
+    if (normalizedRole === 'coach') {
+      return <Badge variant="outline">Sports Coach</Badge>;
+    }
+    return <Badge variant="secondary">{role}</Badge>;
   };
 
   return (
