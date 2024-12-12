@@ -1,4 +1,5 @@
 import { Dialog, DialogContent } from "./ui/dialog";
+import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
