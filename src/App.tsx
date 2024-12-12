@@ -8,12 +8,14 @@ import { AuthProvider } from "./contexts/AuthContext";
 import Auth from "./pages/Auth";
 import EventsAssigned from "./pages/EventsAssigned";
 import Profile from "./pages/Profile";
+import Events from "./pages/Events";
+import Search from "./pages/Search";
 import { useAuth } from "./contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./lib/firebase";
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedCoachRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   
   const { data: profile } = useQuery({
@@ -28,6 +30,16 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   });
 
   if (!user || profile?.role !== 'coach') {
+    return <Navigate to="/auth" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+  const { user } = useAuth();
+  
+  if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
@@ -51,13 +63,23 @@ const App = () => {
                   <Routes>
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/events-assigned" element={
-                      <ProtectedRoute>
+                      <ProtectedCoachRoute>
                         <EventsAssigned />
-                      </ProtectedRoute>
+                      </ProtectedCoachRoute>
                     } />
                     <Route path="/profile" element={
                       <ProtectedRoute>
                         <Profile />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/search" element={
+                      <ProtectedRoute>
+                        <Search />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/" element={
+                      <ProtectedRoute>
+                        <Events />
                       </ProtectedRoute>
                     } />
                     <Route path="*" element={<Navigate to="/auth" replace />} />
