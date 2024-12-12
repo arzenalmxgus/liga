@@ -19,17 +19,19 @@ const RegistrationSection = ({
   onClose 
 }: RegistrationSectionProps) => {
   return (
-    <div className="p-6 h-full overflow-y-auto">
+    <div className="p-8 h-full overflow-y-auto space-y-6">
       <EventHeader 
         title={`Register for ${title}`} 
         onClose={onClose} 
       />
-      <EventRegistrationForm
-        eventId={eventId}
-        userId={userId}
-        onSuccess={onSuccess}
-        onCancel={onClose}
-      />
+      <div className="mt-2">
+        <EventRegistrationForm
+          eventId={eventId}
+          userId={userId}
+          onSuccess={onSuccess}
+          onCancel={onClose}
+        />
+      </div>
     </div>
   );
 };
