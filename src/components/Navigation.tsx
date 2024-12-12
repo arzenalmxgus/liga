@@ -52,6 +52,14 @@ const Navigation = () => {
         {user ? (
           <>
             <NavItem icon={<User className="text-white" />} to="/profile" label="Profile" isActive={location.pathname === "/profile"} />
+            {profile?.role === 'coach' && (
+              <NavItem 
+                icon={<Calendar className="text-white" />} 
+                to="/events-assigned" 
+                label="Assigned" 
+                isActive={location.pathname === "/events-assigned"} 
+              />
+            )}
             <button
               onClick={handleLogout}
               className="p-4 transition-colors duration-200 flex flex-col items-center gap-1 text-gray-400 hover:text-primary"
