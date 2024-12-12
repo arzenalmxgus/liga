@@ -14,6 +14,7 @@ import { useAuth } from "./contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./lib/firebase";
+import Navigation from "./components/Navigation";
 
 const ProtectedCoachRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
@@ -60,6 +61,7 @@ const App = () => {
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
+                  <Navigation />
                   <Routes>
                     <Route path="/auth" element={<Auth />} />
                     <Route path="/events-assigned" element={
@@ -75,6 +77,11 @@ const App = () => {
                     <Route path="/search" element={
                       <ProtectedRoute>
                         <Search />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/events" element={
+                      <ProtectedRoute>
+                        <Events />
                       </ProtectedRoute>
                     } />
                     <Route path="/" element={

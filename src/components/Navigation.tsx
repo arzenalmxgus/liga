@@ -1,17 +1,15 @@
-import { Calendar, User, LogIn, LogOut, Search, Home } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Calendar, User, LogIn, Search, Home } from "lucide-react";
+import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { auth, db } from "@/lib/firebase";
-import { signOut } from "firebase/auth";
-import { useToast } from "@/hooks/use-toast";
 import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import NavItem from "./navigation/NavItem";
+import LogoutButton from "./navigation/LogoutButton";
 
 const Navigation = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { user } = useAuth();
-  const { toast } = useToast();
 
   const { data: profile } = useQuery({
     queryKey: ['user-profile', user?.uid],
@@ -23,23 +21,6 @@ const Navigation = () => {
     },
     enabled: !!user,
   });
-
-  const handleLogout = async () => {
-    try {
-      await signOut(auth);
-      toast({
-        title: "Logged out successfully",
-        description: "You have been logged out of your account",
-      });
-      navigate("/auth");
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "Failed to log out. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   // If not logged in, show home and login
   if (!user) {
@@ -63,7 +44,7 @@ const Navigation = () => {
     );
   }
 
-  // Host navigation - show Home, My Events, Search, Profile
+  // Host navigation
   if (profile?.role === 'host') {
     return (
       <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
@@ -92,19 +73,13 @@ const Navigation = () => {
             label="Profile" 
             isActive={location.pathname === "/profile"} 
           />
-          <button
-            onClick={handleLogout}
-            className="p-4 transition-colors duration-200 flex flex-col items-center gap-1 text-gray-400 hover:text-primary"
-          >
-            <LogOut className="text-white" />
-            <span className="text-xs md:hidden text-white">Logout</span>
-          </button>
+          <LogoutButton />
         </div>
       </nav>
     );
   }
 
-  // Coach navigation - only show Events Assigned and Profile
+  // Coach navigation
   if (profile?.role === 'coach') {
     return (
       <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
@@ -121,19 +96,13 @@ const Navigation = () => {
             label="Profile" 
             isActive={location.pathname === "/profile"} 
           />
-          <button
-            onClick={handleLogout}
-            className="p-4 transition-colors duration-200 flex flex-col items-center gap-1 text-gray-400 hover:text-primary"
-          >
-            <LogOut className="text-white" />
-            <span className="text-xs md:hidden text-white">Logout</span>
-          </button>
+          <LogoutButton />
         </div>
       </nav>
     );
   }
 
-  // Attendee navigation - show Home, Search, Profile
+  // Attendee navigation
   return (
     <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
       <div className="flex justify-around md:flex-col md:h-full md:justify-start md:pt-8">
@@ -155,29 +124,9 @@ const Navigation = () => {
           label="Profile" 
           isActive={location.pathname === "/profile"} 
         />
-        <button
-          onClick={handleLogout}
-          className="p-4 transition-colors duration-200 flex flex-col items-center gap-1 text-gray-400 hover:text-primary"
-        >
-          <LogOut className="text-white" />
-          <span className="text-xs md:hidden text-white">Logout</span>
-        </button>
+        <LogoutButton />
       </div>
     </nav>
-  );
-};
-
-const NavItem = ({ icon, to, label, isActive }: { icon: React.ReactNode; to: string; label: string; isActive: boolean }) => {
-  return (
-    <Link
-      to={to}
-      className={`p-4 transition-colors duration-200 flex flex-col items-center gap-1 ${
-        isActive ? "text-primary" : "text-gray-400 hover:text-primary"
-      }`}
-    >
-      {icon}
-      <span className="text-xs md:hidden text-white">{label}</span>
-    </Link>
   );
 };
 
