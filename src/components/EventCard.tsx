@@ -63,7 +63,13 @@ const EventCard = ({
       return;
     }
 
-    // Allow both attendees and hosts to view event details
+    // Allow coaches to view events without profile completion check
+    if (userProfile?.role === 'coach') {
+      setIsPreviewOpen(true);
+      return;
+    }
+
+    // For other roles (attendees and hosts), check profile completion
     if (userProfile?.role === 'attendee' || userProfile?.role === 'host') {
       setIsPreviewOpen(true);
     } else {
