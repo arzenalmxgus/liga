@@ -76,6 +76,8 @@ const PublicProfile = ({
 
   const getRoleBadge = (role: string) => {
     const normalizedRole = role.toLowerCase();
+    console.log("Current role:", normalizedRole); // Debug log
+    
     if (normalizedRole === 'attendee') {
       return <Badge variant="secondary">Event Attendee</Badge>;
     }
@@ -85,6 +87,7 @@ const PublicProfile = ({
     if (normalizedRole === 'coach') {
       return <Badge variant="outline">Sports Coach</Badge>;
     }
+    // Fallback badge with the actual role value
     return <Badge variant="secondary">{role}</Badge>;
   };
 
