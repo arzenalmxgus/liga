@@ -27,7 +27,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [date, setDate] = useState<Date>();
   const [requireAdditionalInfo, setRequireAdditionalInfo] = useState(false);
-  const [selectedCoachId, setSelectedCoachId] = useState<string>("");
+  const [selectedCoachId, setSelectedCoachId] = useState<string>("no_coach"); // Changed initial value
   
   const [formData, setFormData] = useState({
     title: "",
@@ -118,7 +118,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         date: date.toISOString(),
         bannerPhoto: downloadURL,
         hostId: user.uid,
-        coachId: selectedCoachId || null, // Add the selected coach ID
+        coachId: selectedCoachId === "no_coach" ? null : selectedCoachId, // Updated this line
         createdAt: new Date().toISOString(),
         currentParticipants: 0,
         requiresAdditionalInfo: requireAdditionalInfo,
@@ -180,7 +180,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
             <SelectValue placeholder="Select a coach" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">No coach assigned</SelectItem>
+            <SelectItem value="no_coach">No coach assigned</SelectItem>
             {coaches?.map((coach: any) => (
               <SelectItem key={coach.id} value={coach.id}>
                 {coach.firstName} {coach.lastName}
