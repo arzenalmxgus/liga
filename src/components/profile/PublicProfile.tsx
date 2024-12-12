@@ -82,13 +82,29 @@ const PublicProfile = ({
     
     switch (normalizedRole) {
       case 'attendee':
-        return <Badge variant="secondary" className="text-sm">Event Attendee</Badge>;
+        return (
+          <Badge variant="secondary" className="text-sm font-medium">
+            Event Attendee
+          </Badge>
+        );
       case 'host':
-        return <Badge variant="default" className="text-sm">Event Host</Badge>;
+        return (
+          <Badge variant="default" className="text-sm font-medium">
+            Event Host
+          </Badge>
+        );
       case 'coach':
-        return <Badge variant="outline" className="text-sm">Sports Coach</Badge>;
+        return (
+          <Badge variant="outline" className="text-sm font-medium text-white border-white">
+            Sports Coach
+          </Badge>
+        );
       default:
-        return <Badge variant="secondary" className="text-sm">{role}</Badge>;
+        return (
+          <Badge variant="secondary" className="text-sm font-medium">
+            {role}
+          </Badge>
+        );
     }
   };
 
