@@ -9,6 +9,7 @@ const RoleBadge = ({ role }: RoleBadgeProps) => {
   console.log("RoleBadge rendered with role:", role); // Debug log
   
   const normalizedRole = role.toLowerCase().trim();
+  console.log("Normalized role:", normalizedRole); // Additional debug log
   
   switch (normalizedRole) {
     case 'attendee':

@@ -52,6 +52,7 @@ const RegisterForm = () => {
         displayName: `${formData.firstName} ${formData.lastName}`
       });
 
+      // Save the profile data including the role
       await setDoc(doc(db, 'profiles', user.uid), {
         firstName: formData.firstName,
         middleName: formData.middleName,
@@ -59,9 +60,11 @@ const RegisterForm = () => {
         suffix: formData.suffix,
         birthdate: formData.birthdate,
         email: formData.email,
-        user_role: userRole, // This now correctly saves the selected role (attendee/host/coach)
+        role: userRole, // Save as role instead of user_role
         createdAt: new Date().toISOString(),
       });
+
+      console.log("User registered with role:", userRole); // Debug log
 
       toast({
         title: "Success",
