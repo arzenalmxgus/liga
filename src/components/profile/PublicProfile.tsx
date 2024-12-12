@@ -79,10 +79,15 @@ const PublicProfile = ({
         return 'bg-purple-600';
       case 'coach':
         return 'bg-green-600';
+      case 'attendee':
+        return 'bg-blue-600';
       default:
         return 'bg-blue-600';
     }
   };
+
+  // Capitalize the first letter of the role
+  const displayRole = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
 
   return (
     <Card className="w-full max-w-2xl mx-auto bg-black/20 border-gray-800">
@@ -113,7 +118,7 @@ const PublicProfile = ({
             )}
             <div className="mt-2">
               <span className={`inline-block px-3 py-1 text-sm font-semibold text-white ${getRoleBadgeColor(role)} rounded-full`}>
-                {role}
+                {displayRole}
               </span>
             </div>
           </div>
