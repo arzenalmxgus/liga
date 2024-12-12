@@ -22,10 +22,10 @@ const EventRequirements = ({ formData, handleInputChange, disabled }: EventRequi
       <div>
         <Label htmlFor="eventType" className="text-white">Event Type</Label>
         <Select>
-          <SelectTrigger className="bg-white/40 text-white border border-white/20">
+          <SelectTrigger className="bg-white text-black border border-gray-300">
             <SelectValue placeholder="Select event type" />
           </SelectTrigger>
-          <SelectContent className="bg-black/90 border border-white/20">
+          <SelectContent className="bg-white border border-gray-300">
             <SelectItem value="sports">Sports</SelectItem>
             <SelectItem value="socio-cultural">Socio-cultural</SelectItem>
             <SelectItem value="academic">Academic</SelectItem>
