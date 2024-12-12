@@ -18,6 +18,8 @@ interface CreateEventFormProps {
   onSuccess?: () => void;
 }
 
+const DEFAULT_BANNER = "https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=1200&q=80";
+
 const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -87,16 +89,19 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
     setLoading(true);
 
     try {
-      let downloadURL = null;
+      let downloadURL = DEFAULT_BANNER;
       
       if (bannerFile) {
-        downloadURL = await uploadImageToSupabase(bannerFile, 'events');
+        const uploadedUrl = await uploadImageToSupabase(bannerFile, 'events');
+        if (uploadedUrl) {
+          downloadURL = uploadedUrl;
+        }
       }
 
       const eventData = {
         ...formData,
         date: date.toISOString(),
-        bannerPhoto: downloadURL || '/placeholder.svg', // Use placeholder if no banner
+        bannerPhoto: downloadURL,
         hostId: user.uid,
         coachId: selectedCoachId === "no_coach" ? null : selectedCoachId,
         createdAt: new Date().toISOString(),
@@ -139,6 +144,9 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
           className="cursor-pointer bg-white/10 text-white"
           disabled={loading}
         />
+        <p className="text-sm text-gray-400 mt-1">
+          If no banner is uploaded, a default image will be used
+        </p>
       </div>
 
       <EventBasicInfo
