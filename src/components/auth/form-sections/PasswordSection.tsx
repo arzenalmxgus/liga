@@ -33,7 +33,7 @@ const PasswordSection = ({ formData, setFormData }: PasswordSectionProps) => {
   return (
     <>
       <div className="space-y-2">
-        <Label htmlFor="password" className="text-base">Password</Label>
+        <Label htmlFor="password" className="text-base text-white">Password</Label>
         <div className="relative">
           <Input 
             id="password" 
@@ -41,7 +41,7 @@ const PasswordSection = ({ formData, setFormData }: PasswordSectionProps) => {
             required 
             value={formData.password}
             onChange={(e) => updateFormData('password', e.target.value)}
-            className="h-12 text-base pr-10 rounded-lg"
+            className="h-12 text-base pr-10 rounded-lg bg-black/20 text-white"
           />
           <button
             type="button"
@@ -53,7 +53,7 @@ const PasswordSection = ({ formData, setFormData }: PasswordSectionProps) => {
         </div>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirmPassword" className="text-base">Confirm Password</Label>
+        <Label htmlFor="confirmPassword" className="text-base text-white">Confirm Password</Label>
         <div className="relative">
           <Input 
             id="confirmPassword" 
@@ -61,7 +61,7 @@ const PasswordSection = ({ formData, setFormData }: PasswordSectionProps) => {
             required 
             value={formData.confirmPassword}
             onChange={(e) => updateFormData('confirmPassword', e.target.value)}
-            className={`h-12 text-base pr-10 rounded-lg ${
+            className={`h-12 text-base pr-10 rounded-lg bg-black/20 text-white ${
               !passwordsMatch && passwordTouched ? 'border-red-500 focus-visible:ring-red-500' : ''
             }`}
           />
