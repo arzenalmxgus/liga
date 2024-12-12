@@ -10,7 +10,7 @@ import AccountTypeSection from "./form-sections/AccountTypeSection";
 import PersonalInfoSection from "./form-sections/PersonalInfoSection";
 import PasswordSection from "./form-sections/PasswordSection";
 
-export type UserRole = "attendee" | "host";
+export type UserRole = "attendee" | "host" | "coach";
 
 const RegisterForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -68,12 +68,11 @@ const RegisterForm = () => {
         title: "Success",
         description: "Registration successful! Redirecting to homepage...",
       });
-      navigate("/"); // Changed from "/auth" to "/"
+      navigate("/");
     } catch (error: any) {
       console.error("Registration error:", error);
       let errorMessage = "An unexpected error occurred";
       
-      // Handle specific Firebase auth errors
       if (error.code === "auth/email-already-in-use") {
         errorMessage = "This email is already registered. Please use a different email or try logging in.";
       } else if (error.code === "auth/invalid-email") {

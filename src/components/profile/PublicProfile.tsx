@@ -74,9 +74,14 @@ const PublicProfile = ({
   };
 
   const getRoleBadgeColor = (role: string) => {
-    return role.toLowerCase() === 'host' 
-      ? 'bg-purple-600' 
-      : 'bg-blue-600';
+    switch (role.toLowerCase()) {
+      case 'host':
+        return 'bg-purple-600';
+      case 'coach':
+        return 'bg-green-600';
+      default:
+        return 'bg-blue-600';
+    }
   };
 
   return (
