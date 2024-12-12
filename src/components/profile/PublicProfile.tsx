@@ -3,7 +3,7 @@ import { Card } from "@/components/ui/card";
 import { 
   Instagram, Facebook, Twitter, Youtube, User, MapPin, 
   Phone, Mail, Twitch, Linkedin, Github, MessageCircle, 
-  MessageSquare, PinIcon, UserRound, Info, LucideIcon 
+  MessageSquare, PinIcon, UserRound, Info 
 } from "lucide-react";
 import RoleBadge from "./RoleBadge";
 import type { SocialLinks } from "@/types/profile";
@@ -35,7 +35,9 @@ const PublicProfile = ({
   contactNumber,
   socialLinks,
 }: PublicProfileProps) => {
-  const socialIcons: Record<string, LucideIcon> = {
+  console.log("PublicProfile rendered with role:", role); // Debug log
+
+  const socialIcons = {
     instagram: Instagram,
     facebook: Facebook,
     twitter: Twitter,
@@ -76,7 +78,7 @@ const PublicProfile = ({
               </div>
             )}
             <div className="mt-2">
-              <RoleBadge role={role} />
+              <RoleBadge role={role || 'attendee'} />
             </div>
           </div>
         </div>
@@ -112,7 +114,7 @@ const PublicProfile = ({
             <div className="flex flex-wrap gap-4">
               {Object.entries(socialLinks).map(([platform, link]) => {
                 if (!link) return null;
-                const Icon = socialIcons[platform.toLowerCase()];
+                const Icon = socialIcons[platform.toLowerCase() as keyof typeof socialIcons];
                 if (!Icon) return null;
                 return (
                   <a
