@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
-import { doc, updateDoc, getDoc } from "firebase/firestore";
+import { doc, updateDoc, getDoc, setDoc } from "firebase/firestore";
 import SocialLinksSection from "./SocialLinksSection";
 import BasicInfoSection from "./form-sections/BasicInfoSection";
 import ContactInfoSection from "./form-sections/ContactInfoSection";
@@ -94,7 +94,18 @@ const ProfileForm = ({ user, onCancel, socialLinks, setSocialLinks }: ProfileFor
       }
 
       const userRef = doc(db, "profiles", user.uid);
-      await updateDoc(userRef, flattenObject(updateData));
+      const userDoc = await getDoc(userRef);
+      
+      if (!userDoc.exists()) {
+        // If document doesn't exist, create it
+        await setDoc(userRef, {
+          ...flattenObject(updateData),
+          createdAt: new Date().toISOString(),
+        });
+      } else {
+        // If document exists, update it
+        await updateDoc(userRef, flattenObject(updateData));
+      }
 
       toast({
         title: "Profile Updated",
