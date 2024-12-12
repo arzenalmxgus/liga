@@ -75,20 +75,21 @@ const PublicProfile = ({
   };
 
   const getRoleBadge = (role: string) => {
-    const normalizedRole = role.toLowerCase();
+    if (!role) return null;
+    
+    const normalizedRole = role.toLowerCase().trim();
     console.log("Current role:", normalizedRole); // Debug log
     
-    if (normalizedRole === 'attendee') {
-      return <Badge variant="secondary">Event Attendee</Badge>;
+    switch (normalizedRole) {
+      case 'attendee':
+        return <Badge variant="secondary" className="text-sm">Event Attendee</Badge>;
+      case 'host':
+        return <Badge variant="default" className="text-sm">Event Host</Badge>;
+      case 'coach':
+        return <Badge variant="outline" className="text-sm">Sports Coach</Badge>;
+      default:
+        return <Badge variant="secondary" className="text-sm">{role}</Badge>;
     }
-    if (normalizedRole === 'host') {
-      return <Badge variant="default">Event Host</Badge>;
-    }
-    if (normalizedRole === 'coach') {
-      return <Badge variant="outline">Sports Coach</Badge>;
-    }
-    // Fallback badge with the actual role value
-    return <Badge variant="secondary">{role}</Badge>;
   };
 
   return (
