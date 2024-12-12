@@ -2,12 +2,13 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, updateDoc, doc, increment } from "firebase/firestore";
+import { collection, addDoc, updateDoc, doc, increment, getDoc } from "firebase/firestore";
 import { uploadImageToSupabase } from "@/utils/uploadUtils";
 import { Loader2 } from "lucide-react";
 import PersonalInfoSection from "./PersonalInfoSection";
 import AcademicInfoSection from "./AcademicInfoSection";
 import DocumentsSection from "./DocumentsSection";
+import { useQuery } from "@tanstack/react-query";
 
 interface EventRegistrationFormProps {
   eventId: string;
@@ -43,6 +44,16 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
     psaCopy: null,
   });
 
+  const { data: eventData } = useQuery({
+    queryKey: ['event-details', eventId],
+    queryFn: async () => {
+      const eventDoc = await getDoc(doc(db, 'events', eventId));
+      return eventDoc.exists() ? eventDoc.data() : null;
+    },
+  });
+
+  const requiresAdditionalInfo = eventData?.requiresAdditionalInfo || false;
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
@@ -70,13 +81,18 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const hasEmptyFields = Object.values(formData).some(value => value === "");
-    const hasEmptyFiles = Object.values(files).some(file => file === null);
+    // Validate required fields based on whether additional info is required
+    const requiredFields = requiresAdditionalInfo 
+      ? Object.values(formData)
+      : [formData.name, formData.dateOfBirth, formData.age, formData.nationality];
+      
+    const hasEmptyRequiredFields = requiredFields.some(value => value === "");
+    const hasEmptyRequiredFiles = requiresAdditionalInfo && Object.values(files).some(file => file === null);
     
-    if (hasEmptyFields || hasEmptyFiles) {
+    if (hasEmptyRequiredFields || hasEmptyRequiredFiles) {
       toast({
         title: "Validation Error",
-        description: "Please fill in all fields and upload all required documents.",
+        description: "Please fill in all required fields.",
         variant: "destructive",
       });
       return;
@@ -85,15 +101,19 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
     setLoading(true);
 
     try {
-      const uploadPromises = [];
-      for (const [key, file] of Object.entries(files)) {
-        if (file) {
-          uploadPromises.push(
-            uploadImageToSupabase(file, `registrations/${eventId}`).then(url => [key, url])
-          );
+      let uploadedFiles = {};
+      
+      if (requiresAdditionalInfo) {
+        const uploadPromises = [];
+        for (const [key, file] of Object.entries(files)) {
+          if (file) {
+            uploadPromises.push(
+              uploadImageToSupabase(file, `registrations/${eventId}`).then(url => [key, url])
+            );
+          }
         }
+        uploadedFiles = Object.fromEntries(await Promise.all(uploadPromises));
       }
-      const uploadedFiles = Object.fromEntries(await Promise.all(uploadPromises));
 
       const registrationData = {
         ...formData,
@@ -132,15 +152,19 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
         handleInputChange={handleInputChange}
       />
       
-      <AcademicInfoSection 
-        formData={formData}
-        handleInputChange={handleInputChange}
-        handleSelectChange={handleSelectChange}
-      />
-      
-      <DocumentsSection 
-        handleFileChange={handleFileChange}
-      />
+      {requiresAdditionalInfo && (
+        <>
+          <AcademicInfoSection 
+            formData={formData}
+            handleInputChange={handleInputChange}
+            handleSelectChange={handleSelectChange}
+          />
+          
+          <DocumentsSection 
+            handleFileChange={handleFileChange}
+          />
+        </>
+      )}
 
       <div className="flex justify-end space-x-4 pt-4">
         <Button 

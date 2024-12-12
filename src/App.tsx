@@ -32,7 +32,6 @@ const App = () => {
                     <Route path="/search" element={<Search />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/auth" element={<Auth />} />
-                    <Route path="/events-assigned" element={<EventsAssigned />} />
                   </Routes>
                 </BrowserRouter>
               </div>
