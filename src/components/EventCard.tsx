@@ -63,12 +63,13 @@ const EventCard = ({
       return;
     }
 
-    if (userProfile?.user_role === 'host' || userProfile?.user_role === 'attendee') {
+    // Allow both attendees and hosts to view event details
+    if (userProfile?.role === 'attendee' || userProfile?.role === 'host') {
       setIsPreviewOpen(true);
     } else {
       toast({
-        title: "Access Denied",
-        description: "You don't have permission to view event details",
+        title: "Profile Incomplete",
+        description: "Please complete your profile setup to view event details",
         variant: "destructive",
       });
     }
