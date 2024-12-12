@@ -5,18 +5,15 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ThemeProvider } from "next-themes";
 import { AuthProvider } from "./contexts/AuthContext";
-import Index from "./pages/Index";
-import Events from "./pages/Events";
-import Search from "./pages/Search";
-import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
 import EventsAssigned from "./pages/EventsAssigned";
+import Profile from "./pages/Profile";
 import { useAuth } from "./contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./lib/firebase";
 
-const ProtectedEventsRoute = () => {
+const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user } = useAuth();
   
   const { data: profile } = useQuery({
@@ -30,12 +27,11 @@ const ProtectedEventsRoute = () => {
     enabled: !!user,
   });
 
-  // Redirect coaches and users without profiles to home
-  if (!profile?.role || profile?.role === 'coach') {
-    return <Navigate to="/" replace />;
+  if (!user || profile?.role !== 'coach') {
+    return <Navigate to="/auth" replace />;
   }
 
-  return <Events />;
+  return <>{children}</>;
 };
 
 const App = () => {
@@ -53,12 +49,18 @@ const App = () => {
                 <Sonner />
                 <BrowserRouter>
                   <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/events" element={<ProtectedEventsRoute />} />
-                    <Route path="/search" element={<Search />} />
-                    <Route path="/profile" element={<Profile />} />
                     <Route path="/auth" element={<Auth />} />
-                    <Route path="/events-assigned" element={<EventsAssigned />} />
+                    <Route path="/events-assigned" element={
+                      <ProtectedRoute>
+                        <EventsAssigned />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/profile" element={
+                      <ProtectedRoute>
+                        <Profile />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="*" element={<Navigate to="/auth" replace />} />
                   </Routes>
                 </BrowserRouter>
               </div>
