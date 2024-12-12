@@ -10,6 +10,7 @@ import Events from "./pages/Events";
 import Search from "./pages/Search";
 import Profile from "./pages/Profile";
 import Auth from "./pages/Auth";
+import EventsAssigned from "./pages/EventsAssigned";
 
 const App = () => {
   const queryClient = new QueryClient();
@@ -31,6 +32,7 @@ const App = () => {
                     <Route path="/search" element={<Search />} />
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/auth" element={<Auth />} />
+                    <Route path="/events-assigned" element={<EventsAssigned />} />
                   </Routes>
                 </BrowserRouter>
               </div>

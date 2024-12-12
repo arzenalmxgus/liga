@@ -1,19 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, getDocs, query, where } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import { uploadImageToSupabase } from "@/utils/uploadUtils";
 import { Loader2 } from "lucide-react";
-import { useQuery } from "@tanstack/react-query";
 import EventBasicInfo from "./event-form/EventBasicInfo";
 import EventRequirements from "./event-form/EventRequirements";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import CoachSelection from "./event-form/CoachSelection";
+import AdditionalInfo from "./event-form/AdditionalInfo";
 
 interface CreateEventFormProps {
   onSuccess?: () => void;
@@ -27,7 +25,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
   const [bannerFile, setBannerFile] = useState<File | null>(null);
   const [date, setDate] = useState<Date>();
   const [requireAdditionalInfo, setRequireAdditionalInfo] = useState(false);
-  const [selectedCoachId, setSelectedCoachId] = useState<string>("no_coach"); // Changed initial value
+  const [selectedCoachId, setSelectedCoachId] = useState<string>("no_coach");
   
   const [formData, setFormData] = useState({
     title: "",
@@ -38,20 +36,6 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
     entranceFee: "",
     isFree: "true",
     requiresAdditionalInfo: false,
-  });
-
-  // Query to fetch all coaches
-  const { data: coaches } = useQuery({
-    queryKey: ['coaches'],
-    queryFn: async () => {
-      const coachesRef = collection(db, 'profiles');
-      const q = query(coachesRef, where('role', '==', 'coach'));
-      const querySnapshot = await getDocs(q);
-      return querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-    },
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -118,13 +102,13 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         date: date.toISOString(),
         bannerPhoto: downloadURL,
         hostId: user.uid,
-        coachId: selectedCoachId === "no_coach" ? null : selectedCoachId, // Updated this line
+        coachId: selectedCoachId === "no_coach" ? null : selectedCoachId,
         createdAt: new Date().toISOString(),
         currentParticipants: 0,
         requiresAdditionalInfo: requireAdditionalInfo,
       };
 
-      const docRef = await addDoc(collection(db, "events"), eventData);
+      await addDoc(collection(db, "events"), eventData);
 
       toast({
         title: "Success",
@@ -169,43 +153,17 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
         disabled={loading}
       />
 
-      <div className="space-y-2">
-        <Label htmlFor="coach" className="text-white">Assign Sports Coach (Optional)</Label>
-        <Select
-          value={selectedCoachId}
-          onValueChange={setSelectedCoachId}
-          disabled={loading}
-        >
-          <SelectTrigger className="w-full bg-white/90 text-black border-gray-200">
-            <SelectValue placeholder="Select a coach" />
-          </SelectTrigger>
-          <SelectContent className="bg-white border-gray-200 text-black z-50">
-            <SelectItem value="no_coach">No coach assigned</SelectItem>
-            {coaches?.map((coach: any) => (
-              <SelectItem key={coach.id} value={coach.id}>
-                {coach.firstName} {coach.lastName}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      <CoachSelection
+        selectedCoachId={selectedCoachId}
+        setSelectedCoachId={setSelectedCoachId}
+        disabled={loading}
+      />
 
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="requireAdditionalInfo"
-          checked={requireAdditionalInfo}
-          onCheckedChange={(checked) => {
-            setRequireAdditionalInfo(checked as boolean);
-            setFormData(prev => ({
-              ...prev,
-              requiresAdditionalInfo: checked as boolean
-            }));
-          }}
-        />
-        <Label htmlFor="requireAdditionalInfo" className="text-white">
-          Require additional participant information
-        </Label>
-      </div>
+      <AdditionalInfo
+        requireAdditionalInfo={requireAdditionalInfo}
+        setRequireAdditionalInfo={setRequireAdditionalInfo}
+        setFormData={setFormData}
+      />
 
       <EventRequirements
         formData={formData}

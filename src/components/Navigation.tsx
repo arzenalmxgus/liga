@@ -1,15 +1,28 @@
 import { Home, Calendar, User, Search, LogIn, LogOut } from "lucide-react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { signOut } from "firebase/auth";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { doc, getDoc } from "firebase/firestore";
 
 const Navigation = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { toast } = useToast();
+
+  const { data: profile } = useQuery({
+    queryKey: ['user-profile', user?.uid],
+    queryFn: async () => {
+      if (!user?.uid) return null;
+      const docRef = doc(db, 'profiles', user.uid);
+      const docSnap = await getDoc(docRef);
+      return docSnap.exists() ? docSnap.data() : null;
+    },
+    enabled: !!user,
+  });
 
   const handleLogout = async () => {
     try {
@@ -37,6 +50,14 @@ const Navigation = () => {
         {user ? (
           <>
             <NavItem icon={<User className="text-white" />} to="/profile" label="Profile" isActive={location.pathname === "/profile"} />
+            {profile?.role === 'coach' && (
+              <NavItem 
+                icon={<Calendar className="text-white" />} 
+                to="/events-assigned" 
+                label="Assigned" 
+                isActive={location.pathname === "/events-assigned"} 
+              />
+            )}
             <button
               onClick={handleLogout}
               className="p-4 transition-colors duration-200 flex flex-col items-center gap-1 text-gray-400 hover:text-primary"
