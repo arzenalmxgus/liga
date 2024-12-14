@@ -5,9 +5,10 @@ import { Label } from "@/components/ui/label";
 import { CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { useNavigate } from "react-router-dom";
 import { Loader2 } from "lucide-react";
+import { doc, getDoc } from "firebase/firestore";
 
 const LoginForm = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -52,6 +53,20 @@ const LoginForm = () => {
       const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
       console.log('Login successful for user:', userCredential.user.uid);
       
+      // Check if user profile exists in Firestore
+      const userProfileRef = doc(db, 'profiles', userCredential.user.uid);
+      const userProfileSnap = await getDoc(userProfileRef);
+      
+      if (!userProfileSnap.exists()) {
+        toast({
+          title: "Error",
+          description: "User profile not found. Please register first.",
+          variant: "destructive",
+        });
+        await auth.signOut();
+        return;
+      }
+
       toast({
         title: "Success",
         description: "Logged in successfully!",
@@ -66,7 +81,7 @@ const LoginForm = () => {
       
       switch (error.code) {
         case "auth/invalid-login-credentials":
-          errorMessage = "Invalid email or password. Please check your credentials and try again.";
+          errorMessage = "Invalid email or password. Please check your credentials and try again. If you haven't registered yet, please create an account first.";
           break;
         case "auth/invalid-email":
           errorMessage = "Please enter a valid email address.";
@@ -75,7 +90,7 @@ const LoginForm = () => {
           errorMessage = "This account has been disabled. Please contact support.";
           break;
         case "auth/user-not-found":
-          errorMessage = "No account found with this email. Please check your email or register.";
+          errorMessage = "No account found with this email. Please register first.";
           break;
         case "auth/wrong-password":
           errorMessage = "Incorrect password. Please try again.";
