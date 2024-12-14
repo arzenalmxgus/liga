@@ -1,4 +1,3 @@
-import Navigation from "@/components/Navigation";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { collection, query, where, getDocs } from "firebase/firestore";
@@ -29,7 +28,6 @@ const MyEvents = () => {
 
   return (
     <div className="min-h-screen">
-      <Navigation />
       <main className="md:ml-16 pb-16 md:pb-0">
         <header className="p-6 border-b border-gray-800">
           <h1 className="text-2xl font-bold text-white">My Events</h1>
@@ -37,7 +35,11 @@ const MyEvents = () => {
         </header>
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {myEvents?.map((event: any) => (
-            <EventCard key={event.id} event={event} isHost={true} />
+            <EventCard 
+              key={event.id} 
+              {...event}
+              isHost={true} 
+            />
           ))}
           {myEvents?.length === 0 && (
             <p className="text-white col-span-full text-center">You haven't created any events yet.</p>

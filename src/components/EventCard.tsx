@@ -21,6 +21,7 @@ interface EventCardProps {
   entrance_fee: number | null;
   is_free: boolean;
   hostId: string;
+  isHost?: boolean;
 }
 
 const EventCard = ({ 
@@ -36,6 +37,7 @@ const EventCard = ({
   entrance_fee,
   is_free,
   hostId,
+  isHost
 }: EventCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const navigate = useNavigate();
@@ -122,6 +124,7 @@ const EventCard = ({
           participants_limit,
           hostId
         }}
+        isHost={isHost}
       />
     </>
   );
