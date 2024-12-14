@@ -30,6 +30,7 @@ interface EventPreviewProps {
     is_free: boolean;
     hostId: string;
   };
+  isHost?: boolean;
 }
 
 const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
