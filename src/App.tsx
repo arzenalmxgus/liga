@@ -9,14 +9,15 @@ import Auth from "./pages/Auth";
 import EventsAssigned from "./pages/EventsAssigned";
 import Profile from "./pages/Profile";
 import Events from "./pages/Events";
-import Search from "./pages/Search";
+import MyEvents from "./pages/MyEvents";
+import JoinedEvents from "./pages/JoinedEvents";
 import { useAuth } from "./contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "./lib/firebase";
 import Navigation from "./components/Navigation";
 
-const ProtectedCoachRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode, allowedRoles?: string[] }) => {
   const { user } = useAuth();
   
   const { data: profile } = useQuery({
@@ -30,18 +31,12 @@ const ProtectedCoachRoute = ({ children }: { children: React.ReactNode }) => {
     enabled: !!user,
   });
 
-  if (!user || profile?.role !== 'coach') {
+  if (!user) {
     return <Navigate to="/auth" replace />;
   }
 
-  return <>{children}</>;
-};
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user } = useAuth();
-  
-  if (!user) {
-    return <Navigate to="/auth" replace />;
+  if (allowedRoles && !allowedRoles.includes(profile?.role)) {
+    return <Navigate to="/" replace />;
   }
 
   return <>{children}</>;
@@ -64,24 +59,29 @@ const App = () => {
                   <Navigation />
                   <Routes>
                     <Route path="/auth" element={<Auth />} />
+                    <Route path="/events" element={
+                      <ProtectedRoute allowedRoles={['host', 'attendee']}>
+                        <Events />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/my-events" element={
+                      <ProtectedRoute allowedRoles={['host']}>
+                        <MyEvents />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/joined-events" element={
+                      <ProtectedRoute allowedRoles={['attendee']}>
+                        <JoinedEvents />
+                      </ProtectedRoute>
+                    } />
                     <Route path="/events-assigned" element={
-                      <ProtectedCoachRoute>
+                      <ProtectedRoute allowedRoles={['coach']}>
                         <EventsAssigned />
-                      </ProtectedCoachRoute>
+                      </ProtectedRoute>
                     } />
                     <Route path="/profile" element={
                       <ProtectedRoute>
                         <Profile />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/search" element={
-                      <ProtectedRoute>
-                        <Search />
-                      </ProtectedRoute>
-                    } />
-                    <Route path="/events" element={
-                      <ProtectedRoute>
-                        <Events />
                       </ProtectedRoute>
                     } />
                     <Route path="/" element={
@@ -89,7 +89,7 @@ const App = () => {
                         <Events />
                       </ProtectedRoute>
                     } />
-                    <Route path="*" element={<Navigate to="/auth" replace />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </BrowserRouter>
               </div>

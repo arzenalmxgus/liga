@@ -22,7 +22,7 @@ const Navigation = () => {
     enabled: !!user,
   });
 
-  // If not logged in, show home and login
+  // If not logged in, show only home and login
   if (!user) {
     return (
       <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
@@ -44,7 +44,7 @@ const Navigation = () => {
     );
   }
 
-  // Host navigation
+  // Host navigation - Home, Events, My Events, Profile
   if (profile?.role === 'host') {
     return (
       <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
@@ -58,14 +58,14 @@ const Navigation = () => {
           <NavItem 
             icon={<Calendar className="text-white" />} 
             to="/events" 
-            label="My Events" 
+            label="Events" 
             isActive={location.pathname === "/events"} 
           />
           <NavItem 
-            icon={<Search className="text-white" />} 
-            to="/search" 
-            label="Search" 
-            isActive={location.pathname === "/search"} 
+            icon={<Calendar className="text-white" />} 
+            to="/my-events" 
+            label="My Events" 
+            isActive={location.pathname === "/my-events"} 
           />
           <NavItem 
             icon={<User className="text-white" />} 
@@ -79,11 +79,17 @@ const Navigation = () => {
     );
   }
 
-  // Coach navigation
+  // Coach navigation - Home, Events Assigned, Profile
   if (profile?.role === 'coach') {
     return (
       <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
         <div className="flex justify-around md:flex-col md:h-full md:justify-start md:pt-8">
+          <NavItem 
+            icon={<Home className="text-white" />} 
+            to="/" 
+            label="Home" 
+            isActive={location.pathname === "/"} 
+          />
           <NavItem 
             icon={<Calendar className="text-white" />} 
             to="/events-assigned" 
@@ -102,7 +108,7 @@ const Navigation = () => {
     );
   }
 
-  // Attendee navigation
+  // Attendee navigation - Home, Events, Joined Events, Profile
   return (
     <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
       <div className="flex justify-around md:flex-col md:h-full md:justify-start md:pt-8">
@@ -113,10 +119,16 @@ const Navigation = () => {
           isActive={location.pathname === "/"} 
         />
         <NavItem 
-          icon={<Search className="text-white" />} 
-          to="/search" 
-          label="Search" 
-          isActive={location.pathname === "/search"} 
+          icon={<Calendar className="text-white" />} 
+          to="/events" 
+          label="Events" 
+          isActive={location.pathname === "/events"} 
+        />
+        <NavItem 
+          icon={<Calendar className="text-white" />} 
+          to="/joined-events" 
+          label="Joined" 
+          isActive={location.pathname === "/joined-events"} 
         />
         <NavItem 
           icon={<User className="text-white" />} 
