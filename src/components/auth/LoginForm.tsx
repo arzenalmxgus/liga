@@ -21,9 +21,9 @@ const LoginForm = () => {
     setIsLoading(true);
 
     try {
-      console.log('Attempting to sign in with email:', email);
-      await signInWithEmailAndPassword(auth, email, password);
-      console.log('Sign in successful');
+      console.log('Login attempt with email:', email);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      console.log('Login successful for user:', userCredential.user.uid);
       
       toast({
         title: "Success",
@@ -32,6 +32,8 @@ const LoginForm = () => {
       navigate("/");
     } catch (error: any) {
       console.error("Login error:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
       
       let errorMessage = "Failed to log in. Please try again.";
       
