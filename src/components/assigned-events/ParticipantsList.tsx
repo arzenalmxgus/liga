@@ -33,23 +33,44 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
           
           if (!userProfileSnapshot.empty) {
             const profile = userProfileSnapshot.docs[0].data();
+            
+            // Handle registration date whether it's a Firestore timestamp or ISO string
+            let registrationDate;
+            if (participantData.registrationDate?.toDate) {
+              registrationDate = participantData.registrationDate.toDate();
+            } else if (typeof participantData.registrationDate === 'string') {
+              registrationDate = new Date(participantData.registrationDate);
+            } else {
+              registrationDate = new Date();
+            }
+
             participantsData.push({
               id: participantDoc.id,
               status: participantData.status || 'pending',
               displayName: profile.displayName || profile.name || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Anonymous',
               email: profile.email || participantData.email || 'No email provided',
-              registrationDate: participantData.registrationDate?.toDate() || new Date(),
+              registrationDate,
               age: participantData.age || 'N/A',
               nationality: participantData.nationality || 'N/A',
               dateOfBirth: participantData.dateOfBirth || 'N/A',
             });
           } else {
+            // Handle case where profile is not found
+            let registrationDate;
+            if (participantData.registrationDate?.toDate) {
+              registrationDate = participantData.registrationDate.toDate();
+            } else if (typeof participantData.registrationDate === 'string') {
+              registrationDate = new Date(participantData.registrationDate);
+            } else {
+              registrationDate = new Date();
+            }
+
             participantsData.push({
               id: participantDoc.id,
               status: participantData.status || 'pending',
               displayName: participantData.name || 'Anonymous',
               email: participantData.email || 'No email provided',
-              registrationDate: participantData.registrationDate?.toDate() || new Date(),
+              registrationDate,
               age: participantData.age || 'N/A',
               nationality: participantData.nationality || 'N/A',
               dateOfBirth: participantData.dateOfBirth || 'N/A',
