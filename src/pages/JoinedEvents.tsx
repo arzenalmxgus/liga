@@ -35,13 +35,15 @@ const JoinedEvents = () => {
       }));
     },
     enabled: !!user,
-    onError: (error) => {
-      console.error('Error fetching joined events:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load your joined events. Please try again.",
-        variant: "destructive",
-      });
+    meta: {
+      onError: (error: Error) => {
+        console.error('Error fetching joined events:', error);
+        toast({
+          title: "Error",
+          description: "Failed to load your joined events. Please try again.",
+          variant: "destructive",
+        });
+      }
     }
   });
 
