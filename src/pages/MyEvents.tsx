@@ -9,6 +9,9 @@ import { Plus } from "lucide-react";
 import CreateEventForm from "@/components/CreateEventForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Database } from "@/lib/database.types";
+
+type Event = Database['public']['Tables']['events']['Row'];
 
 const MyEvents = () => {
   const { user } = useAuth();
@@ -19,12 +22,12 @@ const MyEvents = () => {
     queryKey: ['host-events', user?.uid],
     queryFn: async () => {
       const eventsRef = collection(db, 'events');
-      const q = query(eventsRef, where('hostId', '==', user?.uid));
+      const q = query(eventsRef, where('host_id', '==', user?.uid));
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
-      }));
+      })) as Event[];
     },
     enabled: !!user,
   });
@@ -64,8 +67,19 @@ const MyEvents = () => {
         {events?.map((event) => (
           <EventCard
             key={event.id}
-            {...event}
-            hostId={event.hostId}
+            id={event.id}
+            title={event.title}
+            date={event.date}
+            location={event.location}
+            category={event.category}
+            participants_limit={event.participants_limit}
+            current_participants={event.current_participants}
+            banner_photo={event.banner_photo}
+            description={event.description || ''}
+            entrance_fee={event.entrance_fee}
+            is_free={event.is_free}
+            hostId={event.host_id}
+            isHost={true}
           />
         ))}
         {events?.length === 0 && (
