@@ -85,9 +85,9 @@ const JoinedEvents = () => {
                 date={event.date}
                 location={event.location}
                 category={event.category}
-                participants={event.current_participants || 0}
+                current_participants={event.current_participants || 0}
                 participants_limit={event.participants_limit}
-                image={event.banner_photo || event.image}
+                banner_photo={event.banner_photo || event.image}
                 description={event.description}
                 entrance_fee={event.entrance_fee}
                 is_free={event.is_free}
