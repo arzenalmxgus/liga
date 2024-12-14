@@ -115,7 +115,7 @@ const LoginForm = () => {
       <CardHeader className="space-y-3">
         <CardTitle className="text-3xl font-bold text-center text-white">Welcome To Liga!</CardTitle>
         <CardDescription className="text-center text-gray-300 text-lg">
-          Welcome back! Please log in to continue
+          Find your events here!
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-6 px-8">
