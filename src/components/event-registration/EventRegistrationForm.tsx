@@ -145,11 +145,21 @@ const EventRegistrationForm = ({
         description: "Registration submitted successfully",
       });
       onSuccess();
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
+      let errorMessage = "Failed to submit registration.";
+      
+      if (error.code === "permission-denied") {
+        errorMessage = "You don't have permission to register for this event. Please make sure you're logged in with the correct account.";
+      } else if (error.code === "not-found") {
+        errorMessage = "Event not found or has been removed.";
+      } else if (error.code === "already-exists") {
+        errorMessage = "You have already registered for this event.";
+      }
+      
       toast({
-        title: "Error",
-        description: "Failed to submit registration. Please try again.",
+        title: "Registration Failed",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
