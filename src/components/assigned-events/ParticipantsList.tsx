@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import ParticipantsTable from "./participants/ParticipantsTable";
@@ -99,7 +99,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
     }
 
     try {
-      // First, get the participant document to access their userId
+      // Update participant status
       const participantRef = doc(db, 'event_participants', participantId);
       const participantSnap = await getDoc(participantRef);
       
@@ -109,39 +109,47 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
 
       const participantData = participantSnap.data();
 
-      // Update the participant's status
+      // Update the status in event_participants collection
       await updateDoc(participantRef, {
         status: newStatus,
-        updatedAt: new Date(),
-        updatedBy: user.uid,
+        updatedAt: serverTimestamp(),
+        updatedBy: user.uid
       });
 
-      // Create notification
-      const notificationsRef = collection(db, 'notifications');
-      await addDoc(notificationsRef, {
+      // Create a notification document
+      await addDoc(collection(db, 'notifications'), {
         userId: participantData.userId,
-        message: newStatus === 'approved' 
-          ? "You have been approved for the event!" 
-          : "You have been rejected from the event.",
-        status: newStatus,
         eventId: eventId,
-        createdAt: new Date(),
-        read: false,
-        type: 'event_registration',
+        type: 'registration_status',
+        status: newStatus,
+        message: `Your registration has been ${newStatus}`,
+        createdAt: serverTimestamp(),
+        read: false
       });
 
       // Refresh the participants list
       await refetch();
       
       toast({
-        title: `Participant ${newStatus}`,
-        description: `The participant has been ${newStatus} successfully.`,
+        title: "Success",
+        description: `Participant has been ${newStatus} successfully.`,
       });
     } catch (error) {
       console.error("Error updating status:", error);
+      
+      // More specific error messages based on the error type
+      let errorMessage = "Failed to update participant status. Please try again.";
+      if (error instanceof Error) {
+        if (error.message.includes("permission-denied")) {
+          errorMessage = "You don't have permission to perform this action.";
+        } else if (error.message.includes("not-found")) {
+          errorMessage = "Participant record not found.";
+        }
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to update participant status. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
