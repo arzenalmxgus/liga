@@ -1,57 +1,48 @@
 import { Button } from "../ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { collection, query, where, getDocs, deleteDoc } from "firebase/firestore";
+import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import RegistrationButton from "./RegistrationButton";
 
 interface EventActionsProps {
   eventId: string;
-  isHost: boolean;
+  isHost?: boolean;
   isRegistered: boolean;
   isFull: boolean;
   onRegister: () => void;
   onClose: () => void;
-  onDelete: () => Promise<void>;
+  onDelete: () => void;
 }
 
-const EventActions = ({ 
-  eventId, 
-  isHost, 
-  isRegistered, 
-  isFull, 
-  onRegister, 
+const EventActions = ({
+  eventId,
+  isHost,
+  isRegistered,
+  isFull,
+  onRegister,
   onClose,
-  onDelete 
+  onDelete,
 }: EventActionsProps) => {
-  const { user } = useAuth();
-  const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   const handleUnregister = async () => {
-    if (!user?.uid) return;
-
     try {
       const registrationsRef = collection(db, 'event_participants');
-      const q = query(
-        registrationsRef,
-        where('eventId', '==', eventId),
-        where('userId', '==', user.uid)
-      );
+      const q = query(registrationsRef, where('eventId', '==', eventId));
       const snapshot = await getDocs(q);
-
+      
       if (!snapshot.empty) {
         await deleteDoc(snapshot.docs[0].ref);
         
+        queryClient.invalidateQueries({ queryKey: ['event-registration'] });
+        queryClient.invalidateQueries({ queryKey: ['event-participants'] });
+        queryClient.invalidateQueries({ queryKey: ['joined-events'] });
+        
         toast({
           title: "Success",
-          description: "You have successfully unregistered from this event.",
+          description: "You have been unregistered from this event.",
         });
-
-        queryClient.invalidateQueries({ queryKey: ['event-registration'] });
-        queryClient.invalidateQueries({ queryKey: ['joined-events'] });
-        queryClient.invalidateQueries({ queryKey: ['events'] });
         
         onClose();
       }
@@ -66,27 +57,35 @@ const EventActions = ({
   };
 
   return (
-    <div className="flex gap-4">
-      {!isHost && !isRegistered && (
-        <RegistrationButton
-          isHost={isHost}
-          isFull={isFull}
-          onRegister={onRegister}
-        />
-      )}
-      {!isHost && isRegistered && (
-        <Button 
-          onClick={handleUnregister}
+    <div className="space-y-4 w-full">
+      {isHost ? (
+        <Button
           variant="destructive"
-          className="flex-1 w-full"
+          className="w-full"
+          onClick={onDelete}
         >
-          Unregister from Event
-        </Button>
-      )}
-      {isHost && (
-        <Button onClick={onDelete} variant="destructive">
           Delete Event
         </Button>
+      ) : (
+        <>
+          {isRegistered ? (
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={handleUnregister}
+            >
+              Unregister from Event
+            </Button>
+          ) : (
+            <Button
+              className="w-full"
+              onClick={onRegister}
+              disabled={isFull}
+            >
+              {isFull ? "Event is Full" : "Register for Event"}
+            </Button>
+          )}
+        </>
       )}
     </div>
   );
