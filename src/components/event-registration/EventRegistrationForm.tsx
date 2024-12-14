@@ -8,11 +8,7 @@ import DocumentsSection from "./DocumentsSection";
 import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { 
-  uploadRegistrationFiles,
-  type RegistrationFormData,
-  type RegistrationFiles 
-} from "@/utils/eventRegistrationUtils";
+import { uploadRegistrationDoc, saveRegistrationDocs } from "@/utils/uploadUtils";
 
 interface EventRegistrationFormProps {
   eventId: string;
@@ -29,7 +25,8 @@ const EventRegistrationForm = ({
 }: EventRegistrationFormProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState<RegistrationFormData>({
+  const [isUploading, setIsUploading] = useState(false);
+  const [formData, setFormData] = useState({
     name: "",
     dateOfBirth: "",
     age: "",
@@ -43,7 +40,11 @@ const EventRegistrationForm = ({
     school: "",
   });
 
-  const [files, setFiles] = useState<RegistrationFiles>({
+  const [files, setFiles] = useState<{
+    photo: File | null;
+    registrarCert: File | null;
+    psaCopy: File | null;
+  }>({
     photo: null,
     registrarCert: null,
     psaCopy: null,
@@ -68,18 +69,78 @@ const EventRegistrationForm = ({
     setFormData(prev => ({ ...prev, eventType: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: keyof RegistrationFiles) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (file.size > 5 * 1024 * 1024) {
-        toast({
-          title: "File too large",
-          description: "Please select a file under 5MB",
-          variant: "destructive",
-        });
-        return;
+  const handleFileChange = (file: File | null, type: keyof typeof files) => {
+    setFiles(prev => ({ ...prev, [type]: file }));
+  };
+
+  const uploadFiles = async () => {
+    setIsUploading(true);
+    const urls: Record<string, string> = {};
+
+    try {
+      if (files.photo) {
+        const photoUrl = await uploadRegistrationDoc(files.photo, eventId, userId, 'photo');
+        if (photoUrl) urls.photo = photoUrl;
       }
-      setFiles(prev => ({ ...prev, [type]: file }));
+
+      if (files.registrarCert) {
+        const registrarUrl = await uploadRegistrationDoc(files.registrarCert, eventId, userId, 'registrarCert');
+        if (registrarUrl) urls.registrarCert = registrarUrl;
+      }
+
+      if (files.psaCopy) {
+        const psaUrl = await uploadRegistrationDoc(files.psaCopy, eventId, userId, 'psaCopy');
+        if (psaUrl) urls.psaCopy = psaUrl;
+      }
+
+      return urls;
+    } catch (error) {
+      console.error('Error uploading files:', error);
+      throw error;
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!validateForm()) return;
+
+    setLoading(true);
+
+    try {
+      // Upload files first
+      const uploadedUrls = await uploadFiles();
+      
+      // Save document references
+      await saveRegistrationDocs(eventId, userId, uploadedUrls);
+
+      // Create registration in Firebase
+      const registrationId = `${eventId}_${userId}`;
+      await setDoc(doc(db, "event_participants", registrationId), {
+        ...formData,
+        eventId,
+        userId,
+        status: 'pending',
+        registrationDate: new Date().toISOString(),
+        documents: uploadedUrls,
+      });
+
+      toast({
+        title: "Success",
+        description: "Registration submitted successfully",
+      });
+      onSuccess();
+    } catch (error: any) {
+      console.error("Registration error:", error);
+      toast({
+        title: "Registration Failed",
+        description: "Failed to submit registration. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -97,10 +158,7 @@ const EventRegistrationForm = ({
       ? Object.values(formData)
       : [formData.name, formData.dateOfBirth, formData.age, formData.nationality];
       
-    const hasEmptyRequiredFields = requiredFields.some(value => value === "");
-    const hasEmptyRequiredFiles = requiresAdditionalInfo && Object.values(files).some(file => file === null);
-    
-    if (hasEmptyRequiredFields || hasEmptyRequiredFiles) {
+    if (requiredFields.some(value => !value)) {
       toast({
         title: "Validation Error",
         description: "Please fill in all required fields.",
@@ -108,51 +166,17 @@ const EventRegistrationForm = ({
       });
       return false;
     }
-    return true;
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!validateForm()) return;
-
-    setLoading(true);
-
-    try {
-      // Create a unique registration ID
-      const registrationId = `${eventId}_${userId}`;
-      
-      // Try to create the registration document directly
-      await setDoc(doc(db, "event_participants", registrationId), {
-        ...formData,
-        eventId,
-        userId,
-        status: 'pending',
-        registrationDate: new Date().toISOString(),
-      });
-
-      // If we get here, the registration was successful
+    if (requiresAdditionalInfo && (!files.photo || !files.registrarCert || !files.psaCopy)) {
       toast({
-        title: "Success",
-        description: "Registration submitted successfully",
-      });
-      onSuccess();
-    } catch (error: any) {
-      console.error("Registration error:", error);
-      let errorMessage = "Failed to submit registration.";
-      
-      if (error.code === "permission-denied") {
-        errorMessage = "You don't have permission to register. Please ensure you're logged in as an attendee.";
-      }
-      
-      toast({
-        title: "Registration Failed",
-        description: errorMessage,
+        title: "Documents Required",
+        description: "Please upload all required documents.",
         variant: "destructive",
       });
-    } finally {
-      setLoading(false);
+      return false;
     }
+
+    return true;
   };
 
   return (
@@ -172,6 +196,7 @@ const EventRegistrationForm = ({
           
           <DocumentsSection 
             handleFileChange={handleFileChange}
+            isUploading={isUploading}
           />
         </>
       )}
@@ -181,19 +206,20 @@ const EventRegistrationForm = ({
           type="button" 
           variant="outline" 
           onClick={onCancel}
+          disabled={loading || isUploading}
           className="bg-white/20 hover:bg-white/30 text-white border-white/20"
         >
           Cancel
         </Button>
         <Button 
           type="submit" 
-          disabled={loading}
+          disabled={loading || isUploading}
           className="bg-primary hover:bg-primary/90 text-white"
         >
-          {loading ? (
+          {(loading || isUploading) ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Submitting...
+              {isUploading ? 'Uploading...' : 'Submitting...'}
             </>
           ) : (
             'Submit Registration'

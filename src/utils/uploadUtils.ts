@@ -1,52 +1,81 @@
 import { supabase } from '@/lib/supabase';
-import { storage } from '@/lib/firebase';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { toast } from "@/hooks/use-toast";
 
-export const uploadImageToSupabase = async (file: File, path: string): Promise<string> => {
-  console.log('Uploading image to Supabase:', { fileName: file.name, fileSize: file.size });
-  
+export const uploadRegistrationDoc = async (
+  file: File,
+  eventId: string,
+  userId: string,
+  docType: 'photo' | 'registrarCert' | 'psaCopy'
+): Promise<string | null> => {
   try {
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${Math.random()}.${fileExt}`;
-    const filePath = `${fileName}`; // Simplified path
+    if (!file) return null;
 
-    console.log('Uploading to Supabase with path:', filePath);
-    
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${userId}_${docType}_${Math.random()}.${fileExt}`;
+    const filePath = `${eventId}/${fileName}`;
+
     const { data, error } = await supabase.storage
-      .from('events') // Changed from 'event-images' to 'events'
-      .upload(filePath, file);
+      .from('registration-docs')
+      .upload(filePath, file, {
+        upsert: true,
+      });
 
     if (error) {
-      console.error('Supabase upload error:', error);
-      throw error;
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: `Failed to upload ${docType}. Please try again.`,
+        variant: "destructive",
+      });
+      return null;
     }
 
-    console.log('Supabase upload successful:', data);
-
     const { data: { publicUrl } } = supabase.storage
-      .from('events') // Changed from 'event-images' to 'events'
+      .from('registration-docs')
       .getPublicUrl(filePath);
 
     return publicUrl;
   } catch (error) {
-    console.error('Error in uploadImageToSupabase:', error);
-    throw error;
+    console.error('Upload error:', error);
+    toast({
+      title: "Upload Error",
+      description: "An unexpected error occurred during upload.",
+      variant: "destructive",
+    });
+    return null;
   }
 };
 
-// Fallback to Firebase if needed
-export const uploadImageToFirebase = async (file: File, path: string): Promise<string> => {
-  console.log('Uploading image to Firebase:', { fileName: file.name, fileSize: file.size });
-  
+export const saveRegistrationDocs = async (
+  eventId: string,
+  userId: string,
+  urls: {
+    photo?: string;
+    registrarCert?: string;
+    psaCopy?: string;
+  }
+) => {
   try {
-    const storageRef = ref(storage, `${path}/${file.name}`);
-    const snapshot = await uploadBytes(storageRef, file);
-    const downloadURL = await getDownloadURL(snapshot.ref);
-    
-    console.log('Firebase upload successful:', downloadURL);
-    return downloadURL;
+    const { error } = await supabase
+      .from('registration_documents')
+      .insert({
+        event_id: eventId,
+        user_id: userId,
+        photo_url: urls.photo,
+        registrar_cert_url: urls.registrarCert,
+        psa_copy_url: urls.psaCopy,
+      });
+
+    if (error) throw error;
+
+    return true;
   } catch (error) {
-    console.error('Error in uploadImageToFirebase:', error);
-    throw error;
+    console.error('Error saving registration docs:', error);
+    toast({
+      title: "Error",
+      description: "Failed to save document references. Please try again.",
+      variant: "destructive",
+    });
+    return false;
   }
 };

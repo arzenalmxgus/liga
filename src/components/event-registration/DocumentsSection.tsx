@@ -1,47 +1,48 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
+import FileUploadField from "./FileUploadField";
 
 interface DocumentsSectionProps {
-  handleFileChange: (e: React.ChangeEvent<HTMLInputElement>, type: string) => void;
+  handleFileChange: (file: File | null, type: string) => void;
+  isUploading: boolean;
 }
 
-const DocumentsSection = ({ handleFileChange }: DocumentsSectionProps) => {
+const DocumentsSection = ({ handleFileChange, isUploading }: DocumentsSectionProps) => {
+  const [uploadProgress] = useState({
+    photo: 0,
+    registrarCert: 0,
+    psaCopy: 0,
+  });
+
   return (
     <div className="space-y-4">
       <h3 className="text-xl font-semibold text-white mb-4">Required Documents</h3>
-      <div>
-        <Label htmlFor="photo" className="text-white font-medium mb-2 block">Photo</Label>
-        <Input
-          id="photo"
-          type="file"
-          accept="image/*"
-          onChange={(e) => handleFileChange(e, 'photo')}
-          className="bg-white/10 text-white border-white/20"
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="registrarCert" className="text-white font-medium mb-2 block">Registrar's Certification</Label>
-        <Input
-          id="registrarCert"
-          type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={(e) => handleFileChange(e, 'registrarCert')}
-          className="bg-white/10 text-white border-white/20"
-          required
-        />
-      </div>
-      <div>
-        <Label htmlFor="psaCopy" className="text-white font-medium mb-2 block">PSA Copy</Label>
-        <Input
-          id="psaCopy"
-          type="file"
-          accept=".pdf,.doc,.docx"
-          onChange={(e) => handleFileChange(e, 'psaCopy')}
-          className="bg-white/10 text-white border-white/20"
-          required
-        />
-      </div>
+      
+      <FileUploadField
+        label="Photo"
+        id="photo"
+        accept="image/*"
+        onChange={(file) => handleFileChange(file, 'photo')}
+        isUploading={isUploading}
+        progress={uploadProgress.photo}
+      />
+      
+      <FileUploadField
+        label="Registrar's Certification"
+        id="registrarCert"
+        accept=".pdf,.doc,.docx"
+        onChange={(file) => handleFileChange(file, 'registrarCert')}
+        isUploading={isUploading}
+        progress={uploadProgress.registrarCert}
+      />
+      
+      <FileUploadField
+        label="PSA Copy"
+        id="psaCopy"
+        accept=".pdf,.doc,.docx"
+        onChange={(file) => handleFileChange(file, 'psaCopy')}
+        isUploading={isUploading}
+        progress={uploadProgress.psaCopy}
+      />
     </div>
   );
 };
