@@ -113,7 +113,7 @@ const LoginForm = () => {
   return (
     <form onSubmit={handleLogin} className="w-full max-w-md mx-auto">
       <CardHeader className="space-y-3">
-        <CardTitle className="text-3xl font-bold text-center text-white">Login to EventHub</CardTitle>
+        <CardTitle className="text-3xl font-bold text-center text-white">Login to Liga</CardTitle>
         <CardDescription className="text-center text-gray-300 text-lg">
           Welcome back! Please log in to continue
         </CardDescription>
@@ -164,7 +164,7 @@ const LoginForm = () => {
         <p className="text-sm text-center text-gray-400">
           Don't have an account?{" "}
           <a href="#" className="text-white hover:text-[#1DB954] underline transition-colors duration-300">
-            Sign up for EventHub
+            Sign up for Liga
           </a>
         </p>
       </CardFooter>
