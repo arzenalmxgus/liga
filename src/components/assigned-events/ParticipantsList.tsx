@@ -29,47 +29,49 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
         console.log("Processing participant data:", participantData);
         
         try {
-          // Get user profile data
-          const userProfileRef = collection(db, 'profiles');
-          const userProfileQuery = query(userProfileRef, where('userId', '==', participantData.userId));
-          const userProfileSnapshot = await getDocs(userProfileQuery);
+          // Get user profile data directly using userId as document ID
+          const userProfileDoc = await getDocs(doc(db, 'profiles', participantData.userId));
           
-          if (!userProfileSnapshot.empty) {
-            const profile = userProfileSnapshot.docs[0].data();
-            console.log("Found profile data for user:", participantData.userId, profile);
-            
-            let registrationDate;
-            try {
-              if (participantData.registrationDate?.toDate) {
-                registrationDate = participantData.registrationDate.toDate();
-              } else if (typeof participantData.registrationDate === 'string') {
-                registrationDate = new Date(participantData.registrationDate);
-              } else {
-                registrationDate = new Date();
-              }
-            } catch (error) {
-              console.error("Error processing registration date:", error);
+          console.log("Checking profile for userId:", participantData.userId);
+          
+          let profile = null;
+          if (userProfileDoc.exists()) {
+            profile = userProfileDoc.data();
+            console.log("Found profile:", profile);
+          } else {
+            console.log("No profile document found, using participant data only");
+          }
+          
+          let registrationDate;
+          try {
+            if (participantData.registrationDate?.toDate) {
+              registrationDate = participantData.registrationDate.toDate();
+            } else if (participantData.registrationDate) {
+              registrationDate = new Date(participantData.registrationDate);
+            } else {
               registrationDate = new Date();
             }
-
-            const participantInfo = {
-              id: participantDoc.id,
-              status: participantData.status || 'pending',
-              displayName: profile.displayName || participantData.name || 'Anonymous',
-              email: profile.email || participantData.email || 'No email provided',
-              registrationDate,
-              age: participantData.age || 'N/A',
-              nationality: participantData.nationality || 'N/A',
-              dateOfBirth: participantData.dateOfBirth || 'N/A',
-              userId: participantData.userId,
-              eventId: participantData.eventId,
-            };
-            
-            console.log("Adding participant info:", participantInfo);
-            participantsData.push(participantInfo);
-          } else {
-            console.log("No profile found for user:", participantData.userId);
+          } catch (error) {
+            console.error("Error processing registration date:", error);
+            registrationDate = new Date();
           }
+
+          const participantInfo = {
+            id: participantDoc.id,
+            status: participantData.status || 'pending',
+            displayName: profile?.displayName || participantData.name || 'Anonymous',
+            email: profile?.email || participantData.email || 'No email provided',
+            registrationDate,
+            age: participantData.age || 'N/A',
+            nationality: participantData.nationality || 'N/A',
+            dateOfBirth: participantData.dateOfBirth || 'N/A',
+            userId: participantData.userId,
+            eventId: participantData.eventId,
+          };
+          
+          console.log("Adding participant info to list:", participantInfo);
+          participantsData.push(participantInfo);
+          
         } catch (error) {
           console.error("Error processing participant:", error);
           toast({
