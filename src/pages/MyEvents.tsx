@@ -9,9 +9,21 @@ import { Plus } from "lucide-react";
 import CreateEventForm from "@/components/CreateEventForm";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Database } from "@/lib/database.types";
 
-type Event = Database['public']['Tables']['events']['Row'];
+interface Event {
+  id: string;
+  title: string;
+  date: string;
+  location: string;
+  category: string;
+  participantsLimit: number;
+  currentParticipants: number;
+  bannerPhoto: string;
+  description: string;
+  entranceFee: number | null;
+  isFree: boolean;
+  hostId: string;
+}
 
 const MyEvents = () => {
   const { user } = useAuth();
@@ -21,8 +33,9 @@ const MyEvents = () => {
   const { data: events, isLoading, refetch } = useQuery({
     queryKey: ['host-events', user?.uid],
     queryFn: async () => {
+      if (!user?.uid) return [];
       const eventsRef = collection(db, 'events');
-      const q = query(eventsRef, where('host_id', '==', user?.uid));
+      const q = query(eventsRef, where('hostId', '==', user.uid));
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
@@ -34,16 +47,22 @@ const MyEvents = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen p-6">
-        <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-700/50 rounded w-1/4"></div>
-          <div className="h-4 bg-gray-700/50 rounded w-2/4"></div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-96 bg-gray-700/50 rounded-lg"></div>
-            ))}
+      <div className="min-h-screen">
+        <main className="md:ml-16 pb-16 md:pb-0">
+          <header className="p-6 border-b border-gray-800">
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-gray-700/50 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-700/50 rounded w-2/4"></div>
+            </div>
+          </header>
+          <div className="p-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-96 bg-gray-700/50 rounded-lg"></div>
+              ))}
+            </div>
           </div>
-        </div>
+        </main>
       </div>
     );
   }
@@ -92,17 +111,17 @@ const MyEvents = () => {
                 date={event.date}
                 location={event.location}
                 category={event.category}
-                participants_limit={event.participants_limit}
-                current_participants={event.current_participants}
-                banner_photo={event.banner_photo}
-                description={event.description || ''}
-                entrance_fee={event.entrance_fee}
-                is_free={event.is_free}
-                hostId={event.host_id}
+                participants_limit={event.participantsLimit}
+                current_participants={event.currentParticipants}
+                banner_photo={event.bannerPhoto}
+                description={event.description}
+                entrance_fee={event.entranceFee}
+                is_free={event.isFree}
+                hostId={event.hostId}
                 isHost={true}
               />
             ))}
-            {events?.length === 0 && (
+            {(!events || events.length === 0) && (
               <div className="col-span-full text-center py-12">
                 <p className="text-gray-400">
                   You haven't created any events yet. Click the "Create Event" button to get started.
