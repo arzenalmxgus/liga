@@ -22,6 +22,7 @@ interface EventCardProps {
   is_free: boolean;
   hostId: string;
   isHost?: boolean;
+  registrationStatus?: string;
 }
 
 const EventCard = ({ 
@@ -37,7 +38,8 @@ const EventCard = ({
   entrance_fee,
   is_free,
   hostId,
-  isHost
+  isHost,
+  registrationStatus
 }: EventCardProps) => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const navigate = useNavigate();
@@ -86,6 +88,17 @@ const EventCard = ({
           <div className="absolute top-4 right-4 bg-accent/90 backdrop-blur-sm px-3 py-1.5 rounded-full text-sm font-semibold text-white shadow-lg">
             {category}
           </div>
+          {registrationStatus && (
+            <div className={`absolute top-4 left-4 px-3 py-1.5 rounded-full text-sm font-semibold shadow-lg ${
+              registrationStatus === 'approved' 
+                ? 'bg-green-500/90 text-white' 
+                : registrationStatus === 'pending'
+                ? 'bg-yellow-500/90 text-white'
+                : 'bg-red-500/90 text-white'
+            }`}>
+              {registrationStatus.charAt(0).toUpperCase() + registrationStatus.slice(1)}
+            </div>
+          )}
         </div>
         <div className="p-6 space-y-4 bg-gradient-to-b from-gray-900/90 to-gray-900/95">
           <h3 className="text-xl font-semibold mb-2 text-white">{title}</h3>
