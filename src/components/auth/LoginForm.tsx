@@ -111,45 +111,45 @@ const LoginForm = () => {
   };
 
   return (
-    <form onSubmit={handleLogin}>
-      <CardHeader>
-        <CardTitle className="text-2xl font-semibold text-center text-white">Login</CardTitle>
-        <CardDescription className="text-center text-gray-300">
+    <form onSubmit={handleLogin} className="w-full max-w-md mx-auto">
+      <CardHeader className="space-y-3">
+        <CardTitle className="text-3xl font-bold text-center text-white">Login to EventHub</CardTitle>
+        <CardDescription className="text-center text-gray-300 text-lg">
           Welcome back! Please log in to continue
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4 px-8">
+      <CardContent className="space-y-6 px-8">
         <div className="space-y-2">
-          <Label htmlFor="email" className="text-white">Email</Label>
+          <Label htmlFor="email" className="text-sm font-medium text-gray-300">Email address</Label>
           <Input
             id="email"
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="bg-black/20 text-white placeholder:text-gray-400"
+            className="h-12 bg-[#282828] border-0 text-white focus:ring-2 focus:ring-[#1DB954] placeholder:text-gray-500"
             disabled={isLoading}
-            placeholder="Enter your email"
+            placeholder="name@example.com"
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="password" className="text-white">Password</Label>
+          <Label htmlFor="password" className="text-sm font-medium text-gray-300">Password</Label>
           <Input
             id="password"
             type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="bg-black/20 text-white placeholder:text-gray-400"
+            className="h-12 bg-[#282828] border-0 text-white focus:ring-2 focus:ring-[#1DB954] placeholder:text-gray-500"
             disabled={isLoading}
-            placeholder="Enter your password"
+            placeholder="••••••••"
           />
         </div>
       </CardContent>
-      <CardFooter className="px-8 pb-8">
+      <CardFooter className="flex flex-col space-y-4 px-8 pb-8">
         <Button 
           type="submit" 
-          className="w-full h-12 text-base bg-primary hover:bg-primary/90 rounded-lg text-white"
+          className="w-full h-12 text-base font-semibold bg-[#1DB954] hover:bg-[#1ed760] transition-colors duration-300 rounded-full"
           disabled={isLoading}
         >
           {isLoading ? (
@@ -158,9 +158,15 @@ const LoginForm = () => {
               Logging in...
             </>
           ) : (
-            "Login"
+            "Log In"
           )}
         </Button>
+        <p className="text-sm text-center text-gray-400">
+          Don't have an account?{" "}
+          <a href="#" className="text-white hover:text-[#1DB954] underline transition-colors duration-300">
+            Sign up for EventHub
+          </a>
+        </p>
       </CardFooter>
     </form>
   );

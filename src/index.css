@@ -24,7 +24,7 @@
   }
   body {
     @apply text-foreground;
-    background-image: url('/lovable-uploads/5254e291-c462-4e78-88cd-1bf62f2050ac.png');
+    background: linear-gradient(to bottom, #1DB954, #121212);
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
