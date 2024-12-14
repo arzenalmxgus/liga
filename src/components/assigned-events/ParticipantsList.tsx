@@ -36,29 +36,39 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
           
           if (!userProfileSnapshot.empty) {
             const profile = userProfileSnapshot.docs[0].data();
-            console.log("Found profile data:", profile);
+            console.log("Found profile data for user:", participantData.userId, profile);
             
             let registrationDate;
-            if (participantData.registrationDate?.toDate) {
-              registrationDate = participantData.registrationDate.toDate();
-            } else if (typeof participantData.registrationDate === 'string') {
-              registrationDate = new Date(participantData.registrationDate);
-            } else {
+            try {
+              if (participantData.registrationDate?.toDate) {
+                registrationDate = participantData.registrationDate.toDate();
+              } else if (typeof participantData.registrationDate === 'string') {
+                registrationDate = new Date(participantData.registrationDate);
+              } else {
+                registrationDate = new Date();
+              }
+            } catch (error) {
+              console.error("Error processing registration date:", error);
               registrationDate = new Date();
             }
 
-            participantsData.push({
+            const participantInfo = {
               id: participantDoc.id,
               status: participantData.status || 'pending',
-              displayName: profile.displayName || 'Anonymous',
-              email: profile.email || 'No email provided',
+              displayName: profile.displayName || participantData.name || 'Anonymous',
+              email: profile.email || participantData.email || 'No email provided',
               registrationDate,
               age: participantData.age || 'N/A',
               nationality: participantData.nationality || 'N/A',
               dateOfBirth: participantData.dateOfBirth || 'N/A',
               userId: participantData.userId,
               eventId: participantData.eventId,
-            });
+            };
+            
+            console.log("Adding participant info:", participantInfo);
+            participantsData.push(participantInfo);
+          } else {
+            console.log("No profile found for user:", participantData.userId);
           }
         } catch (error) {
           console.error("Error processing participant:", error);
@@ -90,7 +100,6 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
         participants={participants}
         onStatusUpdate={async (participantId: string, newStatus: 'approved' | 'rejected', message?: string) => {
           try {
-            // Update participant status
             const participantRef = doc(db, 'event_participants', participantId);
             await updateDoc(participantRef, {
               status: newStatus,
