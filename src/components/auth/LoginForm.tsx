@@ -16,13 +16,40 @@ const LoginForm = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  const validateInputs = () => {
+    if (!email.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter your email address",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    if (!password.trim()) {
+      toast({
+        title: "Error",
+        description: "Please enter your password",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!validateInputs()) {
+      return;
+    }
+
     setIsLoading(true);
+    console.log('Attempting login with email:', email);
 
     try {
-      console.log('Login attempt with email:', email);
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email.trim(), password);
       console.log('Login successful for user:', userCredential.user.uid);
       
       toast({
@@ -37,7 +64,6 @@ const LoginForm = () => {
       
       let errorMessage = "Failed to log in. Please try again.";
       
-      // Handle specific Firebase auth errors
       switch (error.code) {
         case "auth/invalid-login-credentials":
           errorMessage = "Invalid email or password. Please check your credentials and try again.";
