@@ -33,18 +33,30 @@ const MyEvents = () => {
   });
 
   if (isLoading) {
-    return <div className="p-6 text-white">Loading events...</div>;
+    return (
+      <div className="min-h-screen p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-700/50 rounded w-1/4"></div>
+          <div className="h-4 bg-gray-700/50 rounded w-2/4"></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-96 bg-gray-700/50 rounded-lg"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen">
-      <header className="p-6 border-b border-gray-800">
-        <h1 className="text-2xl font-bold text-white">My Events</h1>
-        <p className="text-gray-400 mt-1">Manage your created events</p>
-      </header>
-      
-      <div className="p-6">
-        <div className="flex justify-end mb-6">
+      <div className="p-6 space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h1 className="text-2xl font-bold text-white">My Events</h1>
+            <p className="text-gray-400 mt-1">Manage your created events</p>
+          </div>
+          
           <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
             <DialogTrigger asChild>
               <Button className="gap-2 bg-white/20 hover:bg-white/30 text-white">
@@ -88,9 +100,11 @@ const MyEvents = () => {
             />
           ))}
           {events?.length === 0 && (
-            <p className="text-gray-400 col-span-full text-center py-12">
-              You haven't created any events yet. Click the "Create Event" button to get started.
-            </p>
+            <div className="col-span-full text-center py-12">
+              <p className="text-gray-400">
+                You haven't created any events yet. Click the "Create Event" button to get started.
+              </p>
+            </div>
           )}
         </div>
       </div>
