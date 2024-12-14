@@ -11,6 +11,7 @@ import Profile from "./pages/Profile";
 import Events from "./pages/Events";
 import MyEvents from "./pages/MyEvents";
 import JoinedEvents from "./pages/JoinedEvents";
+import Notifications from "./pages/Notifications";
 import { useAuth } from "./contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc } from "firebase/firestore";
@@ -72,6 +73,11 @@ const App = () => {
                     <Route path="/joined-events" element={
                       <ProtectedRoute allowedRoles={['attendee']}>
                         <JoinedEvents />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="/notifications" element={
+                      <ProtectedRoute allowedRoles={['attendee']}>
+                        <Notifications />
                       </ProtectedRoute>
                     } />
                     <Route path="/events-assigned" element={

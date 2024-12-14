@@ -1,4 +1,4 @@
-import { Calendar, User, LogIn, Search, Home } from "lucide-react";
+import { Calendar, User, LogIn, Bell, Home } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
@@ -44,7 +44,7 @@ const Navigation = () => {
     );
   }
 
-  // Host navigation - Home, Events, My Events, Profile
+  // Host navigation
   if (profile?.role === 'host') {
     return (
       <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
@@ -79,7 +79,7 @@ const Navigation = () => {
     );
   }
 
-  // Coach navigation - Home, Events Assigned, Profile
+  // Coach navigation
   if (profile?.role === 'coach') {
     return (
       <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
@@ -108,7 +108,7 @@ const Navigation = () => {
     );
   }
 
-  // Attendee navigation - Home, Events, Joined Events, Profile
+  // Attendee navigation
   return (
     <nav className="fixed bottom-0 left-0 w-full bg-black/20 backdrop-blur-sm border-t border-gray-800 md:top-0 md:h-screen md:w-16 md:border-r md:border-t-0">
       <div className="flex justify-around md:flex-col md:h-full md:justify-start md:pt-8">
@@ -129,6 +129,12 @@ const Navigation = () => {
           to="/joined-events" 
           label="Joined" 
           isActive={location.pathname === "/joined-events"} 
+        />
+        <NavItem 
+          icon={<Bell className="text-white" />} 
+          to="/notifications" 
+          label="Notifications" 
+          isActive={location.pathname === "/notifications"} 
         />
         <NavItem 
           icon={<User className="text-white" />} 
