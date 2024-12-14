@@ -21,7 +21,7 @@ service cloud.firestore {
 
     // Events collection
     match /events/{eventId} {
-      allow read: if true;  // Keep public read access as in original rules
+      allow read: if true;
       allow create: if isAuthenticated();
       allow update, delete: if isAuthenticated() && (isEventHost(resource.data) || isCoach());
     }
@@ -29,14 +29,14 @@ service cloud.firestore {
     // Event participants collection
     match /event_participants/{participantId} {
       allow read: if isAuthenticated();
-      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow create: if isAuthenticated();
       allow update: if isAuthenticated() && (
-        isEventHost(get(/databases/$(database)/documents/events/$(request.resource.data.eventId)).data) ||
+        isEventHost(get(/databases/$(database)/documents/events/$(resource.data.eventId)).data) ||
         isOwner(resource.data.userId) ||
-        isCoach()  // Allow coaches to update participant status
+        isCoach()
       );
       allow delete: if isAuthenticated() && (
-        isEventHost(get(/databases/$(database)/documents/events/$(request.resource.data.eventId)).data) ||
+        isEventHost(get(/databases/$(database)/documents/events/$(resource.data.eventId)).data) ||
         isOwner(resource.data.userId)
       );
     }
@@ -47,10 +47,7 @@ service cloud.firestore {
         isOwner(resource.data.userId) ||
         isCoach()
       );
-      allow create: if isAuthenticated() && (
-        isOwner(request.resource.data.userId) ||
-        isCoach()  // Allow coaches to create notifications
-      );
+      allow create: if isAuthenticated();
       allow update: if isAuthenticated() && (
         isOwner(resource.data.userId) ||
         isCoach()
@@ -63,8 +60,8 @@ service cloud.firestore {
 
     // Profiles collection
     match /profiles/{userId} {
-      allow read: if isAuthenticated();  // Everyone can read profiles
-      allow write: if isAuthenticated() && isOwner(userId);
+      allow read: if isAuthenticated();
+      allow write: if isAuthenticated() && (isOwner(userId) || isCoach());
     }
   }
 }

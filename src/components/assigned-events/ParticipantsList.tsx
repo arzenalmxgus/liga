@@ -55,27 +55,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
               nationality: participantData.nationality || 'N/A',
               dateOfBirth: participantData.dateOfBirth || 'N/A',
               userId: participantData.userId,
-            });
-          } else {
-            let registrationDate;
-            if (participantData.registrationDate?.toDate) {
-              registrationDate = participantData.registrationDate.toDate();
-            } else if (typeof participantData.registrationDate === 'string') {
-              registrationDate = new Date(participantData.registrationDate);
-            } else {
-              registrationDate = new Date();
-            }
-
-            participantsData.push({
-              id: participantDoc.id,
-              status: participantData.status || 'pending',
-              displayName: participantData.name || 'Anonymous',
-              email: participantData.email || 'No email provided',
-              registrationDate,
-              age: participantData.age || 'N/A',
-              nationality: participantData.nationality || 'N/A',
-              dateOfBirth: participantData.dateOfBirth || 'N/A',
-              userId: participantData.userId,
+              eventId: participantData.eventId,
             });
           }
         } catch (error) {
@@ -88,7 +68,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
     enabled: !!eventId,
   });
 
-  const handleStatusUpdate = async (participantId: string, newStatus: 'approved' | 'rejected') => {
+  const handleStatusUpdate = async (participantId: string, newStatus: 'approved' | 'rejected', message?: string) => {
     if (!user) {
       toast({
         title: "Error",
@@ -99,7 +79,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
     }
 
     try {
-      // Update participant status
+      // Get participant data
       const participantRef = doc(db, 'event_participants', participantId);
       const participantSnap = await getDoc(participantRef);
       
@@ -109,21 +89,27 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
 
       const participantData = participantSnap.data();
 
-      // Update the status in event_participants collection
+      // Update participant status
       await updateDoc(participantRef, {
         status: newStatus,
         updatedAt: serverTimestamp(),
-        updatedBy: user.uid
+        updatedBy: user.uid,
+        rejectionMessage: newStatus === 'rejected' ? message : null
       });
 
-      // Create a notification document
+      // Create notification
+      const notificationMessage = newStatus === 'approved'
+        ? "Your registration has been approved! You are now registered for the event."
+        : `Your registration has been rejected. Reason: ${message}`;
+
       await addDoc(collection(db, 'notifications'), {
         userId: participantData.userId,
         eventId: eventId,
         type: 'registration_status',
         status: newStatus,
-        message: `Your registration has been ${newStatus}`,
+        message: notificationMessage,
         createdAt: serverTimestamp(),
+        createdBy: user.uid,
         read: false
       });
 
@@ -137,11 +123,10 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
     } catch (error) {
       console.error("Error updating status:", error);
       
-      // More specific error messages based on the error type
       let errorMessage = "Failed to update participant status. Please try again.";
       if (error instanceof Error) {
         if (error.message.includes("permission-denied")) {
-          errorMessage = "You don't have permission to perform this action.";
+          errorMessage = "You don't have permission to perform this action. Make sure your profile has the coach role.";
         } else if (error.message.includes("not-found")) {
           errorMessage = "Participant record not found.";
         }
