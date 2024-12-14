@@ -81,7 +81,15 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Validate required fields based on whether additional info is required
+    if (!userId) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to register for this event",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const requiredFields = requiresAdditionalInfo 
       ? Object.values(formData)
       : [formData.name, formData.dateOfBirth, formData.age, formData.nationality];
@@ -101,6 +109,24 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
     setLoading(true);
 
     try {
+      // Check if user is already registered
+      const registrationsRef = collection(db, "event_participants");
+      const existingRegQuery = query(
+        registrationsRef,
+        where("eventId", "==", eventId),
+        where("userId", "==", userId)
+      );
+      const existingRegDocs = await getDocs(existingRegQuery);
+
+      if (!existingRegDocs.empty) {
+        toast({
+          title: "Already Registered",
+          description: "You have already registered for this event.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       let uploadedFiles = {};
       
       if (requiresAdditionalInfo) {
@@ -120,11 +146,15 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
         ...uploadedFiles,
         eventId,
         userId,
+        status: 'pending',
         registrationDate: new Date().toISOString(),
       };
 
       await addDoc(collection(db, "event_participants"), registrationData);
-      await updateDoc(doc(db, "events", eventId), {
+      
+      // Update event participants count
+      const eventRef = doc(db, "events", eventId);
+      await updateDoc(eventRef, {
         currentParticipants: increment(1)
       });
 

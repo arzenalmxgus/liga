@@ -99,17 +99,25 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
       }
 
       const eventData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        category: formData.category,
         date: date.toISOString(),
         bannerPhoto: downloadURL,
         hostId: user.uid,
         coachId: selectedCoachId === "no_coach" ? null : selectedCoachId,
         createdAt: new Date().toISOString(),
+        participantsLimit: parseInt(formData.participantsLimit) || 0,
         currentParticipants: 0,
+        entranceFee: formData.isFree === "true" ? 0 : parseFloat(formData.entranceFee) || 0,
+        isFree: formData.isFree === "true",
         requiresAdditionalInfo: requireAdditionalInfo,
+        status: 'active'
       };
 
-      await addDoc(collection(db, "events"), eventData);
+      const docRef = await addDoc(collection(db, "events"), eventData);
+      console.log("Event created with ID:", docRef.id);
 
       toast({
         title: "Success",
