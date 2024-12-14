@@ -6,7 +6,7 @@ import PersonalInfoSection from "./PersonalInfoSection";
 import AcademicInfoSection from "./AcademicInfoSection";
 import DocumentsSection from "./DocumentsSection";
 import { useQuery } from "@tanstack/react-query";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { 
   checkExistingRegistration, 
@@ -86,6 +86,15 @@ const EventRegistrationForm = ({
   };
 
   const validateForm = () => {
+    if (!userId) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to register for this event",
+        variant: "destructive",
+      });
+      return false;
+    }
+
     const requiredFields = requiresAdditionalInfo 
       ? Object.values(formData)
       : [formData.name, formData.dateOfBirth, formData.age, formData.nationality];
@@ -107,41 +116,24 @@ const EventRegistrationForm = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!userId) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to register for this event",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!validateForm()) return;
 
     setLoading(true);
 
     try {
-      // Check if user is already registered using a unique registration ID
-      const registrationId = `${userId}_${eventId}`;
-      const isRegistered = await checkExistingRegistration(registrationId);
+      // Create a unique registration ID
+      const registrationId = `${eventId}_${userId}`;
       
-      if (isRegistered) {
-        toast({
-          title: "Already Registered",
-          description: "You have already registered for this event.",
-          variant: "destructive",
-        });
-        return;
-      }
+      // Try to create the registration document directly
+      await setDoc(doc(db, "event_participants", registrationId), {
+        ...formData,
+        eventId,
+        userId,
+        status: 'pending',
+        registrationDate: new Date().toISOString(),
+      });
 
-      // Upload files if required
-      const uploadedFiles = requiresAdditionalInfo 
-        ? await uploadRegistrationFiles(files, eventId)
-        : {};
-
-      // Submit registration with the unique registration ID
-      await submitRegistration(formData, uploadedFiles, eventId, userId, registrationId);
-
+      // If we get here, the registration was successful
       toast({
         title: "Success",
         description: "Registration submitted successfully",
@@ -152,11 +144,7 @@ const EventRegistrationForm = ({
       let errorMessage = "Failed to submit registration.";
       
       if (error.code === "permission-denied") {
-        errorMessage = "You don't have permission to register for this event. Please make sure you're logged in with the correct account.";
-      } else if (error.code === "not-found") {
-        errorMessage = "Event not found or has been removed.";
-      } else if (error.code === "already-exists") {
-        errorMessage = "You have already registered for this event.";
+        errorMessage = "You don't have permission to register. Please ensure you're logged in as an attendee.";
       }
       
       toast({
