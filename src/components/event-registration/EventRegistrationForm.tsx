@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, updateDoc, doc, increment, getDoc } from "firebase/firestore";
+import { collection, addDoc, updateDoc, doc, increment, getDoc, query, where, getDocs } from "firebase/firestore";
 import { uploadImageToSupabase } from "@/utils/uploadUtils";
 import { Loader2 } from "lucide-react";
 import PersonalInfoSection from "./PersonalInfoSection";
