@@ -1,6 +1,6 @@
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery } from "@tanstack/react-query";
-import { collection, query, where, getDocs } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import EventCard from "@/components/EventCard";
 import { useToast } from "@/hooks/use-toast";
@@ -32,18 +32,16 @@ const JoinedEvents = () => {
         const eventIds = registrationsSnapshot.docs.map(doc => doc.data().eventId);
         console.log('Found event IDs:', eventIds);
 
-        // Then fetch each event individually since 'in' queries are limited
+        // Then fetch each event using doc() reference
         const events = [];
         for (const eventId of eventIds) {
-          const eventRef = collection(db, 'events');
-          const eventQuery = query(eventRef, where('id', '==', eventId));
-          const eventSnapshot = await getDocs(eventQuery);
+          const eventDoc = doc(db, 'events', eventId);
+          const eventSnapshot = await getDoc(eventDoc);
           
-          if (!eventSnapshot.empty) {
-            const eventData = eventSnapshot.docs[0].data();
+          if (eventSnapshot.exists()) {
             events.push({
-              id: eventId,
-              ...eventData
+              id: eventSnapshot.id,
+              ...eventSnapshot.data()
             });
           }
         }
