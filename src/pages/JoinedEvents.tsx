@@ -14,46 +14,40 @@ const JoinedEvents = () => {
     queryFn: async () => {
       if (!user?.uid) return [];
       
-      try {
-        // First, get all event registrations for the user
-        const registrationsRef = collection(db, 'event_participants');
-        const registrationsQuery = query(
-          registrationsRef, 
-          where('userId', '==', user.uid)
-        );
-        const registrationsSnapshot = await getDocs(registrationsQuery);
-        
-        if (registrationsSnapshot.empty) {
-          console.log('No registered events found for user');
-          return [];
-        }
-
-        // Get all the event IDs from registrations
-        const eventIds = registrationsSnapshot.docs.map(doc => doc.data().eventId);
-        console.log('Found event IDs:', eventIds);
-
-        // Then fetch each event using doc() reference
-        const events = [];
-        for (const eventId of eventIds) {
-          const eventDoc = doc(db, 'events', eventId);
-          const eventSnapshot = await getDoc(eventDoc);
-          
-          if (eventSnapshot.exists()) {
-            events.push({
-              id: eventSnapshot.id,
-              ...eventSnapshot.data()
-            });
-          }
-        }
-
-        console.log('Retrieved events:', events);
-        return events;
-      } catch (error) {
-        console.error('Error in queryFn:', error);
-        throw error;
+      // Get all event registrations for the user
+      const registrationsRef = collection(db, 'event_participants');
+      const registrationsQuery = query(
+        registrationsRef, 
+        where('userId', '==', user.uid)
+      );
+      
+      const registrationsSnapshot = await getDocs(registrationsQuery);
+      
+      if (registrationsSnapshot.empty) {
+        return [];
       }
+
+      // Get all the events data
+      const events = await Promise.all(
+        registrationsSnapshot.docs.map(async (registration) => {
+          const eventId = registration.data().eventId;
+          const eventDoc = await getDoc(doc(db, 'events', eventId));
+          
+          if (eventDoc.exists()) {
+            return {
+              id: eventDoc.id,
+              ...eventDoc.data()
+            };
+          }
+          return null;
+        })
+      );
+
+      // Filter out any null values from events that might not exist
+      return events.filter(event => event !== null);
     },
     enabled: !!user,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
     meta: {
       onError: (error: Error) => {
         console.error('Error fetching joined events:', error);
@@ -91,13 +85,13 @@ const JoinedEvents = () => {
                 date={event.date}
                 location={event.location}
                 category={event.category}
+                participants={event.current_participants || 0}
                 participants_limit={event.participants_limit}
-                current_participants={event.current_participants}
-                banner_photo={event.banner_photo}
+                image={event.banner_photo || event.image}
                 description={event.description}
                 entrance_fee={event.entrance_fee}
                 is_free={event.is_free}
-                hostId={event.host_id}
+                hostId={event.hostId || event.host_id}
               />
             ))
           ) : (
