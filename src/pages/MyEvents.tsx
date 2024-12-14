@@ -39,7 +39,7 @@ const MyEvents = () => {
   return (
     <div className="space-y-6 p-6">
       <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-bold text-white">My Events</h1>
+        <h1 className="text-3xl font-bold text-white mb-6">My Events</h1>
         <Dialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen}>
           <DialogTrigger asChild>
             <Button className="gap-2 bg-white/20 hover:bg-white/30 text-white">
