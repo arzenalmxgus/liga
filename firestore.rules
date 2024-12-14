@@ -16,7 +16,7 @@ service cloud.firestore {
     }
 
     function isCoach() {
-      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.user_role == 'coach';
+      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.role == 'coach';
     }
 
     // Events collection
