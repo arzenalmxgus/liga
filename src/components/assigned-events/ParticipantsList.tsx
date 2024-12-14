@@ -36,6 +36,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
           
           if (!userProfileSnapshot.empty) {
             const profile = userProfileSnapshot.docs[0].data();
+            console.log("Found profile data:", profile);
             
             let registrationDate;
             if (participantData.registrationDate?.toDate) {
@@ -49,8 +50,8 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
             participantsData.push({
               id: participantDoc.id,
               status: participantData.status || 'pending',
-              displayName: participantData.name || profile.displayName || 'Anonymous',
-              email: profile.email || participantData.email || 'No email provided',
+              displayName: profile.displayName || 'Anonymous',
+              email: profile.email || 'No email provided',
               registrationDate,
               age: participantData.age || 'N/A',
               nationality: participantData.nationality || 'N/A',
@@ -69,6 +70,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
         }
       }
       
+      console.log("Final participants data:", participantsData);
       return participantsData;
     },
     enabled: !!eventId,
