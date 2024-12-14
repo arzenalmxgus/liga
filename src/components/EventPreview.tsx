@@ -1,17 +1,16 @@
 import { Dialog, DialogContent } from "./ui/dialog";
-import { Button } from "./ui/button";
 import { useAuth } from "@/contexts/AuthContext";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { collection, query, where, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 import EventHeader from "./event-preview/EventHeader";
 import EventImage from "./event-preview/EventImage";
 import EventDetails from "./event-preview/EventDetails";
 import ParticipantsList from "./event-preview/ParticipantsList";
-import { useToast } from "@/hooks/use-toast";
 import RegistrationSection from "./event-preview/RegistrationSection";
-import RegistrationButton from "./event-preview/RegistrationButton";
+import EventActions from "./event-preview/EventActions";
 
 interface EventPreviewProps {
   isOpen: boolean;
@@ -30,7 +29,6 @@ interface EventPreviewProps {
     is_free: boolean;
     hostId: string;
   };
-  isHost?: boolean;
 }
 
 const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
@@ -40,7 +38,6 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
   const isHost = user?.uid === event.hostId;
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
-  // Query to check if user is registered
   const { data: isRegistered } = useQuery({
     queryKey: ['event-registration', event.id, user?.uid],
     queryFn: async () => {
@@ -88,43 +85,6 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
     },
     enabled: isHost && isOpen,
   });
-
-  const handleUnregister = async () => {
-    if (!user?.uid) return;
-
-    try {
-      const registrationsRef = collection(db, 'event_participants');
-      const q = query(
-        registrationsRef,
-        where('eventId', '==', event.id),
-        where('userId', '==', user.uid)
-      );
-      const snapshot = await getDocs(q);
-
-      if (!snapshot.empty) {
-        await deleteDoc(snapshot.docs[0].ref);
-        
-        toast({
-          title: "Success",
-          description: "You have successfully unregistered from this event.",
-        });
-
-        // Invalidate relevant queries
-        queryClient.invalidateQueries({ queryKey: ['event-registration'] });
-        queryClient.invalidateQueries({ queryKey: ['joined-events'] });
-        queryClient.invalidateQueries({ queryKey: ['events'] });
-        
-        onClose();
-      }
-    } catch (error) {
-      console.error('Error unregistering from event:', error);
-      toast({
-        title: "Error",
-        description: "Failed to unregister from the event. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleRegistrationSuccess = () => {
     setShowRegistrationForm(false);
@@ -198,29 +158,15 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
                   <p className="text-sm leading-relaxed text-white">{event.description}</p>
                 </div>
 
-                <div className="flex gap-4">
-                  {!isHost && !isRegistered && (
-                    <RegistrationButton
-                      isHost={isHost}
-                      isFull={participants?.length >= event.participants_limit}
-                      onRegister={() => setShowRegistrationForm(true)}
-                    />
-                  )}
-                  {!isHost && isRegistered && (
-                    <Button 
-                      onClick={handleUnregister}
-                      variant="destructive"
-                      className="flex-1"
-                    >
-                      Unregister from Event
-                    </Button>
-                  )}
-                  {isHost && (
-                    <Button onClick={handleDeleteEvent} variant="destructive">
-                      Delete Event
-                    </Button>
-                  )}
-                </div>
+                <EventActions 
+                  eventId={event.id}
+                  isHost={isHost}
+                  isRegistered={!!isRegistered}
+                  isFull={participants?.length >= event.participants_limit}
+                  onRegister={() => setShowRegistrationForm(true)}
+                  onClose={onClose}
+                  onDelete={handleDeleteEvent}
+                />
               </div>
             </div>
 
