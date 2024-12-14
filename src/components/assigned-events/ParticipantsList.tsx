@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import ParticipantsTable from "./participants/ParticipantsTable";
@@ -53,6 +53,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
               age: participantData.age || 'N/A',
               nationality: participantData.nationality || 'N/A',
               dateOfBirth: participantData.dateOfBirth || 'N/A',
+              userId: participantData.userId,
             });
           } else {
             // Handle case where profile is not found
@@ -74,6 +75,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
               age: participantData.age || 'N/A',
               nationality: participantData.nationality || 'N/A',
               dateOfBirth: participantData.dateOfBirth || 'N/A',
+              userId: participantData.userId,
             });
           }
         } catch (error) {
@@ -89,7 +91,27 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
   const handleStatusUpdate = async (participantId: string, newStatus: 'approved' | 'rejected') => {
     try {
       const participantRef = doc(db, 'event_participants', participantId);
-      await updateDoc(participantRef, { status: newStatus });
+      const participantDoc = await getDoc(participantRef);
+      const participantData = participantDoc.data();
+      
+      await updateDoc(participantRef, { 
+        status: newStatus,
+        visible: newStatus === 'approved' // Set visibility based on status
+      });
+      
+      // Create notification in Firestore
+      const notificationsRef = collection(db, 'notifications');
+      await addDoc(notificationsRef, {
+        userId: participantData?.userId,
+        message: newStatus === 'approved' 
+          ? "You have been approved for the event!" 
+          : "You have been rejected from the event.",
+        status: newStatus,
+        eventId: eventId,
+        createdAt: new Date(),
+        read: false
+      });
+
       await refetch();
       
       toast({

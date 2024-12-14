@@ -14,11 +14,12 @@ const JoinedEvents = () => {
     queryFn: async () => {
       if (!user?.uid) return [];
       
-      // Get all event registrations for the user
+      // Get all event registrations for the user that are either approved or pending
       const registrationsRef = collection(db, 'event_participants');
       const registrationsQuery = query(
         registrationsRef, 
-        where('userId', '==', user.uid)
+        where('userId', '==', user.uid),
+        where('status', 'in', ['approved', 'pending'])
       );
       
       const registrationsSnapshot = await getDocs(registrationsQuery);
@@ -36,7 +37,8 @@ const JoinedEvents = () => {
           if (eventDoc.exists()) {
             return {
               id: eventDoc.id,
-              ...eventDoc.data()
+              ...eventDoc.data(),
+              registrationStatus: registration.data().status
             };
           }
           return null;
@@ -92,6 +94,7 @@ const JoinedEvents = () => {
                 entrance_fee={event.entrance_fee}
                 is_free={event.is_free}
                 hostId={event.hostId || event.host_id}
+                registrationStatus={event.registrationStatus}
               />
             ))
           ) : (
