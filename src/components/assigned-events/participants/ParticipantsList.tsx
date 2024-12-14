@@ -14,9 +14,9 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
   const { toast } = useToast();
   const { data: participants, isLoading, refetch } = useParticipantsData(eventId);
 
-  const handleStatusUpdate = async (participantId: string, newStatus: 'approved' | 'rejected') => {
+  const handleStatusUpdate = async (participantId: string, newStatus: 'approved' | 'rejected', message?: string) => {
     try {
-      await handleParticipantStatusUpdate(participantId, newStatus, eventId);
+      await handleParticipantStatusUpdate(participantId, newStatus, eventId, message);
       await refetch();
       
       toast({

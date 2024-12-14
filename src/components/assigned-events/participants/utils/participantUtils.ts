@@ -6,7 +6,8 @@ import { auth } from "@/lib/firebase";
 export const handleParticipantStatusUpdate = async (
   participantId: string, 
   newStatus: 'approved' | 'rejected',
-  eventId: string
+  eventId: string,
+  rejectionMessage?: string
 ) => {
   try {
     const currentUser = auth.currentUser;
@@ -40,7 +41,8 @@ export const handleParticipantStatusUpdate = async (
       visible: newStatus === 'approved',
       updatedAt: serverTimestamp(),
       updatedBy: currentUser.uid,
-      eventId: eventId // Make sure eventId is included in the update
+      eventId: eventId,
+      rejectionMessage: newStatus === 'rejected' ? rejectionMessage : null
     });
     
     // Create notification
@@ -48,8 +50,8 @@ export const handleParticipantStatusUpdate = async (
     await addDoc(notificationsRef, {
       userId: participantData.userId,
       message: newStatus === 'approved' 
-        ? "Your participation request has been approved!" 
-        : "Your participation request has been rejected.",
+        ? "Your participation request has been approved! You are now registered for the event."
+        : `Your participation request has been rejected. Reason: ${rejectionMessage}`,
       status: newStatus,
       eventId: eventId,
       createdAt: serverTimestamp(),
