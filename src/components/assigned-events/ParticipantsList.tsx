@@ -30,29 +30,38 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
       console.log("Found participants:", snapshot.size);
       
       const participantsData = [];
-      for (const doc of snapshot.docs) {
-        const participantData = doc.data();
+      
+      for (const participantDoc of snapshot.docs) {
+        const participantData = participantDoc.data();
+        console.log("Processing participant data:", participantData);
         
-        // Get user profile data
-        const userProfileRef = collection(db, 'profiles');
-        const userProfileQuery = query(userProfileRef, where('userId', '==', participantData.userId));
-        const userProfileSnapshot = await getDocs(userProfileQuery);
-        
-        if (!userProfileSnapshot.empty) {
-          const profile = userProfileSnapshot.docs[0].data();
-          participantsData.push({
-            id: doc.id,
-            status: participantData.status || 'pending',
-            displayName: profile.displayName || `${profile.firstName} ${profile.lastName}`,
-            email: profile.email,
-            registrationDate: participantData.registrationDate,
-            // Additional participant details
-            age: participantData.age,
-            nationality: participantData.nationality,
-            dateOfBirth: participantData.dateOfBirth,
-          });
+        try {
+          // Get user profile data
+          const userProfileRef = collection(db, 'profiles');
+          const userProfileQuery = query(userProfileRef, where('userId', '==', participantData.userId));
+          const userProfileSnapshot = await getDocs(userProfileQuery);
+          
+          if (!userProfileSnapshot.empty) {
+            const profile = userProfileSnapshot.docs[0].data();
+            participantsData.push({
+              id: participantDoc.id,
+              status: participantData.status || 'pending',
+              displayName: profile.displayName || `${profile.firstName} ${profile.lastName}`,
+              email: profile.email,
+              registrationDate: participantData.registrationDate?.toDate() || new Date(),
+              age: participantData.age || 'N/A',
+              nationality: participantData.nationality || 'N/A',
+              dateOfBirth: participantData.dateOfBirth || 'N/A',
+            });
+            console.log("Added participant to list:", participantsData[participantsData.length - 1]);
+          } else {
+            console.log("No profile found for user:", participantData.userId);
+          }
+        } catch (error) {
+          console.error("Error processing participant:", error);
         }
       }
+      
       console.log("Final participants data:", participantsData);
       return participantsData;
     },
@@ -109,7 +118,9 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
               <TableCell className="text-white">{participant.age}</TableCell>
               <TableCell className="text-white">{participant.nationality}</TableCell>
               <TableCell className="text-white">
-                {new Date(participant.registrationDate).toLocaleDateString()}
+                {participant.registrationDate instanceof Date 
+                  ? participant.registrationDate.toLocaleDateString()
+                  : 'N/A'}
               </TableCell>
               <TableCell>
                 <span className={`px-2 py-1 rounded-full text-sm ${
