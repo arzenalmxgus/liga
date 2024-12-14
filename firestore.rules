@@ -23,7 +23,7 @@ service cloud.firestore {
     match /events/{eventId} {
       allow read: if true;  // Keep public read access as in original rules
       allow create: if isAuthenticated();
-      allow update, delete: if isAuthenticated() && isEventHost(resource.data);
+      allow update, delete: if isAuthenticated() && (isEventHost(resource.data) || isCoach());
     }
 
     // Event participants collection

@@ -38,13 +38,13 @@ export const handleParticipantStatusUpdate = async (
       status: newStatus,
       visible: newStatus === 'approved',
       updatedAt: serverTimestamp(),
-      updatedBy: currentUser.uid  // Add the ID of the user making the change
+      updatedBy: currentUser.uid
     });
     
     // Create notification
     const notificationsRef = collection(db, 'notifications');
     await addDoc(notificationsRef, {
-      userId: participantData?.userId,
+      userId: participantData.userId,
       message: newStatus === 'approved' 
         ? "Your participation request has been approved!" 
         : "Your participation request has been rejected.",
@@ -53,7 +53,7 @@ export const handleParticipantStatusUpdate = async (
       createdAt: serverTimestamp(),
       read: false,
       type: 'participant_status_update',
-      createdBy: currentUser.uid  // Add the ID of the user creating the notification
+      createdBy: currentUser.uid
     });
 
     toast({
@@ -65,8 +65,9 @@ export const handleParticipantStatusUpdate = async (
     console.error('Error updating participant status:', error);
     toast({
       title: "Error",
-      description: "Failed to update participant status",
+      description: "Failed to update participant status. Please ensure you have the correct permissions.",
       variant: "destructive",
     });
+    throw error;
   }
 };
