@@ -11,27 +11,29 @@ interface ParticipantsListProps {
 
 const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
   const { toast } = useToast();
-  console.log("Fetching participants for event:", eventId); // Debug log
+  console.log("Fetching participants for event:", eventId);
 
   const { data: participants, isLoading, refetch } = useQuery({
     queryKey: ['event-participants', eventId],
     queryFn: async () => {
-      console.log("Starting query execution"); // Debug log
+      console.log("Starting query execution");
       const participantsRef = collection(db, 'event_participants');
-      const q = query(participantsRef, where('eventId', '==', eventId));
+      const q = query(
+        participantsRef, 
+        where('eventId', '==', eventId),
+        where('status', 'in', ['pending', 'approved', 'rejected'])
+      );
       const snapshot = await getDocs(q);
-      console.log("Found participants:", snapshot.size); // Debug log
+      console.log("Found participants:", snapshot.size);
       
       const participantsData = [];
       for (const doc of snapshot.docs) {
         const participantData = doc.data();
-        console.log("Processing participant:", participantData); // Debug log
+        console.log("Processing participant:", participantData);
         
         // Get user profile data
-        const userProfileQuery = query(
-          collection(db, 'profiles'),
-          where('userId', '==', participantData.userId)
-        );
+        const userProfileRef = collection(db, 'profiles');
+        const userProfileQuery = query(userProfileRef, where('userId', '==', participantData.userId));
         const userProfileSnapshot = await getDocs(userProfileQuery);
         
         if (!userProfileSnapshot.empty) {
@@ -39,13 +41,13 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
           participantsData.push({
             id: doc.id,
             status: participantData.status || 'pending',
-            displayName: profile.firstName + ' ' + profile.lastName || 'N/A',
-            email: profile.email || 'N/A',
+            displayName: `${profile.firstName} ${profile.lastName}`,
+            email: profile.email,
             registrationDate: participantData.registrationDate,
           });
         }
       }
-      console.log("Final participants data:", participantsData); // Debug log
+      console.log("Final participants data:", participantsData);
       return participantsData;
     },
     enabled: !!eventId,
@@ -62,7 +64,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
         description: `The participant has been ${newStatus} successfully.`,
       });
     } catch (error) {
-      console.error("Error updating status:", error); // Debug log
+      console.error("Error updating status:", error);
       toast({
         title: "Error",
         description: "Failed to update participant status.",
