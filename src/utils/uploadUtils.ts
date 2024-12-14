@@ -1,6 +1,49 @@
 import { supabase } from '@/lib/supabase';
 import { toast } from "@/hooks/use-toast";
 
+export const uploadImageToSupabase = async (
+  file: File,
+  bucket: string
+): Promise<string | null> => {
+  try {
+    if (!file) return null;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { data, error } = await supabase.storage
+      .from(bucket)
+      .upload(filePath, file, {
+        upsert: true,
+      });
+
+    if (error) {
+      console.error('Upload error:', error);
+      toast({
+        title: "Upload Failed",
+        description: "Failed to upload image. Please try again.",
+        variant: "destructive",
+      });
+      return null;
+    }
+
+    const { data: { publicUrl } } = supabase.storage
+      .from(bucket)
+      .getPublicUrl(filePath);
+
+    return publicUrl;
+  } catch (error) {
+    console.error('Upload error:', error);
+    toast({
+      title: "Upload Error",
+      description: "An unexpected error occurred during upload.",
+      variant: "destructive",
+    });
+    return null;
+  }
+};
+
 export const uploadRegistrationDoc = async (
   file: File,
   eventId: string,
