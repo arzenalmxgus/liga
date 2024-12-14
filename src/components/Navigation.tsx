@@ -131,12 +131,6 @@ const Navigation = () => {
           isActive={location.pathname === "/joined-events"} 
         />
         <NavItem 
-          icon={<Bell className="text-white" />} 
-          to="/notifications" 
-          label="Notifications" 
-          isActive={location.pathname === "/notifications"} 
-        />
-        <NavItem 
           icon={<User className="text-white" />} 
           to="/profile" 
           label="Profile" 
