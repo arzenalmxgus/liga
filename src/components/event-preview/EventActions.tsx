@@ -3,6 +3,7 @@ import { collection, deleteDoc, doc, getDocs, query, where } from "firebase/fire
 import { db } from "@/lib/firebase";
 import { useQueryClient } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import DeleteEventButton from "./DeleteEventButton";
 
 interface EventActionsProps {
   eventId: string;
@@ -11,7 +12,7 @@ interface EventActionsProps {
   isFull: boolean;
   onRegister: () => void;
   onClose: () => void;
-  onDelete: () => void;
+  onDelete: () => Promise<void>;
 }
 
 const EventActions = ({
@@ -60,13 +61,7 @@ const EventActions = ({
   if (isHost) {
     return (
       <div className="w-full">
-        <Button
-          variant="destructive"
-          className="w-full"
-          onClick={onDelete}
-        >
-          Delete Event
-        </Button>
+        <DeleteEventButton onDelete={onDelete} />
       </div>
     );
   }
