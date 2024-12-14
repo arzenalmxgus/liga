@@ -3,6 +3,7 @@ import { collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc } fro
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import ParticipantsTable from "./participants/ParticipantsTable";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface ParticipantsListProps {
   eventId: string;
@@ -10,6 +11,7 @@ interface ParticipantsListProps {
 
 const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: participants, isLoading, refetch } = useQuery({
     queryKey: ['event-participants', eventId],
@@ -34,7 +36,6 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
           if (!userProfileSnapshot.empty) {
             const profile = userProfileSnapshot.docs[0].data();
             
-            // Handle registration date whether it's a Firestore timestamp or ISO string
             let registrationDate;
             if (participantData.registrationDate?.toDate) {
               registrationDate = participantData.registrationDate.toDate();
@@ -56,7 +57,6 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
               userId: participantData.userId,
             });
           } else {
-            // Handle case where profile is not found
             let registrationDate;
             if (participantData.registrationDate?.toDate) {
               registrationDate = participantData.registrationDate.toDate();
@@ -89,29 +89,48 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
   });
 
   const handleStatusUpdate = async (participantId: string, newStatus: 'approved' | 'rejected') => {
-    try {
-      const participantRef = doc(db, 'event_participants', participantId);
-      const participantDoc = await getDoc(participantRef);
-      const participantData = participantDoc.data();
-      
-      await updateDoc(participantRef, { 
-        status: newStatus,
-        visible: newStatus === 'approved'
+    if (!user) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to perform this action.",
+        variant: "destructive",
       });
+      return;
+    }
+
+    try {
+      // First, get the participant document to access their userId
+      const participantRef = doc(db, 'event_participants', participantId);
+      const participantSnap = await getDoc(participantRef);
       
-      // Create notification in Firestore
+      if (!participantSnap.exists()) {
+        throw new Error("Participant not found");
+      }
+
+      const participantData = participantSnap.data();
+
+      // Update the participant's status
+      await updateDoc(participantRef, {
+        status: newStatus,
+        updatedAt: new Date(),
+        updatedBy: user.uid,
+      });
+
+      // Create notification
       const notificationsRef = collection(db, 'notifications');
       await addDoc(notificationsRef, {
-        userId: participantData?.userId,
+        userId: participantData.userId,
         message: newStatus === 'approved' 
           ? "You have been approved for the event!" 
           : "You have been rejected from the event.",
         status: newStatus,
         eventId: eventId,
         createdAt: new Date(),
-        read: false
+        read: false,
+        type: 'event_registration',
       });
 
+      // Refresh the participants list
       await refetch();
       
       toast({
@@ -122,7 +141,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
       console.error("Error updating status:", error);
       toast({
         title: "Error",
-        description: "Failed to update participant status.",
+        description: "Failed to update participant status. Please try again.",
         variant: "destructive",
       });
     }
