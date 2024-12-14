@@ -1,17 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { collection, query, where, getDocs, doc, updateDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import { Button } from "@/components/ui/button";
-import { Check, X } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import ParticipantsTable from "./participants/ParticipantsTable";
 
 interface ParticipantsListProps {
   eventId: string;
@@ -36,7 +27,6 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
         console.log("Processing participant data:", participantData);
         
         try {
-          // Get user profile data from the profiles collection
           const userProfileRef = collection(db, 'profiles');
           const userProfileQuery = query(userProfileRef, where('userId', '==', participantData.userId));
           const userProfileSnapshot = await getDocs(userProfileQuery);
@@ -53,9 +43,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
               nationality: participantData.nationality || 'N/A',
               dateOfBirth: participantData.dateOfBirth || 'N/A',
             });
-            console.log("Added participant to list:", participantsData[participantsData.length - 1]);
           } else {
-            // If no profile found, still add the participant with available data
             participantsData.push({
               id: participantDoc.id,
               status: participantData.status || 'pending',
@@ -66,14 +54,12 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
               nationality: participantData.nationality || 'N/A',
               dateOfBirth: participantData.dateOfBirth || 'N/A',
             });
-            console.log("Added participant without profile:", participantsData[participantsData.length - 1]);
           }
         } catch (error) {
           console.error("Error processing participant:", error);
         }
       }
       
-      console.log("Final participants data:", participantsData);
       return participantsData;
     },
     enabled: !!eventId,
@@ -109,68 +95,10 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
 
   return (
     <div className="space-y-4">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-white">Name</TableHead>
-            <TableHead className="text-white">Email</TableHead>
-            <TableHead className="text-white">Age</TableHead>
-            <TableHead className="text-white">Nationality</TableHead>
-            <TableHead className="text-white">Registration Date</TableHead>
-            <TableHead className="text-white">Status</TableHead>
-            <TableHead className="text-white">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {participants.map((participant) => (
-            <TableRow key={participant.id}>
-              <TableCell className="text-white">{participant.displayName}</TableCell>
-              <TableCell className="text-white">{participant.email}</TableCell>
-              <TableCell className="text-white">{participant.age}</TableCell>
-              <TableCell className="text-white">{participant.nationality}</TableCell>
-              <TableCell className="text-white">
-                {participant.registrationDate instanceof Date 
-                  ? participant.registrationDate.toLocaleDateString()
-                  : 'N/A'}
-              </TableCell>
-              <TableCell>
-                <span className={`px-2 py-1 rounded-full text-sm ${
-                  participant.status === 'approved' 
-                    ? 'bg-green-600/20 text-green-400' 
-                    : participant.status === 'rejected'
-                    ? 'bg-red-600/20 text-red-400'
-                    : 'bg-yellow-600/20 text-yellow-400'
-                }`}>
-                  {participant.status.charAt(0).toUpperCase() + participant.status.slice(1)}
-                </span>
-              </TableCell>
-              <TableCell>
-                {participant.status === 'pending' && (
-                  <div className="flex gap-2">
-                    <Button
-                      onClick={() => handleStatusUpdate(participant.id, 'approved')}
-                      variant="default"
-                      size="sm"
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <Check className="w-4 h-4 mr-1" />
-                      Approve
-                    </Button>
-                    <Button
-                      onClick={() => handleStatusUpdate(participant.id, 'rejected')}
-                      variant="destructive"
-                      size="sm"
-                    >
-                      <X className="w-4 h-4 mr-1" />
-                      Reject
-                    </Button>
-                  </div>
-                )}
-              </TableCell>
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
+      <ParticipantsTable 
+        participants={participants}
+        onStatusUpdate={handleStatusUpdate}
+      />
     </div>
   );
 };
