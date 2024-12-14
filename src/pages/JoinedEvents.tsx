@@ -3,37 +3,54 @@ import { useQuery } from "@tanstack/react-query";
 import { collection, query, where, getDocs } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import EventCard from "@/components/EventCard";
+import { useToast } from "@/hooks/use-toast";
 
 const JoinedEvents = () => {
   const { user } = useAuth();
+  const { toast } = useToast();
 
   const { data: joinedEvents, isLoading } = useQuery({
     queryKey: ['joined-events', user?.uid],
     queryFn: async () => {
       if (!user?.uid) return [];
-      const eventsRef = collection(db, 'registrations');
-      const q = query(eventsRef, where('userId', '==', user.uid));
-      const querySnapshot = await getDocs(q);
       
-      // Get all event IDs from registrations
-      const eventIds = querySnapshot.docs.map(doc => doc.data().eventId);
+      // First, get all event registrations for the user
+      const registrationsRef = collection(db, 'event_participants');
+      const registrationsQuery = query(registrationsRef, where('userId', '==', user.uid));
+      const registrationsSnapshot = await getDocs(registrationsQuery);
       
-      // Fetch event details for each registration
-      const events = await Promise.all(
-        eventIds.map(async (eventId) => {
-          const eventDoc = await getDocs(query(collection(db, 'events'), where('id', '==', eventId)));
-          const eventData = eventDoc.docs[0]?.data();
-          return eventData ? { id: eventId, ...eventData } : null;
-        })
-      );
+      // Get the event IDs from the registrations
+      const eventIds = registrationsSnapshot.docs.map(doc => doc.data().eventId);
       
-      return events.filter(event => event !== null);
+      if (eventIds.length === 0) return [];
+
+      // Then fetch the actual events
+      const eventsRef = collection(db, 'events');
+      const eventsQuery = query(eventsRef, where('id', 'in', eventIds));
+      const eventsSnapshot = await getDocs(eventsQuery);
+      
+      return eventsSnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
     },
     enabled: !!user,
+    onError: (error) => {
+      console.error('Error fetching joined events:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load your joined events. Please try again.",
+        variant: "destructive",
+      });
+    }
   });
 
   if (isLoading) {
-    return <div className="text-white">Loading...</div>;
+    return (
+      <div className="min-h-screen p-6">
+        <div className="text-white text-center">Loading your joined events...</div>
+      </div>
+    );
   }
 
   return (
@@ -44,14 +61,30 @@ const JoinedEvents = () => {
           <p className="text-gray-400 mt-1">Events you have registered for</p>
         </header>
         <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {joinedEvents?.map((event: any) => (
-            <EventCard 
-              key={event.id} 
-              {...event}
-            />
-          ))}
-          {joinedEvents?.length === 0 && (
-            <p className="text-white col-span-full text-center">You haven't joined any events yet.</p>
+          {joinedEvents && joinedEvents.length > 0 ? (
+            joinedEvents.map((event: any) => (
+              <EventCard 
+                key={event.id}
+                id={event.id}
+                title={event.title}
+                date={event.date}
+                location={event.location}
+                category={event.category}
+                participants_limit={event.participants_limit}
+                current_participants={event.current_participants}
+                banner_photo={event.banner_photo}
+                description={event.description}
+                entrance_fee={event.entrance_fee}
+                is_free={event.is_free}
+                hostId={event.hostId}
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center text-gray-400 py-12">
+              You haven't joined any events yet.
+              <br />
+              Browse available events to get started!
+            </div>
           )}
         </div>
       </main>
