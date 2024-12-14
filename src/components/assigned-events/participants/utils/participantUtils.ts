@@ -35,6 +35,11 @@ export const handleParticipantStatusUpdate = async (
 
     const participantData = participantDoc.data();
     
+    // Get event data for notification
+    const eventRef = doc(db, 'events', eventId);
+    const eventDoc = await getDoc(eventRef);
+    const eventData = eventDoc.exists() ? eventDoc.data() : null;
+    
     // Update participant status
     await updateDoc(participantRef, { 
       status: newStatus,
@@ -50,8 +55,8 @@ export const handleParticipantStatusUpdate = async (
     await addDoc(notificationsRef, {
       userId: participantData.userId,
       message: newStatus === 'approved' 
-        ? "Your participation request has been approved! You are now registered for the event."
-        : `Your participation request has been rejected. Reason: ${rejectionMessage}`,
+        ? `Your participation request for "${eventData?.title || 'the event'}" has been approved! You are now registered for the event.`
+        : `Your participation request for "${eventData?.title || 'the event'}" has been rejected. ${rejectionMessage ? `Reason: ${rejectionMessage}` : ''}`,
       status: newStatus,
       eventId: eventId,
       createdAt: serverTimestamp(),
@@ -59,6 +64,8 @@ export const handleParticipantStatusUpdate = async (
       type: 'participant_status_update',
       createdBy: currentUser.uid
     });
+
+    console.log(`Notification created for user ${participantData.userId} with status ${newStatus}`);
 
     toast({
       title: "Success",
