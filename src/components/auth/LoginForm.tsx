@@ -33,12 +33,28 @@ const LoginForm = () => {
     } catch (error: any) {
       console.error("Login error:", error);
       
-      // Handle specific Firebase auth errors
       let errorMessage = "Failed to log in. Please try again.";
-      if (error.code === "auth/invalid-login-credentials") {
-        errorMessage = "Invalid email or password. Please check your credentials and try again.";
-      } else if (error.code === "auth/network-request-failed") {
-        errorMessage = "Network error. Please check your internet connection.";
+      
+      // Handle specific Firebase auth errors
+      switch (error.code) {
+        case "auth/invalid-login-credentials":
+          errorMessage = "Invalid email or password. Please check your credentials and try again.";
+          break;
+        case "auth/invalid-email":
+          errorMessage = "Please enter a valid email address.";
+          break;
+        case "auth/user-disabled":
+          errorMessage = "This account has been disabled. Please contact support.";
+          break;
+        case "auth/user-not-found":
+          errorMessage = "No account found with this email. Please check your email or register.";
+          break;
+        case "auth/wrong-password":
+          errorMessage = "Incorrect password. Please try again.";
+          break;
+        case "auth/network-request-failed":
+          errorMessage = "Network error. Please check your internet connection.";
+          break;
       }
 
       toast({
@@ -70,6 +86,7 @@ const LoginForm = () => {
             required
             className="bg-black/20 text-white placeholder:text-gray-400"
             disabled={isLoading}
+            placeholder="Enter your email"
           />
         </div>
         <div className="space-y-2">
@@ -82,6 +99,7 @@ const LoginForm = () => {
             required
             className="bg-black/20 text-white placeholder:text-gray-400"
             disabled={isLoading}
+            placeholder="Enter your password"
           />
         </div>
       </CardContent>
