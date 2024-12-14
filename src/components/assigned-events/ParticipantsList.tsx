@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { collection, query, where, getDocs, doc, updateDoc, getDoc } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, getDoc, addDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import ParticipantsTable from "./participants/ParticipantsTable";
@@ -96,7 +96,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
       
       await updateDoc(participantRef, { 
         status: newStatus,
-        visible: newStatus === 'approved' // Set visibility based on status
+        visible: newStatus === 'approved'
       });
       
       // Create notification in Firestore
