@@ -56,9 +56,10 @@ const EventActions = ({
     }
   };
 
-  return (
-    <div className="space-y-4 w-full">
-      {isHost ? (
+  // Render host actions
+  if (isHost) {
+    return (
+      <div className="w-full">
         <Button
           variant="destructive"
           className="w-full"
@@ -66,26 +67,29 @@ const EventActions = ({
         >
           Delete Event
         </Button>
+      </div>
+    );
+  }
+
+  // Render participant actions
+  return (
+    <div className="w-full">
+      {isRegistered ? (
+        <Button
+          variant="destructive"
+          className="w-full"
+          onClick={handleUnregister}
+        >
+          Unregister from Event
+        </Button>
       ) : (
-        <>
-          {isRegistered ? (
-            <Button
-              variant="destructive"
-              className="w-full"
-              onClick={handleUnregister}
-            >
-              Unregister from Event
-            </Button>
-          ) : (
-            <Button
-              className="w-full"
-              onClick={onRegister}
-              disabled={isFull}
-            >
-              {isFull ? "Event is Full" : "Register for Event"}
-            </Button>
-          )}
-        </>
+        <Button
+          className="w-full"
+          onClick={onRegister}
+          disabled={isFull}
+        >
+          {isFull ? "Event is Full" : "Register for Event"}
+        </Button>
       )}
     </div>
   );
