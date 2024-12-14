@@ -113,7 +113,7 @@ const LoginForm = () => {
   return (
     <form onSubmit={handleLogin} className="w-full max-w-md mx-auto">
       <CardHeader className="space-y-3">
-        <CardTitle className="text-3xl font-bold text-center text-white">Login to Liga</CardTitle>
+        <CardTitle className="text-3xl font-bold text-center text-white">Welcome To Liga!</CardTitle>
         <CardDescription className="text-center text-gray-300 text-lg">
           Welcome back! Please log in to continue
         </CardDescription>
