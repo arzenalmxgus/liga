@@ -29,13 +29,13 @@ interface EventPreviewProps {
     is_free: boolean;
     hostId: string;
   };
+  isHost?: boolean;  // Added this line to include isHost in the interface
 }
 
-const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
+const EventPreview = ({ isOpen, onClose, event, isHost }: EventPreviewProps) => {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const isHost = user?.uid === event.hostId;
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
   const { data: isRegistered } = useQuery({
