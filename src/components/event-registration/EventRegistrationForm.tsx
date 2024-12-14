@@ -1,14 +1,20 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { db } from "@/lib/firebase";
-import { collection, addDoc, updateDoc, doc, increment, getDoc, query, where, getDocs } from "firebase/firestore";
-import { uploadImageToSupabase } from "@/utils/uploadUtils";
 import { Loader2 } from "lucide-react";
 import PersonalInfoSection from "./PersonalInfoSection";
 import AcademicInfoSection from "./AcademicInfoSection";
 import DocumentsSection from "./DocumentsSection";
 import { useQuery } from "@tanstack/react-query";
+import { doc, getDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
+import { 
+  checkExistingRegistration, 
+  uploadRegistrationFiles,
+  submitRegistration,
+  type RegistrationFormData,
+  type RegistrationFiles 
+} from "@/utils/eventRegistrationUtils";
 
 interface EventRegistrationFormProps {
   eventId: string;
@@ -17,10 +23,15 @@ interface EventRegistrationFormProps {
   onCancel: () => void;
 }
 
-const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRegistrationFormProps) => {
+const EventRegistrationForm = ({ 
+  eventId, 
+  userId, 
+  onSuccess, 
+  onCancel 
+}: EventRegistrationFormProps) => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<RegistrationFormData>({
     name: "",
     dateOfBirth: "",
     age: "",
@@ -34,11 +45,7 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
     school: "",
   });
 
-  const [files, setFiles] = useState<{
-    photo: File | null;
-    registrarCert: File | null;
-    psaCopy: File | null;
-  }>({
+  const [files, setFiles] = useState<RegistrationFiles>({
     photo: null,
     registrarCert: null,
     psaCopy: null,
@@ -63,7 +70,7 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
     setFormData(prev => ({ ...prev, eventType: value }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: keyof typeof files) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: keyof RegistrationFiles) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.size > 5 * 1024 * 1024) {
@@ -78,18 +85,7 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!userId) {
-      toast({
-        title: "Authentication required",
-        description: "Please log in to register for this event",
-        variant: "destructive",
-      });
-      return;
-    }
-
+  const validateForm = () => {
     const requiredFields = requiresAdditionalInfo 
       ? Object.values(formData)
       : [formData.name, formData.dateOfBirth, formData.age, formData.nationality];
@@ -103,22 +99,31 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
         description: "Please fill in all required fields.",
         variant: "destructive",
       });
+      return false;
+    }
+    return true;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!userId) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to register for this event",
+        variant: "destructive",
+      });
       return;
     }
+
+    if (!validateForm()) return;
 
     setLoading(true);
 
     try {
       // Check if user is already registered
-      const registrationsRef = collection(db, "event_participants");
-      const existingRegQuery = query(
-        registrationsRef,
-        where("eventId", "==", eventId),
-        where("userId", "==", userId)
-      );
-      const existingRegDocs = await getDocs(existingRegQuery);
-
-      if (!existingRegDocs.empty) {
+      const isRegistered = await checkExistingRegistration(eventId, userId);
+      if (isRegistered) {
         toast({
           title: "Already Registered",
           description: "You have already registered for this event.",
@@ -127,36 +132,13 @@ const EventRegistrationForm = ({ eventId, userId, onSuccess, onCancel }: EventRe
         return;
       }
 
-      let uploadedFiles = {};
-      
-      if (requiresAdditionalInfo) {
-        const uploadPromises = [];
-        for (const [key, file] of Object.entries(files)) {
-          if (file) {
-            uploadPromises.push(
-              uploadImageToSupabase(file, `registrations/${eventId}`).then(url => [key, url])
-            );
-          }
-        }
-        uploadedFiles = Object.fromEntries(await Promise.all(uploadPromises));
-      }
+      // Upload files if required
+      const uploadedFiles = requiresAdditionalInfo 
+        ? await uploadRegistrationFiles(files, eventId)
+        : {};
 
-      const registrationData = {
-        ...formData,
-        ...uploadedFiles,
-        eventId,
-        userId,
-        status: 'pending',
-        registrationDate: new Date().toISOString(),
-      };
-
-      await addDoc(collection(db, "event_participants"), registrationData);
-      
-      // Update event participants count
-      const eventRef = doc(db, "events", eventId);
-      await updateDoc(eventRef, {
-        currentParticipants: increment(1)
-      });
+      // Submit registration
+      await submitRegistration(formData, uploadedFiles, eventId, userId);
 
       toast({
         title: "Success",
