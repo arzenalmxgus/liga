@@ -1,6 +1,7 @@
 import { doc, updateDoc, getDoc, collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { toast } from "@/hooks/use-toast";
+import { auth } from "@/lib/firebase";
 
 export const handleParticipantStatusUpdate = async (
   participantId: string, 
@@ -8,6 +9,16 @@ export const handleParticipantStatusUpdate = async (
   eventId: string
 ) => {
   try {
+    const currentUser = auth.currentUser;
+    if (!currentUser) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to perform this action",
+        variant: "destructive",
+      });
+      return;
+    }
+
     const participantRef = doc(db, 'event_participants', participantId);
     const participantDoc = await getDoc(participantRef);
     
@@ -26,7 +37,8 @@ export const handleParticipantStatusUpdate = async (
     await updateDoc(participantRef, { 
       status: newStatus,
       visible: newStatus === 'approved',
-      updatedAt: serverTimestamp()
+      updatedAt: serverTimestamp(),
+      updatedBy: currentUser.uid  // Add the ID of the user making the change
     });
     
     // Create notification
@@ -40,7 +52,8 @@ export const handleParticipantStatusUpdate = async (
       eventId: eventId,
       createdAt: serverTimestamp(),
       read: false,
-      type: 'participant_status_update'
+      type: 'participant_status_update',
+      createdBy: currentUser.uid  // Add the ID of the user creating the notification
     });
 
     toast({
