@@ -1,0 +1,70 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+    
+    function isEventHost(eventData) {
+      return request.auth.uid == eventData.hostId;
+    }
+
+    function isCoach() {
+      return get(/databases/$(database)/documents/profiles/$(request.auth.uid)).data.user_role == 'coach';
+    }
+
+    // Events collection
+    match /events/{eventId} {
+      allow read: if true;  // Keep public read access as in original rules
+      allow create: if isAuthenticated();
+      allow update, delete: if isAuthenticated() && isEventHost(resource.data);
+    }
+
+    // Event participants collection
+    match /event_participants/{participantId} {
+      allow read: if isAuthenticated();
+      allow create: if isAuthenticated() && isOwner(request.resource.data.userId);
+      allow update: if isAuthenticated() && (
+        isEventHost(get(/databases/$(database)/documents/events/$(request.resource.data.eventId)).data) ||
+        isOwner(resource.data.userId) ||
+        isCoach()  // Allow coaches to update participant status
+      );
+      allow delete: if isAuthenticated() && (
+        isEventHost(get(/databases/$(database)/documents/events/$(request.resource.data.eventId)).data) ||
+        isOwner(resource.data.userId)
+      );
+    }
+
+    // Notifications collection
+    match /notifications/{notificationId} {
+      allow read: if isAuthenticated() && (
+        isOwner(resource.data.userId) ||
+        isCoach()
+      );
+      allow create: if isAuthenticated() && (
+        isOwner(request.resource.data.userId) ||
+        isCoach()  // Allow coaches to create notifications
+      );
+      allow update: if isAuthenticated() && (
+        isOwner(resource.data.userId) ||
+        isCoach()
+      );
+      allow delete: if isAuthenticated() && (
+        isOwner(resource.data.userId) ||
+        isCoach()
+      );
+    }
+
+    // Profiles collection
+    match /profiles/{userId} {
+      allow read: if isAuthenticated();  // Everyone can read profiles
+      allow write: if isAuthenticated() && isOwner(userId);
+    }
+  }
+}
