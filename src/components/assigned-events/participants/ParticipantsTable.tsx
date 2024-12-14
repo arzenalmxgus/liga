@@ -7,9 +7,19 @@ import {
 } from "@/components/ui/table";
 import ParticipantRow from "./ParticipantRow";
 
+interface Participant {
+  id: string;
+  displayName: string;
+  email: string;
+  age: string;
+  nationality: string;
+  registrationDate: Date;
+  status: string;
+}
+
 interface ParticipantsTableProps {
-  participants: any[];
-  onStatusUpdate: (participantId: string, status: 'approved' | 'rejected') => Promise<void>;
+  participants: Participant[];
+  onStatusUpdate: (participantId: string, status: 'approved' | 'rejected', message?: string) => Promise<void>;
 }
 
 const ParticipantsTable = ({ participants, onStatusUpdate }: ParticipantsTableProps) => {
