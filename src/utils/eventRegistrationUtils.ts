@@ -1,4 +1,4 @@
-import { collection, query, where, getDocs, addDoc, updateDoc, doc, increment } from "firebase/firestore";
+import { collection, query, where, getDocs, addDoc, updateDoc, doc, increment, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { uploadImageToSupabase } from "./uploadUtils";
 
@@ -22,15 +22,9 @@ export interface RegistrationFiles {
   psaCopy: File | null;
 }
 
-export const checkExistingRegistration = async (eventId: string, userId: string) => {
-  const registrationsRef = collection(db, "event_participants");
-  const existingRegQuery = query(
-    registrationsRef,
-    where("eventId", "==", eventId),
-    where("userId", "==", userId)
-  );
-  const existingRegDocs = await getDocs(existingRegQuery);
-  return !existingRegDocs.empty;
+export const checkExistingRegistration = async (registrationId: string) => {
+  const registrationDoc = await getDoc(doc(db, "event_participants", registrationId));
+  return registrationDoc.exists();
 };
 
 export const uploadRegistrationFiles = async (files: RegistrationFiles, eventId: string) => {
@@ -49,7 +43,8 @@ export const submitRegistration = async (
   formData: RegistrationFormData,
   uploadedFiles: Record<string, string>,
   eventId: string,
-  userId: string
+  userId: string,
+  registrationId: string
 ) => {
   const registrationData = {
     ...formData,
@@ -60,7 +55,11 @@ export const submitRegistration = async (
     registrationDate: new Date().toISOString(),
   };
 
-  await addDoc(collection(db, "event_participants"), registrationData);
+  // Use the provided registrationId when creating the document
+  await addDoc(collection(db, "event_participants"), {
+    ...registrationData,
+    id: registrationId
+  });
   
   // Update event participants count
   const eventRef = doc(db, "events", eventId);

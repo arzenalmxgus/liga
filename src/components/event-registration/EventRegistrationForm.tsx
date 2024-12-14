@@ -121,8 +121,10 @@ const EventRegistrationForm = ({
     setLoading(true);
 
     try {
-      // Check if user is already registered
-      const isRegistered = await checkExistingRegistration(eventId, userId);
+      // Check if user is already registered using a unique registration ID
+      const registrationId = `${userId}_${eventId}`;
+      const isRegistered = await checkExistingRegistration(registrationId);
+      
       if (isRegistered) {
         toast({
           title: "Already Registered",
@@ -137,8 +139,8 @@ const EventRegistrationForm = ({
         ? await uploadRegistrationFiles(files, eventId)
         : {};
 
-      // Submit registration
-      await submitRegistration(formData, uploadedFiles, eventId, userId);
+      // Submit registration with the unique registration ID
+      await submitRegistration(formData, uploadedFiles, eventId, userId, registrationId);
 
       toast({
         title: "Success",
