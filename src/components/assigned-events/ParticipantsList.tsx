@@ -18,10 +18,10 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
     queryFn: async () => {
       console.log("Starting query execution");
       const participantsRef = collection(db, 'event_participants');
+      // Remove the status filter to see all participants initially
       const q = query(
         participantsRef, 
-        where('eventId', '==', eventId),
-        where('status', 'in', ['pending', 'approved', 'rejected'])
+        where('eventId', '==', eventId)
       );
       const snapshot = await getDocs(q);
       console.log("Found participants:", snapshot.size);
