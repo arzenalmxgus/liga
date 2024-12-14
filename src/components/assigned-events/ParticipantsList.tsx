@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, serverTimestamp, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
 import ParticipantsTable from "./participants/ParticipantsTable";
@@ -30,13 +30,14 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
         
         try {
           // Get user profile data directly using userId as document ID
-          const userProfileDoc = await getDocs(doc(db, 'profiles', participantData.userId));
+          const userProfileDocRef = doc(db, 'profiles', participantData.userId);
+          const userProfileSnapshot = await getDoc(userProfileDocRef);
           
           console.log("Checking profile for userId:", participantData.userId);
           
           let profile = null;
-          if (userProfileDoc.exists()) {
-            profile = userProfileDoc.data();
+          if (userProfileSnapshot.exists()) {
+            profile = userProfileSnapshot.data();
             console.log("Found profile:", profile);
           } else {
             console.log("No profile document found, using participant data only");
