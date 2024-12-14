@@ -54,9 +54,11 @@ const AssignedEventCard = ({ event }: AssignedEventCardProps) => {
       </div>
 
       <Dialog open={showParticipants} onOpenChange={setShowParticipants}>
-        <DialogContent className="max-w-4xl bg-gray-900/95">
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto bg-gray-900/95">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-bold text-white">{event.title} - Participants</DialogTitle>
+            <DialogTitle className="text-2xl font-bold text-white mb-4">
+              {event.title} - Participants
+            </DialogTitle>
           </DialogHeader>
           <ParticipantsList eventId={event.id} />
         </DialogContent>
