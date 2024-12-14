@@ -36,7 +36,7 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
         console.log("Processing participant data:", participantData);
         
         try {
-          // Get user profile data
+          // Get user profile data from the profiles collection
           const userProfileRef = collection(db, 'profiles');
           const userProfileQuery = query(userProfileRef, where('userId', '==', participantData.userId));
           const userProfileSnapshot = await getDocs(userProfileQuery);
@@ -46,8 +46,8 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
             participantsData.push({
               id: participantDoc.id,
               status: participantData.status || 'pending',
-              displayName: profile.displayName || `${profile.firstName} ${profile.lastName}`,
-              email: profile.email,
+              displayName: profile.displayName || profile.name || `${profile.firstName || ''} ${profile.lastName || ''}`.trim() || 'Anonymous',
+              email: profile.email || participantData.email || 'No email provided',
               registrationDate: participantData.registrationDate?.toDate() || new Date(),
               age: participantData.age || 'N/A',
               nationality: participantData.nationality || 'N/A',
@@ -55,7 +55,18 @@ const ParticipantsList = ({ eventId }: ParticipantsListProps) => {
             });
             console.log("Added participant to list:", participantsData[participantsData.length - 1]);
           } else {
-            console.log("No profile found for user:", participantData.userId);
+            // If no profile found, still add the participant with available data
+            participantsData.push({
+              id: participantDoc.id,
+              status: participantData.status || 'pending',
+              displayName: participantData.name || 'Anonymous',
+              email: participantData.email || 'No email provided',
+              registrationDate: participantData.registrationDate?.toDate() || new Date(),
+              age: participantData.age || 'N/A',
+              nationality: participantData.nationality || 'N/A',
+              dateOfBirth: participantData.dateOfBirth || 'N/A',
+            });
+            console.log("Added participant without profile:", participantsData[participantsData.length - 1]);
           }
         } catch (error) {
           console.error("Error processing participant:", error);
