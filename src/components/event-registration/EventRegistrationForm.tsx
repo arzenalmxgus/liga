@@ -9,9 +9,7 @@ import { useQuery } from "@tanstack/react-query";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { 
-  checkExistingRegistration, 
   uploadRegistrationFiles,
-  submitRegistration,
   type RegistrationFormData,
   type RegistrationFiles 
 } from "@/utils/eventRegistrationUtils";
