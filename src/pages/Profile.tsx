@@ -8,20 +8,12 @@ import { Pencil } from "lucide-react";
 import { doc, getDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
 
 const Profile = () => {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
-  const [profileData, setProfileData] = useState({
-    displayName: "",
-    realName: "",
-    bio: "",
-    city: "",
-    contactNumber: "",
-    role: "",
-    photoURL: null,
-  });
   const [socialLinks, setSocialLinks] = useState({
     instagram: "",
     facebook: "",
@@ -35,40 +27,48 @@ const Profile = () => {
     pinterest: "",
   });
 
-  useEffect(() => {
-    const fetchProfileData = async () => {
-      if (!user?.uid) return;
-      try {
-        console.log("Fetching profile data for user:", user.uid);
-        const userRef = doc(db, "profiles", user.uid);
-        const userDoc = await getDoc(userRef);
-        if (userDoc.exists()) {
-          const data = userDoc.data();
-          console.log("Retrieved profile data:", data);
-          setProfileData({
-            displayName: data.displayName || "",
-            realName: data.realName || "",
-            bio: data.bio || "",
-            city: data.city || "",
-            contactNumber: data.contactNumber || "",
-            role: data.role || "",
-            photoURL: data.photoURL || null,
-          });
-          if (data.socialLinks) {
-            setSocialLinks(data.socialLinks);
-          }
-        }
-      } catch (error) {
-        console.error("Error fetching profile data:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load profile data",
-          variant: "destructive",
-        });
+  const { data: profileData, isLoading } = useQuery({
+    queryKey: ['profile', user?.uid],
+    queryFn: async () => {
+      if (!user?.uid) return null;
+      const userRef = doc(db, "profiles", user.uid);
+      const userDoc = await getDoc(userRef);
+      if (userDoc.exists()) {
+        return userDoc.data();
       }
-    };
-    fetchProfileData();
-  }, [user, toast]);
+      return null;
+    },
+    enabled: !!user?.uid
+  });
+
+  useEffect(() => {
+    if (profileData?.socialLinks) {
+      setSocialLinks(profileData.socialLinks);
+    }
+  }, [profileData]);
+
+  if (!user) {
+    return null;
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-black">
+        <Navigation />
+        <main className="md:ml-16 pb-16 md:pb-0">
+          <div className="max-w-4xl mx-auto p-6">
+            <div className="animate-pulse">
+              <div className="h-32 bg-gray-700 rounded-lg mb-4"></div>
+              <div className="space-y-3">
+                <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+                <div className="h-4 bg-gray-700 rounded w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    );
+  }
 
   if (!isEditing) {
     return (
@@ -87,14 +87,14 @@ const Profile = () => {
               </Button>
             </div>
             <PublicProfile
-              displayName={profileData.displayName || user?.displayName || ""}
-              realName={profileData.realName}
+              displayName={profileData?.displayName || user?.displayName || ""}
+              realName={profileData?.realName || ""}
               email={user?.email || ""}
-              photoURL={profileData.photoURL || user?.photoURL}
-              bio={profileData.bio}
-              role={profileData.role}
-              city={profileData.city}
-              contactNumber={profileData.contactNumber}
+              photoURL={profileData?.photoURL || user?.photoURL}
+              bio={profileData?.bio || ""}
+              role={profileData?.role || "attendee"}
+              city={profileData?.city}
+              contactNumber={profileData?.contactNumber}
               eventsHosted={0}
               eventsAttended={0}
               socialLinks={socialLinks}
