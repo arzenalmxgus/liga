@@ -19,6 +19,7 @@ export const handleParticipantStatusUpdate = async (
       return;
     }
 
+    // Get participant data first
     const participantRef = doc(db, 'event_participants', participantId);
     const participantDoc = await getDoc(participantRef);
     
@@ -38,7 +39,8 @@ export const handleParticipantStatusUpdate = async (
       status: newStatus,
       visible: newStatus === 'approved',
       updatedAt: serverTimestamp(),
-      updatedBy: currentUser.uid
+      updatedBy: currentUser.uid,
+      eventId: eventId // Make sure eventId is included in the update
     });
     
     // Create notification
