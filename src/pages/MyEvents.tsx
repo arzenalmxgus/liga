@@ -54,7 +54,7 @@ const MyEvents = () => {
         <header className="p-6 border-b border-gray-800">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-              <h1 className="text-2xl font-bold text-white">Events</h1>
+              <h1 className="text-2xl font-bold text-white">My Events</h1>
               <p className="text-gray-400 mt-1">Manage your created events</p>
             </div>
             
