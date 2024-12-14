@@ -40,6 +40,23 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
   const isHost = user?.uid === event.hostId;
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
 
+  // Query to check if user is registered
+  const { data: isRegistered } = useQuery({
+    queryKey: ['event-registration', event.id, user?.uid],
+    queryFn: async () => {
+      if (!user?.uid) return false;
+      const registrationsRef = collection(db, 'event_participants');
+      const q = query(
+        registrationsRef, 
+        where('eventId', '==', event.id),
+        where('userId', '==', user.uid)
+      );
+      const snapshot = await getDocs(q);
+      return !snapshot.empty;
+    },
+    enabled: !!user && !!event.id,
+  });
+
   const { data: participants, isLoading: loadingParticipants } = useQuery({
     queryKey: ['event-participants', event.id],
     queryFn: async () => {
@@ -71,6 +88,43 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
     },
     enabled: isHost && isOpen,
   });
+
+  const handleUnregister = async () => {
+    if (!user?.uid) return;
+
+    try {
+      const registrationsRef = collection(db, 'event_participants');
+      const q = query(
+        registrationsRef,
+        where('eventId', '==', event.id),
+        where('userId', '==', user.uid)
+      );
+      const snapshot = await getDocs(q);
+
+      if (!snapshot.empty) {
+        await deleteDoc(snapshot.docs[0].ref);
+        
+        toast({
+          title: "Success",
+          description: "You have successfully unregistered from this event.",
+        });
+
+        // Invalidate relevant queries
+        queryClient.invalidateQueries({ queryKey: ['event-registration'] });
+        queryClient.invalidateQueries({ queryKey: ['joined-events'] });
+        queryClient.invalidateQueries({ queryKey: ['events'] });
+        
+        onClose();
+      }
+    } catch (error) {
+      console.error('Error unregistering from event:', error);
+      toast({
+        title: "Error",
+        description: "Failed to unregister from the event. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   const handleRegistrationSuccess = () => {
     setShowRegistrationForm(false);
@@ -145,11 +199,22 @@ const EventPreview = ({ isOpen, onClose, event }: EventPreviewProps) => {
                 </div>
 
                 <div className="flex gap-4">
-                  <RegistrationButton
-                    isHost={isHost}
-                    isFull={participants?.length >= event.participants_limit}
-                    onRegister={() => setShowRegistrationForm(true)}
-                  />
+                  {!isHost && !isRegistered && (
+                    <RegistrationButton
+                      isHost={isHost}
+                      isFull={participants?.length >= event.participants_limit}
+                      onRegister={() => setShowRegistrationForm(true)}
+                    />
+                  )}
+                  {!isHost && isRegistered && (
+                    <Button 
+                      onClick={handleUnregister}
+                      variant="destructive"
+                      className="flex-1"
+                    >
+                      Unregister from Event
+                    </Button>
+                  )}
                   {isHost && (
                     <Button onClick={handleDeleteEvent} variant="destructive">
                       Delete Event
