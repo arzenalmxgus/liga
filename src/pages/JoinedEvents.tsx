@@ -14,25 +14,46 @@ const JoinedEvents = () => {
     queryFn: async () => {
       if (!user?.uid) return [];
       
-      // First, get all event registrations for the user
-      const registrationsRef = collection(db, 'event_participants');
-      const registrationsQuery = query(registrationsRef, where('userId', '==', user.uid));
-      const registrationsSnapshot = await getDocs(registrationsQuery);
-      
-      // Get the event IDs from the registrations
-      const eventIds = registrationsSnapshot.docs.map(doc => doc.data().eventId);
-      
-      if (eventIds.length === 0) return [];
+      try {
+        // First, get all event registrations for the user
+        const registrationsRef = collection(db, 'event_participants');
+        const registrationsQuery = query(
+          registrationsRef, 
+          where('userId', '==', user.uid)
+        );
+        const registrationsSnapshot = await getDocs(registrationsQuery);
+        
+        if (registrationsSnapshot.empty) {
+          console.log('No registered events found for user');
+          return [];
+        }
 
-      // Then fetch the actual events
-      const eventsRef = collection(db, 'events');
-      const eventsQuery = query(eventsRef, where('id', 'in', eventIds));
-      const eventsSnapshot = await getDocs(eventsQuery);
-      
-      return eventsSnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
+        // Get all the event IDs from registrations
+        const eventIds = registrationsSnapshot.docs.map(doc => doc.data().eventId);
+        console.log('Found event IDs:', eventIds);
+
+        // Then fetch each event individually since 'in' queries are limited
+        const events = [];
+        for (const eventId of eventIds) {
+          const eventRef = collection(db, 'events');
+          const eventQuery = query(eventRef, where('id', '==', eventId));
+          const eventSnapshot = await getDocs(eventQuery);
+          
+          if (!eventSnapshot.empty) {
+            const eventData = eventSnapshot.docs[0].data();
+            events.push({
+              id: eventId,
+              ...eventData
+            });
+          }
+        }
+
+        console.log('Retrieved events:', events);
+        return events;
+      } catch (error) {
+        console.error('Error in queryFn:', error);
+        throw error;
+      }
     },
     enabled: !!user,
     meta: {
@@ -78,7 +99,7 @@ const JoinedEvents = () => {
                 description={event.description}
                 entrance_fee={event.entrance_fee}
                 is_free={event.is_free}
-                hostId={event.hostId}
+                hostId={event.host_id}
               />
             ))
           ) : (
