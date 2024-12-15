@@ -49,7 +49,7 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (file.size > 5 * 1024 * 1024) {
@@ -93,7 +93,13 @@ const CreateEventForm = ({ onSuccess }: CreateEventFormProps) => {
       
       if (bannerFile) {
         const uploadedUrl = await uploadImageToSupabase(bannerFile, 'events');
-        if (uploadedUrl) {
+        if (!uploadedUrl) {
+          toast({
+            title: "Upload failed",
+            description: "Failed to upload banner image. Using default banner instead.",
+            variant: "destructive",
+          });
+        } else {
           downloadURL = uploadedUrl;
         }
       }
