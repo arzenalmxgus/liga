@@ -9,7 +9,7 @@ const Auth = () => {
     <div className="min-h-screen text-white">
       <Navigation />
       <main className="md:ml-16 pb-16 md:pb-0 flex items-center justify-center min-h-[calc(100vh-4rem)]">
-        <Card className="w-[90%] max-w-[450px] mx-auto bg-[#121212] backdrop-blur-md rounded-xl overflow-hidden border-[#282828]">
+        <Card className="w-[95%] max-w-[600px] mx-auto bg-[#121212] backdrop-blur-md rounded-xl overflow-hidden border-[#282828]">
           <Tabs defaultValue="login" className="w-full">
             <TabsList className="grid w-full grid-cols-2 bg-[#282828] p-1">
               <TabsTrigger 
